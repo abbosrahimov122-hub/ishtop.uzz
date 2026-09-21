@@ -1202,6 +1202,34 @@
             }
         }
 
+        // Telegram Login Widget popup/ilova orqali tasdiqlagach, shu funksiyani
+        // chaqiradi — global (window) doirasida bo'lishi SHART, chunki Telegram'ning
+        // o'z skripti buni to'g'ridan-to'g'ri chaqiradi.
+        window.onTelegramAuth = async function (user) {
+            telegramAuthStatus.style.display = 'block';
+            try {
+                const res = await fetch('/api/auth/telegram-widget', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify(user)
+                });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    showToast('❌ ' + (data.error || 'Telegram orqali kirish amalga oshmadi'), 'error');
+                    telegramAuthStatus.style.display = 'none';
+                    return;
+                }
+
+                showToast(`✅ Xush kelibsiz, ${data.user.firstName || data.user.username || 'foydalanuvchi'}!`, 'success');
+                setTimeout(() => { window.location.href = './dashboard.html'; }, 400);
+            } catch (err) {
+                showToast('Server bilan bog\'lanishda xato. Qaytadan urinib ko\'ring.', 'error');
+                telegramAuthStatus.style.display = 'none';
+            }
+        };
+
         if (window.isTelegramWebApp) {
             // Mini App ichida — foydalanuvchi tugma bosmasdan avtomatik kiradi
             telegramWebAppBtn.style.display = 'flex';
@@ -1217,7 +1245,7 @@
             widgetScript.setAttribute('data-telegram-login', 'myishtop_bot');
             widgetScript.setAttribute('data-size', 'large');
             widgetScript.setAttribute('data-radius', '12');
-            widgetScript.setAttribute('data-auth-url', window.location.origin + '/api/auth/telegram-callback');
+            widgetScript.setAttribute('data-onauth', 'onTelegramAuth(user)');
             widgetScript.setAttribute('data-request-access', 'write');
             telegramWidgetContainer.appendChild(widgetScript);
         }

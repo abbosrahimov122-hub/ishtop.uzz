@@ -262,6 +262,29 @@ app.get('/api/auth/telegram-callback', (req, res) => {
     }
 });
 
+// 2b) Telegram Login Widget'ning JS callback rejimi (data-onauth) uchun.
+//     Bu rejim popup/ilova tasdiqlangandan so'ng sahifani DARHOL, ishonchli
+//     tarzda o'zgartirish imkonini beradi — Telegram Desktop ilovasi orqali
+//     tasdiqlanganda ham (redirect kutilmasdan) frontend o'zi so'rov yuboradi.
+app.post('/api/auth/telegram-widget', paymentLimiter, (req, res) => {
+    try {
+        const tgUser = verifyLoginWidgetData(req.body, TELEGRAM_BOT_TOKEN);
+        if (!tgUser) {
+            return res.status(401).json({ error: 'Telegram ma\'lumotlari tasdiqlanmadi' });
+        }
+
+        const user = usersDb.upsert(tgUser);
+        setSessionCookie(res, tgUser);
+        res.json({
+            ok: true,
+            user: { id: user.telegramId, firstName: user.firstName, lastName: user.lastName, username: user.username, photoUrl: user.photoUrl }
+        });
+    } catch (err) {
+        logError('POST /api/auth/telegram-widget', err);
+        res.status(500).json({ error: 'Ichki server xatosi' });
+    }
+});
+
 // 3) Joriy foydalanuvchini tekshirish — himoyalangan sahifalar shu endpoint'ni
 //    chaqirib, sessiya haqiqiy ekanini tasdiqlaydi.
 app.get('/api/auth/me', (req, res) => {
