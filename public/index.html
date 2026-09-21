@@ -781,14 +781,18 @@
                         <span>Gmail orqali kirish (Kod bilan)</span>
                     </button>
 
-                    <!-- Telegram Sign-In Button -->
-                    <button type="button" class="telegram-btn" id="telegramLoginBtn">
+                    <!-- Telegram Login — Mini App ichida avtomatik, brauzerda rasmiy Widget orqali -->
+                    <div id="telegramWebAppBtn" class="telegram-btn" style="display:none; cursor:pointer;">
                         <svg viewBox="0 0 24 24">
                             <path
                                 d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
                         </svg>
                         <span>Telegram orqali kirish</span>
-                    </button>
+                    </div>
+                    <div id="telegramWidgetContainer" style="display:flex; justify-content:center;"></div>
+                    <p id="telegramAuthStatus" style="font-size:11px; color:#64748b; text-align:center; display:none;">
+                        Telegram orqali tekshirilmoqda...
+                    </p>
                 </div>
 
                 <!-- Demo 1-Click Fast Enter -->
@@ -940,63 +944,6 @@
         </div>
     </div>
 
-    <!-- TELEGRAM LOGIN MODAL -->
-    <div class="modal-overlay" id="telegramModal">
-        <div class="modal-content">
-            <button class="modal-close" id="closeTelegramModal"><span
-                    class="material-symbols-outlined">close</span></button>
-
-            <div style="text-align: center; margin-bottom: 16px;">
-                <div
-                    style="width: 50px; height: 50px; border-radius: 16px; background: linear-gradient(135deg, #2AABEE, #1A87D6); display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; box-shadow: 0 8px 20px rgba(26, 135, 214, 0.35);">
-                    <svg style="width:26px; height:26px; fill:#fff;" viewBox="0 0 24 24">
-                        <path
-                            d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
-                    </svg>
-                </div>
-                <h3 style="font-family:'Fraunces',serif; font-size:19px; font-weight:700; color:var(--ink);">
-                    Telegram orqali kirish</h3>
-                <p style="font-size:12px; color:var(--muted); margin-top:2px;">Telefon raqamingizga 4 xonali kod
-                    yuboriladi</p>
-                <p style="font-size:11px; color:#64748b; margin-top:3px;">Rasmiy bot: <strong>@myishtop_bot</strong></p>
-            </div>
-
-            <!-- Step 1: Phone -->
-            <div id="tgStep1" style="display: block;">
-                <div class="input-group">
-                    <label for="tgPhone">Telegram raqamingiz</label>
-                    <div class="phone-input-wrapper">
-                        <span class="prefix">+998</span>
-                        <input id="tgPhone" type="tel" placeholder="90 123 45 67" maxlength="12" inputmode="numeric" />
-                    </div>
-                </div>
-                <button type="button" id="sendTgCodeBtn" class="telegram-btn" style="width:100%; min-height:46px;">
-                    <span>Tasdiqlash kodini olish</span>
-                    <span class="material-symbols-outlined" style="font-size:18px;">send</span>
-                </button>
-            </div>
-
-            <!-- Step 2: Code -->
-            <div id="tgStep2" style="display: none;">
-                <div
-                    style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px; padding:10px; text-align:center; font-size:12px; color:#166534; margin-bottom:12px;">
-                    Kod yuborildi! Sinov uchun <strong>7777</strong> kodini kiriting.
-                </div>
-                <div class="input-group">
-                    <label for="tgCodeInput">4 xonali tasdiqlash kodi</label>
-                    <div class="phone-input-wrapper">
-                        <input id="tgCodeInput" type="text" placeholder="7777" maxlength="4"
-                            style="text-align:center; letter-spacing:8px; font-size:20px; font-weight:800;" />
-                    </div>
-                </div>
-                <button type="button" id="verifyTgCodeBtn" class="telegram-btn" style="width:100%; min-height:46px;">
-                    <span>Tasdiqlash va Kirish</span>
-                    <span class="material-symbols-outlined" style="font-size:18px;">check</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- SCRIPT LOGIC -->
     <script>
         function showToast(msg, type = 'success') {
@@ -1022,9 +969,6 @@
 
         const phoneEl = document.getElementById('phone');
         phoneEl.addEventListener('input', () => formatPhone(phoneEl));
-
-        const tgPhoneEl = document.getElementById('tgPhone');
-        tgPhoneEl.addEventListener('input', () => formatPhone(tgPhoneEl));
 
         // ==========================================
         // 1. GMAIL OTP CODE VERIFICATION SYSTEM
@@ -1209,91 +1153,74 @@
         });
 
         // ==========================================
-        // 2. TELEGRAM AUTHENTICATION
+        // 2. TELEGRAM AUTHENTICATION (HAQIQIY)
+        //
+        // Ikki xil oqim:
+        // a) Sayt Telegram Mini App ichida ochilsa — window.Telegram.WebApp.initData
+        //    (bu tasodifiy ma'lumot emas, Telegram tomonidan KRIPTOGRAFIK IMZOLANGAN
+        //    satr) serverga yuboriladi, server bot tokeni bilan imzoni tekshiradi.
+        // b) Oddiy brauzerda ochilsa — Telegram'ning rasmiy Login Widget'i ko'rsatiladi,
+        //    u xavfsiz tarzda Telegram'ning o'zi orqali ishlaydi.
+        //
+        // Hech qanday holatda foydalanuvchi kodi/paroli qo'lda kiritilmaydi va
+        // hech narsa localStorage'da "soxta" login sifatida saqlanmaydi — haqiqiy
+        // sessiya serverda, xavfsiz httpOnly cookie orqali boshqariladi.
         // ==========================================
-        const tgModal = document.getElementById('telegramModal');
-        const tgBtn = document.getElementById('telegramLoginBtn');
-        const closeTelegramModal = document.getElementById('closeTelegramModal');
-        const tgStep1 = document.getElementById('tgStep1');
-        const tgStep2 = document.getElementById('tgStep2');
-        const sendTgCodeBtn = document.getElementById('sendTgCodeBtn');
-        const verifyTgCodeBtn = document.getElementById('verifyTgCodeBtn');
-        const tgCodeInput = document.getElementById('tgCodeInput');
+        const telegramWebAppBtn = document.getElementById('telegramWebAppBtn');
+        const telegramWidgetContainer = document.getElementById('telegramWidgetContainer');
+        const telegramAuthStatus = document.getElementById('telegramAuthStatus');
 
-        tgBtn.addEventListener('click', () => {
-            if (window.tmaHaptic) window.tmaHaptic('light');
-
-            // If inside real Telegram Mini App
-            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
-                const u = window.Telegram.WebApp.initDataUnsafe.user;
-                const name = `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.username || 'Telegram User';
-                const user = {
-                    name: name,
-                    email: u.username ? `@${u.username}` : 'telegram@user.uz',
-                    role: 'Telegram A\'zosi',
-                    avatar: u.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=2AABEE&color=fff&size=128`,
-                    loginMethod: 'telegram',
-                    loginTime: new Date().toISOString()
-                };
-                localStorage.setItem('user_profile', JSON.stringify(user));
-                showToast(`✅ Telegram orqali kirdingiz: ${name}`, 'success');
-                setTimeout(() => { window.location.href = './dashboard.html'; }, 500);
+        async function loginWithTelegramWebApp() {
+            const initData = window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData;
+            if (!initData) {
+                showToast('Telegram ma\'lumotlari topilmadi. Iltimos, saytni Telegram ilovasi ichida oching.', 'error');
                 return;
             }
 
-            tgModal.classList.add('active');
-            tgStep1.style.display = 'block';
-            tgStep2.style.display = 'none';
-        });
+            telegramAuthStatus.style.display = 'block';
+            try {
+                const res = await fetch('/api/auth/telegram-webapp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ initData })
+                });
+                const data = await res.json();
 
-        closeTelegramModal.addEventListener('click', () => {
-            tgModal.classList.remove('active');
-        });
+                if (!res.ok) {
+                    showToast('❌ ' + (data.error || 'Telegram orqali kirish amalga oshmadi'), 'error');
+                    telegramAuthStatus.style.display = 'none';
+                    return;
+                }
 
-        tgModal.addEventListener('click', (e) => {
-            if (e.target === tgModal) tgModal.classList.remove('active');
-        });
-
-        sendTgCodeBtn.addEventListener('click', () => {
-            const rawPhone = tgPhoneEl.value.replace(/\s/g, '');
-            if (rawPhone.length < 9) {
-                showToast('Raqamni to\'liq kiriting (90 123 45 67)', 'error');
-                tgPhoneEl.focus();
-                return;
+                if (window.tmaHaptic) window.tmaHaptic('success');
+                showToast(`✅ Xush kelibsiz, ${data.user.firstName || data.user.username || 'foydalanuvchi'}!`, 'success');
+                setTimeout(() => { window.location.href = './dashboard.html'; }, 400);
+            } catch (err) {
+                showToast('Server bilan bog\'lanishda xato. Qaytadan urinib ko\'ring.', 'error');
+                telegramAuthStatus.style.display = 'none';
             }
-            if (window.tmaHaptic) window.tmaHaptic('light');
-            sendTgCodeBtn.innerHTML = '<span>Kutib turing...</span>';
-            setTimeout(() => {
-                sendTgCodeBtn.innerHTML = '<span>Tasdiqlash kodini olish</span><span class="material-symbols-outlined" style="font-size:18px;">send</span>';
-                tgStep1.style.display = 'none';
-                tgStep2.style.display = 'block';
-                tgCodeInput.value = '7777';
-                showToast('📩 Kod Telegramga yuborildi: 7777', 'info');
-            }, 600);
-        });
+        }
 
-        verifyTgCodeBtn.addEventListener('click', () => {
-            const code = tgCodeInput.value.trim();
-            if (code.length < 4) {
-                showToast('4 xonali kodni kiriting (7777)', 'error');
-                return;
-            }
-            if (window.tmaHaptic) window.tmaHaptic('medium');
-            const phone = tgPhoneEl.value || '90 123 45 67';
-            const user = {
-                name: 'Telegram Foydalanuvchi',
-                email: 'telegram_user@ishtop.uz',
-                phone: '+998 ' + phone,
-                role: 'Telegram A\'zosi',
-                avatar: 'https://ui-avatars.com/api/?name=Telegram+User&background=2AABEE&color=fff&size=128',
-                loginMethod: 'telegram',
-                loginTime: new Date().toISOString()
-            };
-            localStorage.setItem('user_profile', JSON.stringify(user));
-            tgModal.classList.remove('active');
-            showToast('✅ Telegram orqali muvaffaqiyatli kirdingiz!', 'success');
-            setTimeout(() => { window.location.href = './dashboard.html'; }, 500);
-        });
+        if (window.isTelegramWebApp) {
+            // Mini App ichida — foydalanuvchi tugma bosmasdan avtomatik kiradi
+            telegramWebAppBtn.style.display = 'flex';
+            telegramWebAppBtn.addEventListener('click', loginWithTelegramWebApp);
+            loginWithTelegramWebApp();
+        } else {
+            // Oddiy brauzer — Telegram'ning rasmiy Login Widget'ini ko'rsatamiz.
+            // MUHIM: bu ishlashi uchun @BotFather'da botingizga ushbu saytning
+            // domenini bog'lashingiz kerak: @BotFather -> /setdomain -> @myishtop_bot
+            const widgetScript = document.createElement('script');
+            widgetScript.async = true;
+            widgetScript.src = 'https://telegram.org/js/telegram-widget.js?22';
+            widgetScript.setAttribute('data-telegram-login', 'myishtop_bot');
+            widgetScript.setAttribute('data-size', 'large');
+            widgetScript.setAttribute('data-radius', '12');
+            widgetScript.setAttribute('data-auth-url', window.location.origin + '/api/auth/telegram-callback');
+            widgetScript.setAttribute('data-request-access', 'write');
+            telegramWidgetContainer.appendChild(widgetScript);
+        }
 
         // ==========================================
         // 3. FAST DEMO LOGIN
@@ -1344,4 +1271,4 @@
     </script>
 </body>
 
-</html
+</html>
