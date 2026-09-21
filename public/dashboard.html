@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Zayafka yuborish</title>
+</head>
+
+<body>
+
+    <form id="zayafkaForm">
+        <h2>Biz bilan bog'laning</h2>
+        <label>Ismingiz:</label><br>
+        <input type="text" name="name" required><br><br>
+
+        <label>Telefon raqamingiz:</label><br>
+        <input type="text" name="phone" required><br><br>
+
+        <label>Xabaringiz:</label><br>
+        <textarea name="message" rows="4"></textarea><br><br>
+
+        <button type="submit" id="submitBtn">Yuborish</button>
+    </form>
+
+    <div id="status" style="margin-top: 15px; font-weight: bold;"></div>
+
+    <script>
+        const scriptURL = ''; // <-- HAVOLANI SHU YERGA QO'YING
+        const form = document.getElementById('zayafkaForm');
+        const statusDiv = document.getElementById('status');
+
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            document.getElementById('submitBtn').disabled = true;
+            statusDiv.innerText = "Yuborilmoqda...";
+
+            fetch(scriptURL, { method: 'POST', body: new FormData(form) })
+                .then(response => {
+                    statusDiv.innerText = "Zayafkangiz muvaffaqiyatli yuborildi!";
+                    statusDiv.style.color = "green";
+                    form.reset();
+                    document.getElementById('submitBtn').disabled = false;
+                })
+                .catch(error => {
+                    statusDiv.innerText = "Xatolik yuz berdi: " + error.message;
+                    statusDiv.style.color = "red";
+                    document.getElementById('submitBtn').disabled = false;
+                });
+        });
+    </script>
+
+</body>
+
+</html>

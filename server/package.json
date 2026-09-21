@@ -1,0 +1,23 @@
+{
+  "name": "ishtop-payments-server",
+  "version": "2.0.0",
+  "description": "IshTop.uz uchun Payme va Click to'lov integratsiyasi (xavfsizlik yaxshilangan)",
+  "main": "payments-server.js",
+  "scripts": {
+    "start": "node payments-server.js",
+    "dev": "node --watch payments-server.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "cookie-parser": "^1.4.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-rate-limit": "^7.4.0",
+    "helmet": "^7.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "UNLICENSED",
+  "private": true
+}

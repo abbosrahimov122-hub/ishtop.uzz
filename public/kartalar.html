@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+        name="viewport" />
+    <title>Kartalarim &amp; Moliya | ishtop.uz Mini Ilova</title>
+    <meta name="theme-color" content="#002046" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="/manifest.json" />
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="/telegram.js" defer></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f9fb;
+            color: #191c1e;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+
+        .card-shadow {
+            box-shadow: 0 4px 20px -2px rgba(0, 32, 70, 0.05), 0 2px 6px -1px rgba(0, 32, 70, 0.03);
+        }
+
+        .vip-glow {
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.25);
+            border: 2px solid #ffd700;
+        }
+
+        .premium-glow {
+            box-shadow: 0 0 25px rgba(0, 168, 139, 0.25);
+            border: 2px solid #00a88b;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 32, 70, 0.5);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #ffffff;
+            border-radius: 24px;
+            max-width: 440px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+
+        @keyframes modalIn {
+            from {
+                transform: translateY(20px) scale(0.96);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .toast-message {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #002046;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 14px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+            font-weight: 600;
+            font-size: 13px;
+            z-index: 9999;
+            opacity: 0;
+            transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            pointer-events: none;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        .toast-message.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col pb-20 md:pb-0">
+
+    <!-- Toast Notification -->
+    <div class="toast-message" id="toast"></div>
+
+    <!-- Header -->
+    <header class="bg-white/95 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200/80 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <a href="./dashboard.html" class="flex items-center gap-2">
+                <div
+                    class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#002046] to-[#006b5c] text-white flex items-center justify-center shadow-md">
+                    <span class="material-symbols-outlined text-xl">work_outline</span>
+                </div>
+                <span class="text-xl font-black text-[#002046] tracking-tight">ishtop<span
+                        class="text-[#006b5c]">.uz</span></span>
+            </a>
+
+            <div class="flex items-center gap-2 sm:gap-3">
+                <span
+                    class="px-2.5 py-1 bg-amber-100 text-amber-900 rounded-full text-xs font-bold flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm text-amber-600">stars</span> VIP A'zo
+                </span>
+                <a href="./dashboard.html" class="p-1 rounded-full">
+                    <img class="w-9 h-9 rounded-full object-cover border-2 border-slate-200"
+                        src="https://ui-avatars.com/api/?name=Alisher+Usmanov&background=002046&color=fff&size=128"
+                        alt="Admin" />
+                </a>
+            </div>
+        </div>
+
+        <!-- Subnav -->
+        <div class="border-t border-slate-100 bg-white">
+            <div class="max-w-7xl mx-auto px-4 flex items-center gap-1 overflow-x-auto">
+                <a href="./dashboard.html"
+                    class="px-4 py-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent whitespace-nowrap flex items-center gap-1.5 transition-colors">
+                    <span class="material-symbols-outlined text-base">dashboard</span>
+                    Boshqaruv paneli
+                </a>
+                <a href="./vakansiyalar.html"
+                    class="px-4 py-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent whitespace-nowrap flex items-center gap-1.5 transition-colors">
+                    <span class="material-symbols-outlined text-base">work</span>
+                    Vakansiyalar
+                </a>
+                <a href="./nomzodlar.html"
+                    class="px-4 py-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent whitespace-nowrap flex items-center gap-1.5 transition-colors">
+                    <span class="material-symbols-outlined text-base">group</span>
+                    Nomzodlar
+                </a>
+                <a href="./statistika.html"
+                    class="px-4 py-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent whitespace-nowrap flex items-center gap-1.5 transition-colors">
+                    <span class="material-symbols-outlined text-base">bar_chart</span>
+                    Statistika
+                </a>
+                <a href="./sozlamalar.html"
+                    class="px-4 py-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent whitespace-nowrap flex items-center gap-1.5 transition-colors">
+                    <span class="material-symbols-outlined text-base">settings</span>
+                    Sozlamalar
+                </a>
+                <a href="./kartalar.html"
+                    class="ml-auto px-4 py-2.5 text-xs font-bold text-amber-700 bg-amber-50/70 border-b-2 border-amber-600 rounded-t-lg whitespace-nowrap flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-base text-amber-600"
+                        style="font-variation-settings: 'FILL' 1;">credit_card</span>
+                    💳 Kartalarim
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6 space-y-6">
+
+        <div>
+            <h1 class="text-xl font-black text-[#002046]">To'lovlar</h1>
+            <p class="text-xs text-slate-500">VIP obunani sotib olish va to'lovlar tarixi</p>
+        </div>
+
+        <!-- Status Grid -->
+        <div class="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            <div
+                class="bg-gradient-to-br from-amber-50 to-orange-50/60 p-4 rounded-2xl card-shadow border border-amber-200/80 flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-[11px] font-bold text-amber-800 uppercase tracking-wider">A'zolik holati</span>
+                    <span class="text-[10px] bg-amber-200 text-amber-900 font-black px-1.5 py-0.5 rounded">VIP</span>
+                </div>
+                <p class="text-lg font-black text-amber-900">Faol</p>
+                <p class="text-[11px] text-amber-700 mt-0.5">Amal qilish muddati: 26.09.2026 gacha</p>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl card-shadow border border-slate-100">
+                <div class="flex items-center gap-1.5 text-slate-400 mb-1">
+                    <span class="material-symbols-outlined text-base text-[#006b5c]">calendar_month</span>
+                    <span class="text-[11px] font-semibold">Keyingi to'lov</span>
+                </div>
+                <h3 class="text-xl sm:text-2xl font-black text-[#002046]">29,000 UZS</h3>
+                <p class="text-[11px] text-slate-400 mt-0.5">26.09.2026</p>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl card-shadow border border-slate-100 col-span-2 lg:col-span-1">
+                <div class="flex items-center gap-1.5 text-slate-400 mb-1">
+                    <span class="material-symbols-outlined text-base text-emerald-600">verified_user</span>
+                    <span class="text-[11px] font-semibold">To'lov usuli</span>
+                </div>
+                <h3 class="text-base sm:text-lg font-black text-[#002046]">Payme · Click</h3>
+                <p class="text-[11px] text-slate-400 mt-0.5">Rasmiy litsenziyalangan shlyuzlar</p>
+            </div>
+        </div>
+
+        <!-- VIP Subscription Purchase -->
+        <div class="bg-white p-6 rounded-2xl card-shadow border border-slate-100">
+            <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                <div>
+                    <h3 class="text-base font-bold text-[#002046]">VIP obunani sotib olish</h3>
+                    <p class="text-xs text-slate-400">To'lov Payme yoki Click'ning rasmiy sahifasida amalga oshiriladi
+                    </p>
+                </div>
+            </div>
+
+            <div class="grid sm:grid-cols-3 gap-3 mb-5" id="planGrid">
+                <button type="button" data-amount="29000" data-days="30"
+                    class="plan-btn text-left p-4 rounded-xl border-2 border-[#006b5c] bg-emerald-50/60 transition-all">
+                    <p class="text-xs font-bold text-slate-500 uppercase">1 oy</p>
+                    <p class="text-xl font-black text-[#002046] mt-1">29,000 <span class="text-xs font-bold">UZS</span>
+                    </p>
+                </button>
+                <button type="button" data-amount="79000" data-days="90"
+                    class="plan-btn text-left p-4 rounded-xl border-2 border-slate-200 hover:border-[#006b5c] transition-all">
+                    <p class="text-xs font-bold text-slate-500 uppercase">3 oy</p>
+                    <p class="text-xl font-black text-[#002046] mt-1">79,000 <span class="text-xs font-bold">UZS</span>
+                    </p>
+                </button>
+                <button type="button" data-amount="279000" data-days="365"
+                    class="plan-btn text-left p-4 rounded-xl border-2 border-slate-200 hover:border-[#006b5c] transition-all">
+                    <p class="text-xs font-bold text-slate-500 uppercase">12 oy</p>
+                    <p class="text-xl font-black text-[#002046] mt-1">279,000 <span class="text-xs font-bold">UZS</span>
+                    </p>
+                </button>
+            </div>
+
+            <div class="grid sm:grid-cols-2 gap-3">
+                <button id="payWithPayme"
+                    class="py-3.5 bg-[#00cbff] hover:bg-[#00b8e6] text-[#002046] font-black rounded-xl text-sm transition-all active:scale-95 shadow-md flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-lg">credit_card</span>
+                    Payme orqali to'lash
+                </button>
+                <button id="payWithClick"
+                    class="py-3.5 bg-[#0272ff] hover:bg-[#0260d9] text-white font-black rounded-xl text-sm transition-all active:scale-95 shadow-md flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-lg">credit_card</span>
+                    Click orqali to'lash
+                </button>
+            </div>
+
+            <div class="mt-4 p-3 bg-slate-50 rounded-xl text-[11px] text-slate-500 flex items-start gap-2">
+                <span class="material-symbols-outlined text-slate-400 text-sm mt-0.5">info</span>
+                <span>Karta raqami va CVV kod ishtop.uz saytiga emas, faqat Payme/Click'ning o'zining xavfsiz
+                    to'lov sahifasiga kiritiladi. Biz karta ma'lumotlarini hech qachon saqlamaymiz yoki
+                    ko'rmaymiz.</span>
+            </div>
+        </div>
+
+        <!-- Payment History -->
+        <div class="bg-white p-5 rounded-2xl card-shadow border border-slate-100">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="text-base font-bold text-[#002046]">To'lovlar tarixi</h3>
+                    <p class="text-xs text-slate-400">VIP obuna uchun amalga oshirilgan to'lovlar</p>
+                </div>
+            </div>
+
+            <div class="divide-y divide-slate-100" id="txList">
+                <div class="py-3 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-blue-50 text-[#002046] flex items-center justify-center">
+                            <span class="material-symbols-outlined text-lg">receipt_long</span>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-800">VIP A'zolik to'lovi · Payme</p>
+                            <p class="text-[10px] text-slate-400">30 kunlik obuna · 26.08.2026</p>
+                        </div>
+                    </div>
+                    <span class="text-xs font-bold text-slate-700">-29,000 UZS</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Mobile Navigation -->
+    <nav
+        class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-slate-200/80 flex items-center justify-around z-30 px-2 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+        <a href="./dashboard.html" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-700">
+            <span class="material-symbols-outlined text-2xl">dashboard</span>
+            <span class="text-[10px]">Boshqaruv</span>
+        </a>
+        <a href="./vakansiyalar.html" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-700">
+            <span class="material-symbols-outlined text-2xl">work</span>
+            <span class="text-[10px]">Vakansiyalar</span>
+        </a>
+        <div class="relative -top-3">
+            <a href="./dashboard.html"
+                class="w-12 h-12 rounded-full bg-[#006b5c] text-white flex items-center justify-center shadow-lg shadow-emerald-700/30 active:scale-90 transition-transform">
+                <span class="material-symbols-outlined text-2xl">home</span>
+            </a>
+        </div>
+        <a href="./nomzodlar.html" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-700">
+            <span class="material-symbols-outlined text-2xl">group</span>
+            <span class="text-[10px]">Nomzodlar</span>
+        </a>
+        <a href="./kartalar.html" class="flex flex-col items-center gap-0.5 text-[#006b5c]">
+            <span class="material-symbols-outlined text-2xl"
+                style="font-variation-settings: 'FILL' 1;">credit_card</span>
+            <span class="text-[10px] font-bold">Kartalar</span>
+        </a>
+    </nav>
+
+    <script>
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            clearTimeout(window._tTimer);
+            window._tTimer = setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // ==========================================
+        // PAYME / CLICK CHECKOUT INTEGRATION
+        //
+        // MUHIM: Bu yerda faqat OMMAVIY identifikatorlar
+        // (Merchant ID, Service ID) ishlatiladi. Secret Key
+        // hech qachon brauzer kodiga qo'yilmaydi — u faqat
+        // serverda, webhook imzosini tekshirish uchun kerak.
+        // Real order_id ham serverda yaratilishi kerak
+        // (bu yerda demo uchun vaqtinchalik ID ishlatilgan).
+        // Backend namunasi uchun: server/payments-server.js
+        // ==========================================
+
+        const PAYME_MERCHANT_ID = '64f1a2b3c4d5e6f7a8b9c0d1'; // faqat ommaviy ID (test/sandbox)
+        const CLICK_MERCHANT_ID = '12345'; // faqat ommaviy ID (test/sandbox)
+        const CLICK_SERVICE_ID = '67890';   // faqat ommaviy ID (test/sandbox)
+        const RETURN_URL = window.location.origin + '/kartalar.html?payment=success';
+
+        let selectedAmount = 29000;
+        let selectedDays = 30;
+
+        document.querySelectorAll('.plan-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.plan-btn').forEach(b => {
+                    b.classList.remove('border-[#006b5c]', 'bg-emerald-50/60');
+                    b.classList.add('border-slate-200');
+                });
+                btn.classList.add('border-[#006b5c]', 'bg-emerald-50/60');
+                btn.classList.remove('border-slate-200');
+                selectedAmount = parseInt(btn.dataset.amount, 10);
+                selectedDays = parseInt(btn.dataset.days, 10);
+            });
+        });
+
+        // Buyurtmani serverda yaratadi va haqiqiy orderId'ni qaytaradi.
+        // Server /api/orders endpoint'i buyurtmani bazaga (orders.db) yozadi.
+        async function createOrderOnServer(amountUzs, days) {
+            const res = await fetch('/api/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount: amountUzs, days, userId: window.currentUserId || 'anonymous' })
+            });
+            if (!res.ok) {
+                throw new Error('Buyurtma yaratib bo\'lmadi');
+            }
+            const data = await res.json();
+            return data.orderId;
+        }
+
+        function buildPaymeUrl(amountUzs, orderId) {
+            const amountTiyin = amountUzs * 100; // Payme summani tiyin (1/100 so'm)da kutadi
+            const params = `m=${PAYME_MERCHANT_ID};ac.order_id=${orderId};a=${amountTiyin};c=${encodeURIComponent(RETURN_URL)}`;
+            const encoded = btoa(params);
+            return `https://checkout.paycom.uz/${encoded}`;
+        }
+
+        function buildClickUrl(amountUzs, orderId) {
+            const params = new URLSearchParams({
+                service_id: CLICK_SERVICE_ID,
+                merchant_id: CLICK_MERCHANT_ID,
+                amount: amountUzs,
+                transaction_param: orderId,
+                return_url: RETURN_URL
+            });
+            return `https://my.click.uz/services/pay?${params.toString()}`;
+        }
+
+        document.getElementById('payWithPayme').addEventListener('click', async () => {
+            if (PAYME_MERCHANT_ID.includes('BU_YERGA')) {
+                showToast('⚠️ Avval PAYME_MERCHANT_ID ni sozlang (backend orqali)');
+                return;
+            }
+            try {
+                const orderId = await createOrderOnServer(selectedAmount, selectedDays);
+                window.location.href = buildPaymeUrl(selectedAmount, orderId);
+            } catch (e) {
+                showToast('⚠️ Buyurtma yaratishda xatolik yuz berdi. Qayta urinib ko\'ring.');
+            }
+        });
+
+        document.getElementById('payWithClick').addEventListener('click', async () => {
+            if (CLICK_MERCHANT_ID.includes('BU_YERGA')) {
+                showToast('⚠️ Avval CLICK_MERCHANT_ID va CLICK_SERVICE_ID ni sozlang (backend orqali)');
+                return;
+            }
+            try {
+                const orderId = await createOrderOnServer(selectedAmount, selectedDays);
+                window.location.href = buildClickUrl(selectedAmount, orderId);
+            } catch (e) {
+                showToast('⚠️ Buyurtma yaratishda xatolik yuz berdi. Qayta urinib ko\'ring.');
+            }
+        });
+
+        // To'lov muvaffaqiyatli qaytgandan so'ng xabar ko'rsatish (return_url orqali)
+        if (new URLSearchParams(window.location.search).get('payment') === 'success') {
+            showToast('✅ To\'lov qabul qilindi! VIP obunangiz yangilandi.');
+        }
+    </script>
+</body>
+
+</html>

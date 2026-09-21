@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+        name="viewport" />
+    <title>IshTop — Kirish (Gmail &amp; Telegram)</title>
+    <meta name="description"
+        content="O'zbekistondagi eng zamonaviy ish qidiruv portali. Gmail va Telegram orqali xavfsiz kirish." />
+    <meta name="theme-color" content="#0D2247" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Telegram & Google SDKs -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="/telegram.js" defer></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600..900;1,9..144,600..900&family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+
+    <style>
+        :root {
+            --ink: #0F1B2D;
+            --navy: #16324F;
+            --navy-2: #0B1522;
+            --forest: #0B5C46;
+            --forest-bright: #17A374;
+            --emerald: #17A374;
+            --emerald-dark: #0B5C46;
+            --gold: #D69A2D;
+            --amber: #D69A2D;
+            --red: #C6433D;
+            --linen: #F1EFE6;
+            --paper: #F1EFE6;
+            --line: #E3DFD0;
+            --muted: #6B7280;
+            --text: #1A1F26;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html,
+        body {
+            min-height: 100%;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 16px;
+            background: var(--navy-2);
+            position: relative;
+            overflow-x: hidden;
+            color: var(--text);
+        }
+
+        /* Atmospheric Background */
+        .bg-mesh {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .bg-mesh::before {
+            content: '';
+            position: absolute;
+            inset: -10%;
+            background:
+                radial-gradient(46% 38% at 14% 8%, rgba(23, 163, 116, 0.40) 0%, transparent 100%),
+                radial-gradient(50% 42% at 92% 14%, rgba(22, 50, 79, 0.85) 0%, transparent 100%),
+                radial-gradient(60% 50% at 50% 100%, rgba(214, 154, 45, 0.16) 0%, transparent 100%),
+                linear-gradient(160deg, #0F1B2D 0%, #0B1522 60%, #070D16 100%);
+        }
+
+        .bg-grid {
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.10) 1px, transparent 1px);
+            background-size: 26px 26px;
+            mask-image: radial-gradient(70% 60% at 50% 30%, #000 10%, transparent 78%);
+            opacity: .45;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(2px);
+            animation: float 9s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-14px);
+            }
+        }
+
+        /* Card Container */
+        .stage {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .login-card {
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 24px 60px rgba(4, 10, 22, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.08);
+            overflow: hidden;
+            animation: cardIn .55s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes cardIn {
+            from {
+                opacity: 0;
+                transform: translateY(18px) scale(.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        /* Header band — brand + tagline folded into the card itself */
+        .card-band {
+            position: relative;
+            padding: 22px 22px 46px;
+            background: linear-gradient(135deg, var(--forest) 0%, var(--ink) 130%);
+            overflow: hidden;
+        }
+
+        .card-band svg.path-motif {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.5;
+        }
+
+        .brand-row {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-mark {
+            width: 38px;
+            height: 38px;
+            border-radius: 11px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .brand-mark .material-symbols-outlined {
+            color: #fff;
+            font-size: 21px;
+        }
+
+        .brand-word {
+            font-family: 'Fraunces', serif;
+            font-weight: 700;
+            font-style: italic;
+            font-size: 22px;
+            letter-spacing: -0.01em;
+            color: #fff;
+        }
+
+        .brand-word .accent {
+            color: var(--gold);
+        }
+
+        .brand-word .tld {
+            color: rgba(255, 255, 255, 0.4);
+            font-style: normal;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .card-band .tagline {
+            position: relative;
+            margin-top: 10px;
+            font-size: 12.5px;
+            color: rgba(255, 255, 255, 0.72);
+            max-width: 30ch;
+        }
+
+        .card-heading {
+            position: relative;
+            margin-top: -26px;
+            background: #fff;
+            border-radius: 20px 20px 0 0;
+            padding: 20px 22px 16px;
+        }
+
+        .card-heading h1 {
+            font-family: 'Fraunces', serif;
+            font-size: 21px;
+            font-weight: 700;
+            color: var(--ink);
+            letter-spacing: -0.01em;
+        }
+
+        .card-heading p {
+            font-size: 13px;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        .login-card .card-body {
+            padding: 0 22px 20px;
+        }
+
+        /* Social Auth Buttons Grid */
+        .social-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        /* Google / Gmail button */
+        .google-btn {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 14px;
+            background: #ffffff;
+            color: #1e293b;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-family: 'Inter', sans-serif;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+            transition: all .2s ease;
+            min-height: 50px;
+            user-select: none;
+        }
+
+        .google-btn:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+        }
+
+        .google-btn:active {
+            transform: scale(0.98);
+        }
+
+        .google-btn svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        /* Telegram button */
+        .telegram-btn {
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #2AABEE 0%, #1A87D6 100%);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-family: 'Inter', sans-serif;
+            box-shadow: 0 8px 20px rgba(26, 135, 214, 0.32);
+            transition: all .2s ease;
+            min-height: 50px;
+            user-select: none;
+        }
+
+        .telegram-btn:hover {
+            filter: brightness(1.04);
+            box-shadow: 0 10px 24px rgba(26, 135, 214, 0.40);
+        }
+
+        .telegram-btn:active {
+            transform: scale(0.98);
+        }
+
+        .telegram-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: #fff;
+            flex-shrink: 0;
+        }
+
+        /* Demo Quick Pill */
+        .demo-pill-btn {
+            width: 100%;
+            padding: 10px 14px;
+            background: transparent;
+            border: 1.5px solid var(--line);
+            color: var(--forest);
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all .2s ease;
+        }
+
+        .demo-pill-btn:hover {
+            background: #F0FBF7;
+            border-color: var(--forest-bright);
+        }
+
+        .demo-pill-btn:active {
+            transform: scale(0.98);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--line);
+        }
+
+        .divider span {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--muted);
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .phone-input-wrapper {
+            display: flex;
+            align-items: center;
+            border: 1.5px solid var(--line);
+            border-radius: 13px;
+            background: var(--paper);
+            transition: all .2s ease;
+            overflow: hidden;
+        }
+
+        .phone-input-wrapper:focus-within {
+            border-color: var(--emerald);
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(23, 163, 116, 0.12);
+        }
+
+        .phone-input-wrapper .prefix {
+            padding: 10px 12px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--navy);
+            border-right: 1.5px solid var(--line);
+            background: rgba(18, 50, 98, 0.04);
+            white-space: nowrap;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .phone-input-wrapper input {
+            width: 100%;
+            padding: 11px 13px;
+            border: none;
+            background: transparent;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--ink);
+            outline: none;
+            font-family: 'Inter', sans-serif;
+            min-height: 46px;
+        }
+
+        .phone-input-wrapper input::placeholder {
+            color: #A2A9B5;
+            font-weight: 400;
+            font-size: 13.5px;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            background: linear-gradient(135deg, var(--emerald) 0%, var(--emerald-dark) 100%);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: 'Inter', sans-serif;
+            transition: all .2s ease;
+            box-shadow: 0 10px 22px rgba(23, 163, 116, 0.30);
+            min-height: 48px;
+            touch-action: manipulation;
+            user-select: none;
+            margin-top: 4px;
+        }
+
+        .login-btn:hover {
+            filter: brightness(1.05);
+            box-shadow: 0 12px 26px rgba(23, 163, 116, 0.38);
+        }
+
+        .login-btn:active {
+            transform: scale(0.98);
+        }
+
+        .custom-checkbox {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 4px 0 8px;
+        }
+
+        .custom-checkbox input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            min-width: 16px;
+            margin-top: 2px;
+            accent-color: var(--emerald);
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .custom-checkbox label {
+            font-size: 11.5px;
+            color: var(--muted);
+            line-height: 1.45;
+        }
+
+        .custom-checkbox label a {
+            color: var(--emerald-dark);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-140%);
+            padding: 12px 20px;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 13px;
+            color: #fff;
+            opacity: 0;
+            transition: all .35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            z-index: 99999;
+            pointer-events: none;
+            box-shadow: 0 14px 34px rgba(0, 0, 0, 0.3);
+            max-width: 90%;
+            text-align: center;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast.success {
+            background: linear-gradient(135deg, #0E9F6E, #0B7A55);
+        }
+
+        .toast.error {
+            background: linear-gradient(135deg, #F0575C, #E5484D);
+        }
+
+        .toast.info {
+            background: linear-gradient(135deg, #123262, #0D2247);
+        }
+
+        /* Gmail Incoming Simulation Push Notification */
+        .gmail-notification-popup {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            left: 16px;
+            max-width: 400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(12px);
+            border-radius: 18px;
+            padding: 14px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(234, 67, 53, 0.3);
+            z-index: 999999;
+            display: none;
+            animation: bounceIn .4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .gmail-notification-popup.show {
+            display: block;
+        }
+
+        @keyframes bounceIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(6, 12, 24, 0.65);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #fff;
+            border-radius: 24px;
+            max-width: 420px;
+            width: 100%;
+            padding: 24px 22px 20px;
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.4);
+            animation: slideUp .3s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(24px) scale(.96);
+                opacity: 0;
+            }
+
+            to {
+                transform: none;
+                opacity: 1;
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--paper);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+            transition: all .2s;
+        }
+
+        .modal-close:hover {
+            background: #fee2e2;
+            color: #ef4444;
+        }
+
+        .quick-nav-links {
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1px solid var(--line);
+            text-align: center;
+        }
+
+        .quick-nav-links p {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .quick-nav-links .links {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .quick-nav-links a {
+            font-size: 11px;
+            color: #334155;
+            background: #f1f5f9;
+            padding: 4px 9px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all .15s;
+        }
+
+        .quick-nav-links a:hover {
+            background: #e2e8f0;
+            color: var(--emerald);
+        }
+
+        .resend-timer-link {
+            font-size: 12px;
+            color: #EA4335;
+            font-weight: 700;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+        }
+
+        .resend-timer-link.disabled {
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Atmospheric Ambient Grid & Orbs -->
+    <div class="bg-mesh">
+        <div class="bg-grid"></div>
+    </div>
+    <div class="orb"
+        style="width:240px;height:240px;top:6%;left:4%;background:radial-gradient(circle,rgba(95,227,179,0.30),transparent 70%);animation-delay:0s;">
+    </div>
+    <div class="orb"
+        style="width:280px;height:280px;bottom:5%;right:3%;background:radial-gradient(circle,rgba(245,165,36,0.20),transparent 70%);animation-delay:2.5s;">
+    </div>
+
+    <!-- Global Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Interactive Gmail Push Notification Popup -->
+    <div class="gmail-notification-popup" id="gmailNotificationPopup">
+        <div style="display: flex; align-items: flex-start; gap: 12px;">
+            <div
+                style="width: 40px; height: 40px; border-radius: 12px; background: #fee2e2; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <svg style="width: 22px; height: 22px;" viewBox="0 0 24 24">
+                    <path fill="#EA4335"
+                        d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                </svg>
+            </div>
+            <div style="flex: 1; min-width: 0;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-size: 11px; font-weight: 800; color: #1e293b;">Gmail • hozirgina</span>
+                    <span
+                        style="font-size: 10px; font-weight: 700; color: #dc2626; background: #fef2f2; padding: 2px 6px; border-radius: 6px;">Yangi
+                        xabar</span>
+                </div>
+                <p style="font-size: 12.5px; font-weight: 800; color: #0f172a; margin-top: 2px;">
+                    ishtop.uz: Tasdiqlash kodi: <span id="notificationCodeDisplay"
+                        style="color: #059669; font-size: 15px; font-weight: 900; letter-spacing: 1px;"></span>
+                </p>
+                <p style="font-size: 11px; color: #64748b; margin-top: 2px;" id="notificationTargetEmail">
+                    yoxyotoshboltoyev@gmail.com</p>
+            </div>
+        </div>
+        <div style="display: flex; gap: 8px; margin-top: 10px; justify-content: flex-end;">
+            <button type="button" onclick="autoFillAndSubmitGmailCode()"
+                style="padding: 6px 14px; background: #0E9F6E; color: white; border: none; border-radius: 8px; font-size: 11.5px; font-weight: 700; cursor: pointer;">
+                ⚡️ Kodni kiritish
+            </button>
+            <button type="button" onclick="dismissGmailNotification()"
+                style="padding: 6px 10px; background: #f1f5f9; color: #475569; border: none; border-radius: 8px; font-size: 11.5px; font-weight: 600; cursor: pointer;">
+                Yopish
+            </button>
+        </div>
+    </div>
+
+    <!-- STAGE CARD -->
+    <div class="stage">
+        <div class="login-card" id="loginCard">
+            <!-- Header band: brand + tagline, folded into the card itself -->
+            <div class="card-band">
+                <svg class="path-motif" viewBox="0 0 400 140" preserveAspectRatio="none">
+                    <circle cx="30" cy="24" r="2.5" fill="#fff" opacity=".55" />
+                    <circle cx="120" cy="60" r="2.5" fill="#fff" opacity=".4" />
+                    <circle cx="230" cy="18" r="2.5" fill="#fff" opacity=".5" />
+                    <circle cx="330" cy="50" r="2.5" fill="#fff" opacity=".35" />
+                    <circle cx="380" cy="100" r="2.5" fill="#fff" opacity=".45" />
+                    <path d="M30 24 C 80 24, 90 60, 120 60 S 190 18, 230 18 S 300 50, 330 50 S 360 100, 380 100"
+                        stroke="#fff" stroke-opacity=".25" stroke-width="1.4" fill="none" />
+                </svg>
+                <div class="brand-row">
+                    <div class="brand-mark"><span class="material-symbols-outlined">work</span></div>
+                    <div class="brand-word">ish<span class="accent">top</span><span class="tld">.uz</span></div>
+                </div>
+                <p class="tagline">O'zbekistondagi ish beruvchi va nomzodlarni bog'lovchi platforma</p>
+            </div>
+
+            <div class="card-heading">
+                <h1>Tizimga kirish</h1>
+                <p>Gmail (kod bilan) yoki Telegram orqali</p>
+            </div>
+
+            <div class="card-body">
+
+                <!-- Social Logins (Google/Gmail & Telegram) -->
+                <div class="social-buttons">
+                    <!-- Gmail Sign-In Button with Code -->
+                    <button type="button" class="google-btn" id="gmailLoginBtn">
+                        <svg viewBox="0 0 24 24">
+                            <path fill="#4285F4"
+                                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                            <path fill="#34A853"
+                                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                            <path fill="#FBBC05"
+                                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                            <path fill="#EA4335"
+                                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                        </svg>
+                        <span>Gmail orqali kirish (Kod bilan)</span>
+                    </button>
+
+                    <!-- Telegram Sign-In Button -->
+                    <button type="button" class="telegram-btn" id="telegramLoginBtn">
+                        <svg viewBox="0 0 24 24">
+                            <path
+                                d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
+                        </svg>
+                        <span>Telegram orqali kirish</span>
+                    </button>
+                </div>
+
+                <!-- Demo 1-Click Fast Enter -->
+                <button type="button" class="demo-pill-btn" id="demoQuickLoginBtn">
+                    <span class="material-symbols-outlined" style="font-size: 18px;">bolt</span>
+                    <span>Tezkor sinov (Demo admin sifatida kirish)</span>
+                </button>
+
+                <div class="divider"><span>yoki telefon raqam bilan</span></div>
+
+                <!-- Standard Phone & Age Form -->
+                <form id="phoneLoginForm">
+                    <div class="input-group">
+                        <label for="phone">Telefon raqami</label>
+                        <div class="phone-input-wrapper">
+                            <span class="prefix">+998</span>
+                            <input id="phone" type="tel" placeholder="90 123 45 67" required maxlength="12"
+                                inputmode="numeric" />
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="age">Yoshingiz</label>
+                        <div class="phone-input-wrapper">
+                            <input id="age" type="number" placeholder="Masalan: 25" min="16" max="99" required
+                                inputmode="numeric" style="padding-left:14px;" />
+                        </div>
+                    </div>
+
+                    <div class="custom-checkbox">
+                        <input id="terms" type="checkbox" checked required />
+                        <label for="terms">Foydalanish shartlari va <a href="#">Maxfiylik siyosatiga</a>
+                            roziman.</label>
+                    </div>
+
+                    <button class="login-btn" type="submit" id="phoneSubmitBtn">
+                        <span>Kirish</span>
+                        <span class="material-symbols-outlined" style="font-size:18px;">arrow_forward</span>
+                    </button>
+                </form>
+
+                <!-- Quick Navigation to internal pages -->
+                <div class="quick-nav-links">
+                    <p>Platforma bo'limlariga to'g'ridan-to'g'ri o'tish:</p>
+                    <div class="links">
+                        <a href="./dashboard.html">Boshqaruv</a>
+                        <a href="./vakansiyalar.html">Vakansiyalar</a>
+                        <a href="./nomzodlar.html">Nomzodlar</a>
+                        <a href="./statistika.html">Statistika</a>
+                        <a href="./kartalar.html">Kartalar</a>
+                        <a href="./sozlamalar.html">Sozlamalar</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GMAIL OTP VERIFICATION MODAL -->
+    <div class="modal-overlay" id="gmailModal">
+        <div class="modal-content">
+            <button class="modal-close" id="closeGmailModal"><span
+                    class="material-symbols-outlined">close</span></button>
+
+            <div style="text-align: center; margin-bottom: 16px;">
+                <div
+                    style="width: 52px; height: 52px; border-radius: 16px; background: #fee2e2; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; box-shadow: 0 8px 20px rgba(234, 67, 53, 0.2);">
+                    <svg style="width:28px; height:28px;" viewBox="0 0 24 24">
+                        <path fill="#EA4335"
+                            d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                    </svg>
+                </div>
+                <h3 style="font-family:'Fraunces',serif; font-size:19px; font-weight:700; color:var(--ink);"
+                    id="gmailModalTitle">Gmail orqali kirish</h3>
+                <p style="font-size:12.5px; color:var(--muted); margin-top:3px;" id="gmailModalSubtitle">Pochtani
+                    kiriting, biz 6 xonali kod yuboramiz</p>
+            </div>
+
+            <!-- Step 1: Input Gmail Address -->
+            <div id="gmailStep1">
+                <!-- Suggested email pills for fast 1-click test -->
+                <div style="margin-bottom: 12px;">
+                    <p style="font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 6px;">Tezkor tanlash:
+                    </p>
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <button type="button" onclick="selectPresetGmail('yoxyotoshboltoyev@gmail.com')"
+                            style="display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid #cbd5e1; border-radius:10px; background:#f8fafc; font-size:12px; font-weight:600; color:#1e293b; text-align:left; cursor:pointer; transition:all .15s;">
+                            <span class="material-symbols-outlined" style="font-size:16px; color:#EA4335;">mail</span>
+                            <span style="flex:1;">yoxyotoshboltoyev@gmail.com</span>
+                            <span
+                                style="font-size:10px; background:#e2e8f0; padding:2px 6px; border-radius:6px; color:#475569;">Tanlash</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="gmailInput">Gmail pochtangiz</label>
+                    <div class="phone-input-wrapper">
+                        <input id="gmailInput" type="email" placeholder="masalan@gmail.com"
+                            value="yoxyotoshboltoyev@gmail.com" required style="padding: 11px 14px;" />
+                    </div>
+                </div>
+
+                <button type="button" id="sendGmailCodeBtn" class="login-btn"
+                    style="background: linear-gradient(135deg, #EA4335 0%, #C5221F 100%);">
+                    <span id="sendGmailBtnText">Gmailga kod yuborish</span>
+                    <span class="material-symbols-outlined" style="font-size: 18px;">send</span>
+                </button>
+            </div>
+
+            <!-- Step 2: Enter 6-digit Code from Gmail -->
+            <div id="gmailStep2" style="display: none;">
+                <div
+                    style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 14px; padding: 12px; margin-bottom: 14px; text-align: center;">
+                    <p style="font-size: 12px; color: #991b1b; font-weight: 600;">
+                        📩 Tasdiqlash kodi <strong id="targetEmailLabel">...</strong> manziliga yuborildi!
+                    </p>
+                    <p style="font-size: 11px; color: #b91c1c; margin-top: 4px;">
+                        Pochtangizni yoki ekranning yuqorisidagi xabarni tekshiring.
+                    </p>
+                </div>
+
+                <div class="input-group">
+                    <label for="gmailCodeInput" style="text-align: center; display: block;">6 xonali tasdiqlash
+                        kodi</label>
+                    <div class="phone-input-wrapper" style="border-color: #fca5a5;">
+                        <input id="gmailCodeInput" type="text" placeholder="••••••" maxlength="6" inputmode="numeric"
+                            style="text-align: center; font-size: 22px; font-weight: 900; letter-spacing: 6px; color: #991b1b;" />
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                        <button type="button" id="resendGmailCodeBtn" class="resend-timer-link disabled">Kodni qayta
+                            yuborish</button>
+                        <span id="gmailTimerText" style="font-size: 11.5px; color: #64748b;">(60s)</span>
+                    </div>
+                </div>
+
+                <button type="button" id="verifyGmailCodeBtn" class="login-btn"
+                    style="background: linear-gradient(135deg, #0E9F6E 0%, #0B7A55 100%); margin-top: 10px;">
+                    <span>Tasdiqlash va Kirish</span>
+                    <span class="material-symbols-outlined" style="font-size: 18px;">verified</span>
+                </button>
+
+                <div style="text-align: center; margin-top: 10px;">
+                    <button type="button" onclick="backToGmailStep1()"
+                        style="background:none; border:none; color:#64748b; font-size:11.5px; font-weight:600; cursor:pointer;">
+                        ← Pochtani o'zgartirish
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TELEGRAM LOGIN MODAL -->
+    <div class="modal-overlay" id="telegramModal">
+        <div class="modal-content">
+            <button class="modal-close" id="closeTelegramModal"><span
+                    class="material-symbols-outlined">close</span></button>
+
+            <div style="text-align: center; margin-bottom: 16px;">
+                <div
+                    style="width: 50px; height: 50px; border-radius: 16px; background: linear-gradient(135deg, #2AABEE, #1A87D6); display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; box-shadow: 0 8px 20px rgba(26, 135, 214, 0.35);">
+                    <svg style="width:26px; height:26px; fill:#fff;" viewBox="0 0 24 24">
+                        <path
+                            d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
+                    </svg>
+                </div>
+                <h3 style="font-family:'Fraunces',serif; font-size:19px; font-weight:700; color:var(--ink);">
+                    Telegram orqali kirish</h3>
+                <p style="font-size:12px; color:var(--muted); margin-top:2px;">Telefon raqamingizga 4 xonali kod
+                    yuboriladi</p>
+                <p style="font-size:11px; color:#64748b; margin-top:3px;">Rasmiy bot: <strong>@myishtop_bot</strong></p>
+            </div>
+
+            <!-- Step 1: Phone -->
+            <div id="tgStep1" style="display: block;">
+                <div class="input-group">
+                    <label for="tgPhone">Telegram raqamingiz</label>
+                    <div class="phone-input-wrapper">
+                        <span class="prefix">+998</span>
+                        <input id="tgPhone" type="tel" placeholder="90 123 45 67" maxlength="12" inputmode="numeric" />
+                    </div>
+                </div>
+                <button type="button" id="sendTgCodeBtn" class="telegram-btn" style="width:100%; min-height:46px;">
+                    <span>Tasdiqlash kodini olish</span>
+                    <span class="material-symbols-outlined" style="font-size:18px;">send</span>
+                </button>
+            </div>
+
+            <!-- Step 2: Code -->
+            <div id="tgStep2" style="display: none;">
+                <div
+                    style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px; padding:10px; text-align:center; font-size:12px; color:#166534; margin-bottom:12px;">
+                    Kod yuborildi! Sinov uchun <strong>7777</strong> kodini kiriting.
+                </div>
+                <div class="input-group">
+                    <label for="tgCodeInput">4 xonali tasdiqlash kodi</label>
+                    <div class="phone-input-wrapper">
+                        <input id="tgCodeInput" type="text" placeholder="7777" maxlength="4"
+                            style="text-align:center; letter-spacing:8px; font-size:20px; font-weight:800;" />
+                    </div>
+                </div>
+                <button type="button" id="verifyTgCodeBtn" class="telegram-btn" style="width:100%; min-height:46px;">
+                    <span>Tasdiqlash va Kirish</span>
+                    <span class="material-symbols-outlined" style="font-size:18px;">check</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT LOGIC -->
+    <script>
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.className = 'toast ' + type + ' show';
+            clearTimeout(window._tTimer);
+            window._tTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3400);
+        }
+
+        // Format phone inputs
+        function formatPhone(el) {
+            let val = el.value.replace(/\D/g, '').slice(0, 9);
+            let res = '';
+            if (val.length > 0) res += val.slice(0, 2);
+            if (val.length > 2) res += ' ' + val.slice(2, 5);
+            if (val.length > 5) res += ' ' + val.slice(5, 7);
+            if (val.length > 7) res += ' ' + val.slice(7, 9);
+            el.value = res;
+        }
+
+        const phoneEl = document.getElementById('phone');
+        phoneEl.addEventListener('input', () => formatPhone(phoneEl));
+
+        const tgPhoneEl = document.getElementById('tgPhone');
+        tgPhoneEl.addEventListener('input', () => formatPhone(tgPhoneEl));
+
+        // ==========================================
+        // 1. GMAIL OTP CODE VERIFICATION SYSTEM
+        // ==========================================
+        let currentGmailCode = null;
+        let gmailCountdown = 60;
+        let gmailTimerInterval = null;
+        let activeGmailAddress = '';
+
+        const gmailModal = document.getElementById('gmailModal');
+        const gmailLoginBtn = document.getElementById('gmailLoginBtn');
+        const closeGmailModal = document.getElementById('closeGmailModal');
+        const gmailStep1 = document.getElementById('gmailStep1');
+        const gmailStep2 = document.getElementById('gmailStep2');
+        const gmailInput = document.getElementById('gmailInput');
+        const gmailCodeInput = document.getElementById('gmailCodeInput');
+        const sendGmailCodeBtn = document.getElementById('sendGmailCodeBtn');
+        const verifyGmailCodeBtn = document.getElementById('verifyGmailCodeBtn');
+        const resendGmailCodeBtn = document.getElementById('resendGmailCodeBtn');
+        const gmailTimerText = document.getElementById('gmailTimerText');
+        const targetEmailLabel = document.getElementById('targetEmailLabel');
+        const gmailNotificationPopup = document.getElementById('gmailNotificationPopup');
+        const notificationCodeDisplay = document.getElementById('notificationCodeDisplay');
+        const notificationTargetEmail = document.getElementById('notificationTargetEmail');
+
+        gmailLoginBtn.addEventListener('click', () => {
+            if (window.tmaHaptic) window.tmaHaptic('light');
+            gmailModal.classList.add('active');
+            backToGmailStep1();
+        });
+
+        closeGmailModal.addEventListener('click', () => {
+            gmailModal.classList.remove('active');
+            dismissGmailNotification();
+        });
+
+        gmailModal.addEventListener('click', (e) => {
+            if (e.target === gmailModal) {
+                gmailModal.classList.remove('active');
+                dismissGmailNotification();
+            }
+        });
+
+        function selectPresetGmail(email) {
+            gmailInput.value = email;
+            triggerSendGmailCode();
+        }
+
+        function backToGmailStep1() {
+            gmailStep1.style.display = 'block';
+            gmailStep2.style.display = 'none';
+            document.getElementById('gmailModalTitle').textContent = 'Gmail orqali kirish';
+            document.getElementById('gmailModalSubtitle').textContent = 'Pochtani kiriting, biz 6 xonali kod yuboramiz';
+            if (gmailTimerInterval) clearInterval(gmailTimerInterval);
+        }
+
+        function triggerSendGmailCode() {
+            const email = gmailInput.value.trim().toLowerCase();
+            if (!email || !email.includes('@')) {
+                showToast('Iltimos, haqiqiy Gmail pochtangizni kiriting!', 'error');
+                gmailInput.focus();
+                return;
+            }
+
+            activeGmailAddress = email;
+            if (window.tmaHaptic) window.tmaHaptic('medium');
+
+            // Generate 6-digit random verification code
+            currentGmailCode = String(Math.floor(100000 + Math.random() * 900000));
+
+            // Visual feedback on button
+            sendGmailCodeBtn.disabled = true;
+            document.getElementById('sendGmailBtnText').textContent = 'Xat yuborilmoqda...';
+
+            setTimeout(() => {
+                sendGmailCodeBtn.disabled = false;
+                document.getElementById('sendGmailBtnText').textContent = 'Gmailga kod yuborish';
+
+                // Switch to Step 2
+                gmailStep1.style.display = 'none';
+                gmailStep2.style.display = 'block';
+                targetEmailLabel.textContent = email;
+                document.getElementById('gmailModalTitle').textContent = 'Kodni tasdiqlash';
+                document.getElementById('gmailModalSubtitle').textContent = email + ' pochtasiga kelgan kodni kiriting';
+                gmailCodeInput.value = '';
+                gmailCodeInput.focus();
+
+                // Show Interactive Gmail Push Notification Popup
+                notificationCodeDisplay.textContent = currentGmailCode;
+                notificationTargetEmail.textContent = email;
+                gmailNotificationPopup.classList.add('show');
+
+                showToast(`📩 ${email} pochtasiga 6 xonali kod yuborildi!`, 'info');
+                startGmailTimer();
+            }, 700);
+        }
+
+        sendGmailCodeBtn.addEventListener('click', triggerSendGmailCode);
+
+        function startGmailTimer() {
+            if (gmailTimerInterval) clearInterval(gmailTimerInterval);
+            gmailCountdown = 60;
+            resendGmailCodeBtn.classList.add('disabled');
+            gmailTimerText.textContent = `(${gmailCountdown}s)`;
+
+            gmailTimerInterval = setInterval(() => {
+                gmailCountdown--;
+                gmailTimerText.textContent = `(${gmailCountdown}s)`;
+                if (gmailCountdown <= 0) {
+                    clearInterval(gmailTimerInterval);
+                    resendGmailCodeBtn.classList.remove('disabled');
+                    gmailTimerText.textContent = '(qayta yuborish mumkin)';
+                }
+            }, 1000);
+        }
+
+        resendGmailCodeBtn.addEventListener('click', () => {
+            if (resendGmailCodeBtn.classList.contains('disabled')) return;
+            triggerSendGmailCode();
+            showToast('✅ Yangi tasdiqlash kodi qayta yuborildi!', 'success');
+        });
+
+        function autoFillAndSubmitGmailCode() {
+            if (currentGmailCode) {
+                gmailCodeInput.value = currentGmailCode;
+                dismissGmailNotification();
+                verifyGmailCode();
+            }
+        }
+
+        function dismissGmailNotification() {
+            gmailNotificationPopup.classList.remove('show');
+        }
+
+        function verifyGmailCode() {
+            const entered = gmailCodeInput.value.trim();
+            if (!entered || entered.length !== 6) {
+                showToast('Iltimos, 6 xonali tasdiqlash kodini to\'liq kiriting!', 'error');
+                gmailCodeInput.focus();
+                return;
+            }
+
+            if (entered !== currentGmailCode) {
+                showToast('❌ Tasdiqlash kodi noto\'g\'ri! Pochtani tekshiring.', 'error');
+                gmailCodeInput.focus();
+                return;
+            }
+
+            if (window.tmaHaptic) window.tmaHaptic('heavy');
+            dismissGmailNotification();
+
+            // Extract display name from email
+            const prefix = activeGmailAddress.split('@')[0];
+            const cleanName = prefix.split(/[._]/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || 'Gmail Foydalanuvchi';
+
+            const user = {
+                name: cleanName,
+                email: activeGmailAddress,
+                role: 'Gmail Foydalanuvchi',
+                avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanName)}&background=EA4335&color=fff&size=128`,
+                loginMethod: 'gmail_code',
+                loginTime: new Date().toISOString()
+            };
+
+            localStorage.setItem('user_profile', JSON.stringify(user));
+            showToast(`✅ Kod tasdiqlandi! Xush kelibsiz, ${cleanName}!`, 'success');
+            gmailModal.classList.remove('active');
+
+            setTimeout(() => {
+                window.location.href = './dashboard.html';
+            }, 500);
+        }
+
+        verifyGmailCodeBtn.addEventListener('click', verifyGmailCode);
+
+        // Auto submit when 6 digits are typed
+        gmailCodeInput.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
+            if (e.target.value.length === 6) {
+                setTimeout(verifyGmailCode, 200);
+            }
+        });
+
+        // ==========================================
+        // 2. TELEGRAM AUTHENTICATION
+        // ==========================================
+        const tgModal = document.getElementById('telegramModal');
+        const tgBtn = document.getElementById('telegramLoginBtn');
+        const closeTelegramModal = document.getElementById('closeTelegramModal');
+        const tgStep1 = document.getElementById('tgStep1');
+        const tgStep2 = document.getElementById('tgStep2');
+        const sendTgCodeBtn = document.getElementById('sendTgCodeBtn');
+        const verifyTgCodeBtn = document.getElementById('verifyTgCodeBtn');
+        const tgCodeInput = document.getElementById('tgCodeInput');
+
+        tgBtn.addEventListener('click', () => {
+            if (window.tmaHaptic) window.tmaHaptic('light');
+
+            // If inside real Telegram Mini App
+            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
+                const u = window.Telegram.WebApp.initDataUnsafe.user;
+                const name = `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.username || 'Telegram User';
+                const user = {
+                    name: name,
+                    email: u.username ? `@${u.username}` : 'telegram@user.uz',
+                    role: 'Telegram A\'zosi',
+                    avatar: u.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=2AABEE&color=fff&size=128`,
+                    loginMethod: 'telegram',
+                    loginTime: new Date().toISOString()
+                };
+                localStorage.setItem('user_profile', JSON.stringify(user));
+                showToast(`✅ Telegram orqali kirdingiz: ${name}`, 'success');
+                setTimeout(() => { window.location.href = './dashboard.html'; }, 500);
+                return;
+            }
+
+            tgModal.classList.add('active');
+            tgStep1.style.display = 'block';
+            tgStep2.style.display = 'none';
+        });
+
+        closeTelegramModal.addEventListener('click', () => {
+            tgModal.classList.remove('active');
+        });
+
+        tgModal.addEventListener('click', (e) => {
+            if (e.target === tgModal) tgModal.classList.remove('active');
+        });
+
+        sendTgCodeBtn.addEventListener('click', () => {
+            const rawPhone = tgPhoneEl.value.replace(/\s/g, '');
+            if (rawPhone.length < 9) {
+                showToast('Raqamni to\'liq kiriting (90 123 45 67)', 'error');
+                tgPhoneEl.focus();
+                return;
+            }
+            if (window.tmaHaptic) window.tmaHaptic('light');
+            sendTgCodeBtn.innerHTML = '<span>Kutib turing...</span>';
+            setTimeout(() => {
+                sendTgCodeBtn.innerHTML = '<span>Tasdiqlash kodini olish</span><span class="material-symbols-outlined" style="font-size:18px;">send</span>';
+                tgStep1.style.display = 'none';
+                tgStep2.style.display = 'block';
+                tgCodeInput.value = '7777';
+                showToast('📩 Kod Telegramga yuborildi: 7777', 'info');
+            }, 600);
+        });
+
+        verifyTgCodeBtn.addEventListener('click', () => {
+            const code = tgCodeInput.value.trim();
+            if (code.length < 4) {
+                showToast('4 xonali kodni kiriting (7777)', 'error');
+                return;
+            }
+            if (window.tmaHaptic) window.tmaHaptic('medium');
+            const phone = tgPhoneEl.value || '90 123 45 67';
+            const user = {
+                name: 'Telegram Foydalanuvchi',
+                email: 'telegram_user@ishtop.uz',
+                phone: '+998 ' + phone,
+                role: 'Telegram A\'zosi',
+                avatar: 'https://ui-avatars.com/api/?name=Telegram+User&background=2AABEE&color=fff&size=128',
+                loginMethod: 'telegram',
+                loginTime: new Date().toISOString()
+            };
+            localStorage.setItem('user_profile', JSON.stringify(user));
+            tgModal.classList.remove('active');
+            showToast('✅ Telegram orqali muvaffaqiyatli kirdingiz!', 'success');
+            setTimeout(() => { window.location.href = './dashboard.html'; }, 500);
+        });
+
+        // ==========================================
+        // 3. FAST DEMO LOGIN
+        // ==========================================
+        document.getElementById('demoQuickLoginBtn').addEventListener('click', () => {
+            if (window.tmaHaptic) window.tmaHaptic('light');
+            const user = {
+                name: 'Alisher Usmanov',
+                role: 'Bosh Administrator',
+                email: 'admin@ishtop.uz',
+                phone: '+998 90 123 45 67',
+                avatar: 'https://ui-avatars.com/api/?name=Alisher+Usmanov&background=002046&color=fff&size=128',
+                loginMethod: 'demo',
+                loginTime: new Date().toISOString()
+            };
+            localStorage.setItem('user_profile', JSON.stringify(user));
+            showToast('⚡️ Demo rejimda muvaffaqiyatli kirdingiz!', 'success');
+            setTimeout(() => { window.location.href = './dashboard.html'; }, 400);
+        });
+
+        // ==========================================
+        // 4. PHONE & AGE FORM
+        // ==========================================
+        document.getElementById('phoneLoginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const phone = phoneEl.value.replace(/\s/g, '');
+            const age = document.getElementById('age').value;
+            if (phone.length < 9) {
+                showToast('Telefon raqamni to\'liq kiriting', 'error');
+                phoneEl.focus();
+                return;
+            }
+            if (window.tmaHaptic) window.tmaHaptic('medium');
+            const user = {
+                name: 'Foydalanuvchi (+998 ' + phoneEl.value + ')',
+                role: 'Foydalanuvchi',
+                email: 'user' + phone.slice(-4) + '@ishtop.uz',
+                phone: '+998 ' + phoneEl.value,
+                age: age,
+                avatar: 'https://ui-avatars.com/api/?name=Foydalanuvchi&background=0E9F6E&color=fff&size=128',
+                loginMethod: 'phone',
+                loginTime: new Date().toISOString()
+            };
+            localStorage.setItem('user_profile', JSON.stringify(user));
+            showToast('✅ Tizimga muvaffaqiyatli kirdingiz!', 'success');
+            setTimeout(() => { window.location.href = './dashboard.html'; }, 500);
+        });
+    </script>
+</body>
+
+</html

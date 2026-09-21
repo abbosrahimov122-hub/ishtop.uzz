@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+        name="viewport" />
+    <title>Statistika va Tahlil | ishtop.uz Mini Ilova</title>
+    <meta name="theme-color" content="#002046" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="/manifest.json" />
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="/telegram.js" defer></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f9fb;
+            color: #191c1e;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+
+        .card-shadow {
+            box-shadow: 0 4px 20px -2px rgba(0, 32, 70, 0.05), 0 2px 6px -1px rgba(0, 32, 70, 0.03);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 260px;
+            width: 100%;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 32, 70, 0.5);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #ffffff;
+            border-radius: 24px;
+            max-width: 540px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+
+        @keyframes modalIn {
+            from {
+                transform: translateY(20px) scale(0.96);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .toast-message {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #002046;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 14px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+            font-weight: 600;
+            font-size: 13px;
+            z-index: 9999;
+            opacity: 0;
+            transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            pointer-events: none;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        .toast-message.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col pb-20 md:pb-0">
+
+    <!-- Toast Notification -->
+    <div class="toast-message" id="toast"></div>
+
+    <!-- Header -->
+    <header class="bg-white/95 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200/80 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <a href="./dashboard.html" class="flex items-center gap-2">
+                <div
+                    class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#002046] to-[#006b5c] text-white flex items-center justify-center shadow-md">
+                    <span class="material-symbols-outlined text-xl">work_outline</span>
+                </div>
+                <span class="text-xl font-black text-[#002046] tracking-tight">ishtop<span
+                        class="text-[#006b5c]">.uz</span></span>
+            </a>
+
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button id="openExportModalBtn"
+                    class="flex items-center gap-1.5 px-3.5 py-2 bg-[#006b5c] text-white rounded-xl text-xs font-bold hover:bg-[#005145] transition-all active:scale-95 shadow-md shadow-emerald-700/20">
+                    <span class="material-symbols-outlined text-base">download</span>
+                    <span>Hisobot yuklash</span>
+                </button>
+                <a href="./dashboard.html" class="p-1 rounded-full">
+                    <img class="w-9 h-9 rounded-full object-cover border-2 border-slate-200"
+                        src="https://ui-avatars.com/api/?name=Alisher+Usmanov&background=002046&color=fff&size=128"
+                        alt="Admin" />
+                </a>
+            </div>
+        </div>
+
+        <!-- Subnav -->
+        <div class="border-t border-slate-100 bg-white">
+            <div class="max-w-7xl mx-auto px-4 flex items-center gap-1 overflow-x-auto">
+                <a href="./dashboard.html"
+                    class="px-4 py-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent whitespace-nowrap flex items-center gap-1.5 transition-colors">
+                    <span class="material-symbols-outlined text-base">dashboard</span>
+                    Boshqaruv paneli
+                </a>
+                <a href="./vakansiyalar.html"
+                    class="px-4 py-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent whitespace-nowrap flex items-center gap-1.5 transition-colors">
+                    <span class="material-symbols-outlined text-base">work</span>
+                    Vakansiyalar
+                </a>
+                <a href="./nomzodlar.html"
+                    class="px-4 py-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent whitespace-nowrap flex items-center gap-1.5 transition-colors">
+                    <span class="material-symbols-outlined text-base">group</span>
+                    Nomzodlar
+                </a>
+                <a href="./statistika.html"
+                    class="px-4 py-2.5 text-xs font-bold text-[#006b5c] border-b-2 border-[#006b5c] whitespace-nowrap flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-base"
+                        style="font-variation-settings: 'FILL' 1;">bar_chart</span>
+                    Statistika
+                </a>
+                <a href="./sozlamalar.html"
+                    class="px-4 py-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent whitespace-nowrap flex items-center gap-1.5 transition-colors">
+                    <span class="material-symbols-outlined text-base">settings</span>
+                    Sozlamalar
+                </a>
+                <a href="./kartalar.html"
+                    class="ml-auto px-4 py-2.5 text-xs font-bold text-amber-700 bg-amber-50/70 hover:bg-amber-100/70 rounded-t-lg whitespace-nowrap flex items-center gap-1.5 transition-colors">
+                    <span class="material-symbols-outlined text-base text-amber-600">credit_card</span>
+                    💳 Kartalarim
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6 space-y-6">
+
+        <!-- Top Header & Time Range Selector -->
+        <div
+            class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl card-shadow border border-slate-100">
+            <div>
+                <h1 class="text-xl font-black text-[#002046]">Statistika va Analitika</h1>
+                <p class="text-xs text-slate-500">Platformadagi dinamika va asosiy ko'rsatkichlar</p>
+            </div>
+            <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl" id="timePeriodSelector">
+                <button class="period-btn px-3 py-1.5 text-xs font-bold rounded-lg transition-all" data-period="7">7
+                    kun</button>
+                <button
+                    class="period-btn px-3 py-1.5 text-xs font-bold bg-white text-[#002046] shadow-sm rounded-lg transition-all"
+                    data-period="30">30 kun</button>
+                <button class="period-btn px-3 py-1.5 text-xs font-bold rounded-lg transition-all" data-period="90">90
+                    kun</button>
+                <button class="period-btn px-3 py-1.5 text-xs font-bold rounded-lg transition-all" data-period="365">1
+                    yil</button>
+            </div>
+        </div>
+
+        <!-- 4 Key Stat Metric Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div onclick="showMetricDetail('Yangi vakansiyalar', '1,284', '+12.4%', 'O\'tgan oyga nisbatan 142 ta ko\'proq vakansiya')"
+                class="bg-white p-4 rounded-2xl card-shadow border border-slate-100 cursor-pointer hover:border-emerald-300 transition-all">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="w-9 h-9 rounded-xl bg-emerald-50 text-[#006b5c] flex items-center justify-center">
+                        <span class="material-symbols-outlined text-lg">work</span>
+                    </span>
+                    <span
+                        class="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">+12.4%</span>
+                </div>
+                <p class="text-xs font-semibold text-slate-500">Yangi vakansiyalar</p>
+                <h3 class="text-2xl font-black text-[#002046] mt-0.5" id="statJobsCount">1,284</h3>
+            </div>
+
+            <div onclick="showMetricDetail('Ro\'yxatdan o\'tganlar', '4,592', '+8.1%', 'Bu oy 4.5k yangi talabgor profil ochdi')"
+                class="bg-white p-4 rounded-2xl card-shadow border border-slate-100 cursor-pointer hover:border-blue-300 transition-all">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="w-9 h-9 rounded-xl bg-blue-50 text-[#002046] flex items-center justify-center">
+                        <span class="material-symbols-outlined text-lg">person_add</span>
+                    </span>
+                    <span class="text-[11px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">+8.1%</span>
+                </div>
+                <p class="text-xs font-semibold text-slate-500">Ro'yxatdan o'tganlar</p>
+                <h3 class="text-2xl font-black text-[#002046] mt-0.5" id="statUsersCount">4,592</h3>
+            </div>
+
+            <div onclick="showMetricDetail('Faol arizalar', '12,102', '+18.5%', 'Nomzodlar tomonidan yuborilgan umumiy arizalar soni')"
+                class="bg-white p-4 rounded-2xl card-shadow border border-slate-100 cursor-pointer hover:border-teal-300 transition-all">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="w-9 h-9 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-lg">touch_app</span>
+                    </span>
+                    <span class="text-[11px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full">+18.5%</span>
+                </div>
+                <p class="text-xs font-semibold text-slate-500">Faol arizalar</p>
+                <h3 class="text-2xl font-black text-[#002046] mt-0.5">12,102</h3>
+            </div>
+
+            <div onclick="showMetricDetail('O\'rtacha vaqt', '4:20', '+15s', 'Foydalanuvchilarning o\'rtacha portalda qolish davomiyligi')"
+                class="bg-white p-4 rounded-2xl card-shadow border border-slate-100 cursor-pointer hover:border-amber-300 transition-all">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-lg">timer</span>
+                    </span>
+                    <span class="text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">+15s</span>
+                </div>
+                <p class="text-xs font-semibold text-slate-500">O'rtacha vaqt</p>
+                <h3 class="text-2xl font-black text-[#002046] mt-0.5">4m 20s</h3>
+            </div>
+        </div>
+
+        <!-- Dynamic Chart.js Growth Section -->
+        <div class="bg-white p-5 rounded-2xl card-shadow border border-slate-100">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                <div>
+                    <h3 class="text-base font-bold text-[#002046]">Vakansiyalar va Foydalanuvchilar o'sishi</h3>
+                    <p class="text-xs text-slate-400">Oylik dinamik ko'rsatkichlar monitoringi</p>
+                </div>
+                <div class="flex items-center gap-4 text-xs font-semibold">
+                    <span class="flex items-center gap-1.5 text-[#002046]">
+                        <span class="w-3 h-3 rounded-full bg-[#002046]"></span> Vakansiyalar
+                    </span>
+                    <span class="flex items-center gap-1.5 text-[#006b5c]">
+                        <span class="w-3 h-3 rounded-full bg-[#006b5c]"></span> Nomzodlar
+                    </span>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="mainStatsChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 2 Columns: Top Categories & Company Rankings -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Categories Breakdown -->
+            <div class="bg-white p-5 rounded-2xl card-shadow border border-slate-100 space-y-4">
+                <h3 class="text-base font-bold text-[#002046]">Ommabop sohalar ulushi</h3>
+                <div class="space-y-3 text-xs">
+                    <div>
+                        <div class="flex justify-between font-semibold mb-1">
+                            <span class="text-slate-700">Qurilish va Muhandislik</span>
+                            <span class="text-[#002046] font-bold">42%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                            <div class="bg-[#002046] h-full rounded-full w-[42%]"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between font-semibold mb-1">
+                            <span class="text-slate-700">Savdo va Chakana savdo</span>
+                            <span class="text-[#006b5c] font-bold">28%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                            <div class="bg-[#006b5c] h-full rounded-full w-[28%]"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between font-semibold mb-1">
+                            <span class="text-slate-700">Transport va Logistika</span>
+                            <span class="text-amber-600 font-bold">15%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                            <div class="bg-amber-500 h-full rounded-full w-[15%]"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between font-semibold mb-1">
+                            <span class="text-slate-700">Restoran va Mehmondo'stlik</span>
+                            <span class="text-teal-600 font-bold">10%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                            <div class="bg-teal-500 h-full rounded-full w-[10%]"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between font-semibold mb-1">
+                            <span class="text-slate-700">IT va Boshqa sohalar</span>
+                            <span class="text-slate-500 font-bold">5%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                            <div class="bg-slate-400 h-full rounded-full w-[5%]"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-2 border-t border-slate-100">
+                    <button id="openFullAnalysisBtn"
+                        class="w-full py-2.5 bg-slate-100 hover:bg-[#006b5c] hover:text-white text-slate-700 font-bold text-xs rounded-xl transition-colors flex items-center justify-center gap-1.5">
+                        <span class="material-symbols-outlined text-base">analytics</span>
+                        To'liq tahliliy hisobot
+                    </button>
+                </div>
+            </div>
+
+            <!-- Top Companies Analytics Table -->
+            <div class="lg:col-span-2 bg-white p-5 rounded-2xl card-shadow border border-slate-100">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                    <div>
+                        <h3 class="text-base font-bold text-[#002046]">Top Ish Beruvchilar</h3>
+                        <p class="text-xs text-slate-400">Eng ko'p ish o'rni yaratgan va ariza qabul qilgan kompaniyalar
+                        </p>
+                    </div>
+                    <input id="companySearchInput" type="text" placeholder="Qidirish..."
+                        class="px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-[#006b5c]" />
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead>
+                            <tr class="border-b border-slate-100 text-slate-400 font-semibold">
+                                <th class="py-2.5 px-3 cursor-pointer hover:text-slate-700"
+                                    onclick="sortCompanyTable(0)">Kompaniya ↕</th>
+                                <th class="py-2.5 px-3 cursor-pointer hover:text-slate-700"
+                                    onclick="sortCompanyTable(1)">Vakansiyalar ↕</th>
+                                <th class="py-2.5 px-3 cursor-pointer hover:text-slate-700"
+                                    onclick="sortCompanyTable(2)">Arizalar ↕</th>
+                                <th class="py-2.5 px-3 cursor-pointer hover:text-slate-700"
+                                    onclick="sortCompanyTable(3)">O'rtacha maosh ↕</th>
+                                <th class="py-2.5 px-3">Trend</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100" id="companyTableBody">
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="py-3 px-3 font-bold text-slate-800 flex items-center gap-2">
+                                    <div
+                                        class="w-6 h-6 rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold flex items-center justify-center">
+                                        KZ</div>
+                                    Korzinka.uz
+                                </td>
+                                <td class="py-3 px-3">124 ta</td>
+                                <td class="py-3 px-3 font-semibold">1,842</td>
+                                <td class="py-3 px-3 text-emerald-700 font-bold">4.8 mln UZS</td>
+                                <td class="py-3 px-3 text-emerald-600 font-bold">▲ +14%</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="py-3 px-3 font-bold text-slate-800 flex items-center gap-2">
+                                    <div
+                                        class="w-6 h-6 rounded bg-blue-100 text-blue-800 text-[10px] font-bold flex items-center justify-center">
+                                        AG</div>
+                                    Artel Group
+                                </td>
+                                <td class="py-3 px-3">86 ta</td>
+                                <td class="py-3 px-3 font-semibold">2,105</td>
+                                <td class="py-3 px-3 text-emerald-700 font-bold">6.2 mln UZS</td>
+                                <td class="py-3 px-3 text-emerald-600 font-bold">▲ +21%</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="py-3 px-3 font-bold text-slate-800 flex items-center gap-2">
+                                    <div
+                                        class="w-6 h-6 rounded bg-amber-100 text-amber-800 text-[10px] font-bold flex items-center justify-center">
+                                        AK</div>
+                                    Akfa Group
+                                </td>
+                                <td class="py-3 px-3">74 ta</td>
+                                <td class="py-3 px-3 font-semibold">1,430</td>
+                                <td class="py-3 px-3 text-emerald-700 font-bold">5.5 mln UZS</td>
+                                <td class="py-3 px-3 text-emerald-600 font-bold">▲ +11%</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="py-3 px-3 font-bold text-slate-800 flex items-center gap-2">
+                                    <div
+                                        class="w-6 h-6 rounded bg-red-100 text-red-800 text-[10px] font-bold flex items-center justify-center">
+                                        EV</div>
+                                    EVOS Fast Food
+                                </td>
+                                <td class="py-3 px-3">54 ta</td>
+                                <td class="py-3 px-3 font-semibold">920</td>
+                                <td class="py-3 px-3 text-emerald-700 font-bold">3.8 mln UZS</td>
+                                <td class="py-3 px-3 text-red-500 font-bold">▼ -4%</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="py-3 px-3 font-bold text-slate-800 flex items-center gap-2">
+                                    <div
+                                        class="w-6 h-6 rounded bg-teal-100 text-teal-800 text-[10px] font-bold flex items-center justify-center">
+                                        MW</div>
+                                    MaxWay Logistics
+                                </td>
+                                <td class="py-3 px-3">41 ta</td>
+                                <td class="py-3 px-3 font-semibold">745</td>
+                                <td class="py-3 px-3 text-emerald-700 font-bold">4.2 mln UZS</td>
+                                <td class="py-3 px-3 text-emerald-600 font-bold">▲ +8%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal: Metric Detail -->
+    <div class="modal-overlay" id="metricModal">
+        <div class="modal-content p-6 text-center">
+            <button class="absolute top-4 right-4 text-slate-400 hover:text-slate-600" id="closeMetricModal">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+            <div
+                class="w-14 h-14 rounded-2xl bg-emerald-50 text-[#006b5c] flex items-center justify-center mx-auto mb-3">
+                <span class="material-symbols-outlined text-3xl">insights</span>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900" id="metricModalTitle">Ko'rsatkich</h3>
+            <p class="text-3xl font-black text-[#002046] my-2" id="metricModalValue">0</p>
+            <span class="inline-block px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full mb-3"
+                id="metricModalChange">+0%</span>
+            <p class="text-xs text-slate-600 bg-slate-50 p-3 rounded-xl leading-relaxed text-left" id="metricModalDesc">
+                Batafsil ma'lumot</p>
+            <button onclick="document.getElementById('metricModal').classList.remove('active')"
+                class="w-full mt-4 py-2.5 bg-[#002046] text-white text-xs font-bold rounded-xl">
+                Yopish
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal: Working Export Downloads -->
+    <div class="modal-overlay" id="exportModal">
+        <div class="modal-content p-6">
+            <button class="absolute top-4 right-4 text-slate-400 hover:text-slate-600" id="closeExportModal">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+
+            <div class="text-center mb-5">
+                <div
+                    class="w-12 h-12 rounded-2xl bg-emerald-50 text-[#006b5c] flex items-center justify-center mx-auto mb-2">
+                    <span class="material-symbols-outlined text-2xl">file_download</span>
+                </div>
+                <h3 class="text-lg font-bold text-[#002046]">Hisobotlarni yuklab olish</h3>
+                <p class="text-xs text-slate-500">Kerakli formatni tanlang</p>
+            </div>
+
+            <div class="space-y-3">
+                <!-- CSV Download -->
+                <button onclick="downloadCSVReport()"
+                    class="w-full p-3.5 bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-[#006b5c] rounded-2xl flex items-center justify-between transition-all text-left group">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs">
+                            CSV
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-800 group-hover:text-[#006b5c]">CSV / Excel formati
+                            </p>
+                            <p class="text-[10px] text-slate-400">Jadval ko'rinishida barcha statistik raqamlar</p>
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-400 group-hover:text-[#006b5c]">download</span>
+                </button>
+
+                <!-- JSON Download -->
+                <button onclick="downloadJSONReport()"
+                    class="w-full p-3.5 bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-500 rounded-2xl flex items-center justify-between transition-all text-left group">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs">
+                            JSON
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-800 group-hover:text-blue-600">JSON Dasturiy formati
+                            </p>
+                            <p class="text-[10px] text-slate-400">Integratsiya va analitik dasturlar uchun</p>
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-400 group-hover:text-blue-600">download</span>
+                </button>
+
+                <!-- Print Report -->
+                <button onclick="window.print()"
+                    class="w-full p-3.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-2xl flex items-center justify-between transition-all text-left group">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-xs">
+                            PDF
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-800">Chop etish / PDF sifatida saqlash</p>
+                            <p class="text-[10px] text-slate-400">Brauzer orqali to'liq chop etish</p>
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-400">print</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Navigation -->
+    <nav
+        class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-slate-200/80 flex items-center justify-around z-30 px-2 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+        <a href="./dashboard.html" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-700">
+            <span class="material-symbols-outlined text-2xl">dashboard</span>
+            <span class="text-[10px]">Boshqaruv</span>
+        </a>
+        <a href="./vakansiyalar.html" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-700">
+            <span class="material-symbols-outlined text-2xl">work</span>
+            <span class="text-[10px]">Vakansiyalar</span>
+        </a>
+        <div class="relative -top-3">
+            <a href="./dashboard.html"
+                class="w-12 h-12 rounded-full bg-[#006b5c] text-white flex items-center justify-center shadow-lg shadow-emerald-700/30 active:scale-90 transition-transform">
+                <span class="material-symbols-outlined text-2xl">home</span>
+            </a>
+        </div>
+        <a href="./statistika.html" class="flex flex-col items-center gap-0.5 text-[#006b5c]">
+            <span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">bar_chart</span>
+            <span class="text-[10px] font-bold">Statistika</span>
+        </a>
+        <a href="./kartalar.html" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-700">
+            <span class="material-symbols-outlined text-2xl">credit_card</span>
+            <span class="text-[10px]">Kartalar</span>
+        </a>
+    </nav>
+
+    <script>
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            clearTimeout(window._tTimer);
+            window._tTimer = setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // Initialize Chart.js
+        let chartInstance = null;
+        function initChart(period = '30') {
+            const ctx = document.getElementById('mainStatsChart').getContext('2d');
+            let labels = ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyun'];
+            let jobData = [650, 800, 750, 950, 1100, 1284];
+            let userData = [2100, 2400, 2900, 3500, 4100, 4592];
+
+            if (period === '7') {
+                labels = ['Dush', 'Sesh', 'Chor', 'Pay', 'Jum', 'Shan', 'Yak'];
+                jobData = [120, 150, 140, 180, 210, 280, 204];
+                userData = [420, 510, 490, 620, 780, 940, 832];
+            } else if (period === '90') {
+                labels = ['1-oy', '2-oy', '3-oy'];
+                jobData = [2400, 3100, 3850];
+                userData = [7800, 9900, 12400];
+            } else if (period === '365') {
+                labels = ['Q1', 'Q2', 'Q3', 'Q4'];
+                jobData = [8200, 10400, 12800, 15400];
+                userData = [28000, 36000, 44000, 52000];
+            }
+
+            if (chartInstance) chartInstance.destroy();
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Vakansiyalar',
+                            data: jobData,
+                            borderColor: '#002046',
+                            backgroundColor: 'rgba(0, 32, 70, 0.08)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.35,
+                            pointBackgroundColor: '#002046',
+                            pointRadius: 4
+                        },
+                        {
+                            label: 'Nomzodlar',
+                            data: userData,
+                            borderColor: '#006b5c',
+                            backgroundColor: 'rgba(0, 107, 92, 0.08)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.35,
+                            pointBackgroundColor: '#006b5c',
+                            pointRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            grid: { color: 'rgba(226, 232, 240, 0.6)' },
+                            ticks: { font: { size: 10 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { size: 10 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Period switcher
+        document.querySelectorAll('.period-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('.period-btn').forEach(b => {
+                    b.className = 'period-btn px-3 py-1.5 text-xs font-bold rounded-lg transition-all text-slate-600 hover:text-slate-900';
+                });
+                this.className = 'period-btn px-3 py-1.5 text-xs font-bold bg-white text-[#002046] shadow-sm rounded-lg transition-all';
+
+                const p = this.dataset.period;
+                initChart(p);
+                showToast(`Davr tanlandi: ${this.textContent}`);
+            });
+        });
+
+        // Metric detail modal
+        const metricModal = document.getElementById('metricModal');
+        document.getElementById('closeMetricModal').addEventListener('click', () => metricModal.classList.remove('active'));
+        metricModal.addEventListener('click', (e) => { if (e.target === metricModal) metricModal.classList.remove('active'); });
+
+        function showMetricDetail(title, val, change, desc) {
+            document.getElementById('metricModalTitle').textContent = title;
+            document.getElementById('metricModalValue').textContent = val;
+            document.getElementById('metricModalChange').textContent = change;
+            document.getElementById('metricModalDesc').textContent = desc;
+            metricModal.classList.add('active');
+        }
+
+        // Export Modal
+        const exportModal = document.getElementById('exportModal');
+        document.getElementById('openExportModalBtn').addEventListener('click', () => exportModal.classList.add('active'));
+        document.getElementById('closeExportModal').addEventListener('click', () => exportModal.classList.remove('active'));
+        exportModal.addEventListener('click', (e) => { if (e.target === exportModal) exportModal.classList.remove('active'); });
+
+        // Real CSV Downloader
+        function downloadCSVReport() {
+            let csv = "Kompaniya;Vakansiyalar;Arizalar;Maosh;Trend\n";
+            csv += "Korzinka.uz;124;1842;4800000 UZS;+14%\n";
+            csv += "Artel Group;86;2105;6200000 UZS;+21%\n";
+            csv += "Akfa Group;74;1430;5500000 UZS;+11%\n";
+            csv += "EVOS Fast Food;54;920;3800000 UZS;-4%\n";
+            csv += "MaxWay Logistics;41;745;4200000 UZS;+8%\n";
+
+            const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ishtop_uz_statistika_${new Date().toISOString().slice(0, 10)}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+            exportModal.classList.remove('active');
+            showToast('✅ CSV hisobot muvaffaqiyatli yuklab olindi!');
+        }
+
+        // Real JSON Downloader
+        function downloadJSONReport() {
+            const data = {
+                platform: "ishtop.uz",
+                generated_at: new Date().toISOString(),
+                metrics: {
+                    active_vacancies: 1284,
+                    total_candidates: 42592,
+                    total_applications: 12102,
+                    average_stay_time: "4m 20s"
+                },
+                top_sectors: [
+                    { name: "Qurilish", share: "42%" },
+                    { name: "Savdo", share: "28%" },
+                    { name: "Logistika", share: "15%" },
+                    { name: "Restoran", share: "10%" }
+                ]
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ishtop_uz_report_${new Date().toISOString().slice(0, 10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            exportModal.classList.remove('active');
+            showToast('✅ JSON ma\'lumotlar muvaffaqiyatli yuklandi!');
+        }
+
+        // Company search
+        document.getElementById('companySearchInput').addEventListener('input', function () {
+            const q = this.value.toLowerCase();
+            document.querySelectorAll('#companyTableBody tr').forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+            });
+        });
+
+        // Company sorting
+        let sortDirections = [true, true, true, true];
+        function sortCompanyTable(colIdx) {
+            const tbody = document.getElementById('companyTableBody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            const isAsc = sortDirections[colIdx];
+            sortDirections[colIdx] = !isAsc;
+
+            rows.sort((a, b) => {
+                const aText = a.children[colIdx].textContent.trim();
+                const bText = b.children[colIdx].textContent.trim();
+                return isAsc ? aText.localeCompare(bText, undefined, { numeric: true }) : bText.localeCompare(aText, undefined, { numeric: true });
+            });
+
+            rows.forEach(r => tbody.appendChild(r));
+            showToast('Jadval qayta saralandi');
+        }
+
+        initChart('30');
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+        name="viewport" />
+    <title>Sozlamalar | ishtop.uz Mini Ilova</title>
+    <meta name="theme-color" content="#002046" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="/manifest.json" />
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="/telegram.js" defer></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f9fb;
+            color: #191c1e;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+
+        .card-shadow {
+            box-shadow: 0 4px 20px -2px rgba(0, 32, 70, 0.05), 0 2px 6px -1px rgba(0, 32, 70, 0.03);
+        }
+
+        .toast-message {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #002046;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 14px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+            font-weight: 600;
+            font-size: 13px;
+            z-index: 9999;
+            opacity: 0;
+            transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            pointer-events: none;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        .toast-message.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Toggle switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 26px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            transition: .3s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked+.toggle-slider {
+            background-color: #006b5c;
+        }
+
+        input:checked+.toggle-slider:before {
+            transform: translateX(22px);
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col pb-20 md:pb-0">
+
+    <!-- Toast Notification -->
+    <div class="toast-message" id="toast"></div>
+
+    <!-- Header -->
+    <header class="bg-white/95 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200/80 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <a href="./dashboard.html" class="flex items-center gap-2">
+                <div
+                    class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#002046] to-[#006b5c] text-white flex items-center justify-center shadow-md">
+                    <span class="material-symbols-outlined text-xl">work_outline</span>
+                </div>
+                <span class="text-xl font-black text-[#002046] tracking-tight">ishtop<span
+                        class="text-[#006b5c]">.uz</span></span>
+            </a>
+
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button id="headerSaveBtn"
+                    class="flex items-center gap-1.5 px-4 py-2 bg-[#006b5c] text-white rounded-xl text-xs font-bold hover:bg-[#005145] transition-all active:scale-95 shadow-md shadow-emerald-700/20">
+                    <span class="material-symbols-outlined text-base">save</span>
+                    <span>Saqlash</span>
+                </button>
+                <a href="./dashboard.html" class="p-1 rounded-full">
+                    <img id="navAvatar" class="w-9 h-9 rounded-full object-cover border-2 border-slate-200"
+                        src="https://ui-avatars.com/api/?name=Alisher+Usmanov&background=002046&color=fff&size=128"
+                        alt="Admin" />
+                </a>
+            </div>
+        </div>
+
+        <!-- Subnav -->
+        <div class="border-t border-slate-100 bg-white">
+            <div class="max-w-7xl mx-auto px-4 flex items-center gap-1 overflow-x-auto">
+                <a href="./dashboard.html"
+                    class="px-4 py-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent whitespace-nowrap flex items-center gap-1.5 transition-colors">
+                    <span class="material-symbols-outlined text-base">dashboard</span>
+                    Boshqaruv paneli
+                </a>
+                <a href="./vakansiyalar.html"
+                    class="px-4 py-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent whitespace-nowrap flex items-center gap-1.5 transition-colors">
+                    <span class="material-symbols-outlined text-base">work</span>
+                    Vakansiyalar
+                </a>
+                <a href="./nomzodlar.html"
+                    class="px-4 py-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent whitespace-nowrap flex items-center gap-1.5 transition-colors">
+                    <span class="material-symbols-outlined text-base">group</span>
+                    Nomzodlar
+                </a>
+                <a href="./statistika.html"
+                    class="px-4 py-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent whitespace-nowrap flex items-center gap-1.5 transition-colors">
+                    <span class="material-symbols-outlined text-base">bar_chart</span>
+                    Statistika
+                </a>
+                <a href="./sozlamalar.html"
+                    class="px-4 py-2.5 text-xs font-bold text-[#006b5c] border-b-2 border-[#006b5c] whitespace-nowrap flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-base"
+                        style="font-variation-settings: 'FILL' 1;">settings</span>
+                    Sozlamalar
+                </a>
+                <a href="./kartalar.html"
+                    class="ml-auto px-4 py-2.5 text-xs font-bold text-amber-700 bg-amber-50/70 hover:bg-amber-100/70 rounded-t-lg whitespace-nowrap flex items-center gap-1.5 transition-colors">
+                    <span class="material-symbols-outlined text-base text-amber-600">credit_card</span>
+                    💳 Kartalarim
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-6 space-y-6">
+
+        <div>
+            <h1 class="text-xl font-black text-[#002046]">Tizim va Profil Sozlamalari</h1>
+            <p class="text-xs text-slate-500">Shaxsiy ma'lumotlar, korxona tafsilotlari va xavfsizlik parametrlari</p>
+        </div>
+
+        <form id="settingsForm" class="space-y-6">
+
+            <!-- Profile & Photo Section -->
+            <div class="bg-white p-5 rounded-2xl card-shadow border border-slate-100">
+                <div class="flex flex-col sm:flex-row items-center gap-5">
+                    <div class="relative group">
+                        <img id="avatarPreview"
+                            class="w-24 h-24 rounded-2xl object-cover border-4 border-slate-100 shadow-md"
+                            src="https://ui-avatars.com/api/?name=Alisher+Usmanov&background=002046&color=fff&size=200"
+                            alt="Avatar" />
+                        <label for="avatarUpload"
+                            class="absolute bottom-1 right-1 w-8 h-8 rounded-full bg-[#006b5c] text-white flex items-center justify-center cursor-pointer shadow-md hover:scale-105 transition-transform"
+                            title="Rasm yuklash">
+                            <span class="material-symbols-outlined text-sm">photo_camera</span>
+                        </label>
+                        <input id="avatarUpload" type="file" accept="image/*" class="hidden" />
+                    </div>
+
+                    <div class="text-center sm:text-left flex-1">
+                        <h3 class="text-base font-bold text-[#002046]" id="profileNameDisplay">Alisher Usmanov</h3>
+                        <p class="text-xs text-slate-400">Bosh Administrator · HR Departament</p>
+                        <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-2">
+                            <span
+                                class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold">Verifikatsiyadan
+                                o'tgan</span>
+                            <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px]">Toshkent,
+                                O'zbekiston</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personal Information -->
+            <div class="bg-white p-5 rounded-2xl card-shadow border border-slate-100 space-y-4">
+                <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+                    <span class="material-symbols-outlined text-[#006b5c]">person</span>
+                    <h3 class="text-sm font-bold text-[#002046]">Shaxsiy ma'lumotlar</h3>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">To'liq ism-sharif</label>
+                        <input id="inputName" type="text" value="Alisher Usmanov"
+                            class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none transition-all" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Elektron pochta</label>
+                        <input id="inputEmail" type="email" value="admin@ishtop.uz"
+                            class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none transition-all" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Telefon raqam</label>
+                        <div
+                            class="flex items-center bg-slate-50 border border-slate-200 rounded-xl overflow-hidden focus-within:border-[#006b5c] focus-within:bg-white">
+                            <span class="px-3 text-xs font-bold text-slate-500 border-r border-slate-200">+998</span>
+                            <input id="inputPhone" type="text" value="90 123 45 67"
+                                class="w-full px-3 py-2.5 text-xs sm:text-sm bg-transparent border-none outline-none" />
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Lavozim</label>
+                        <input id="inputRole" type="text" value="Bosh Administrator"
+                            class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none transition-all" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Company Information -->
+            <div class="bg-white p-5 rounded-2xl card-shadow border border-slate-100 space-y-4">
+                <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+                    <span class="material-symbols-outlined text-[#006b5c]">business</span>
+                    <h3 class="text-sm font-bold text-[#002046]">Kompaniya parametrlari</h3>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Tashkilot nomi</label>
+                        <input type="text" value="ishtop.uz MChJ"
+                            class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none transition-all" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">STIR (INN raqami)</label>
+                        <input type="text" value="309124872"
+                            class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none transition-all" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Faoliyat sohasi</label>
+                        <select
+                            class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none transition-all">
+                            <option>HR &amp; Bandlik xizmatlari</option>
+                            <option>IT &amp; Dasturiy ta'minot</option>
+                            <option>Savdo va Chakana</option>
+                            <option>Ishlab chiqarish</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Bosh ofis manzili</label>
+                        <input type="text" value="Toshkent shahri, Amir Temur shox ko'chasi 107B"
+                            class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none transition-all" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security & 2FA -->
+            <div class="bg-white p-5 rounded-2xl card-shadow border border-slate-100 space-y-4">
+                <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+                    <span class="material-symbols-outlined text-[#006b5c]">security</span>
+                    <h3 class="text-sm font-bold text-[#002046]">Xavfsizlik va Parol</h3>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Amaldagi parol</label>
+                        <input type="password" placeholder="••••••••"
+                            class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none transition-all" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Yangi parol</label>
+                        <input type="password" placeholder="••••••••"
+                            class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none transition-all" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Parolni takrorlang</label>
+                        <input type="password" placeholder="••••••••"
+                            class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none transition-all" />
+                    </div>
+                </div>
+
+                <!-- 2FA Toggle -->
+                <div class="pt-2">
+                    <div class="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                        <div class="flex items-center gap-3">
+                            <span
+                                class="w-10 h-10 rounded-xl bg-emerald-50 text-[#006b5c] flex items-center justify-center">
+                                <span class="material-symbols-outlined">sms</span>
+                            </span>
+                            <div>
+                                <p class="text-xs font-bold text-slate-800">SMS orqali 2 bosqichli tasdiqlash (2FA)</p>
+                                <p class="text-[11px] text-slate-400">Har bir kirishda telefoningizga tasdiqlash kodi
+                                    yuboriladi</p>
+                            </div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input id="toggle2FA" type="checkbox" checked />
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Save Bar -->
+            <div class="flex items-center justify-end gap-3 pt-2">
+                <a href="./dashboard.html"
+                    class="px-5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-100 transition-colors">
+                    Bekor qilish
+                </a>
+                <button type="submit" id="saveBtn"
+                    class="px-6 py-2.5 bg-[#006b5c] hover:bg-[#005145] text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-emerald-700/20 active:scale-95 flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-base">check</span>
+                    <span>O'zgarishlarni saqlash</span>
+                </button>
+            </div>
+        </form>
+    </main>
+
+    <!-- Mobile Navigation -->
+    <nav
+        class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-slate-200/80 flex items-center justify-around z-30 px-2 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+        <a href="./dashboard.html" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-700">
+            <span class="material-symbols-outlined text-2xl">dashboard</span>
+            <span class="text-[10px]">Boshqaruv</span>
+        </a>
+        <a href="./vakansiyalar.html" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-700">
+            <span class="material-symbols-outlined text-2xl">work</span>
+            <span class="text-[10px]">Vakansiyalar</span>
+        </a>
+        <div class="relative -top-3">
+            <a href="./dashboard.html"
+                class="w-12 h-12 rounded-full bg-[#006b5c] text-white flex items-center justify-center shadow-lg shadow-emerald-700/30 active:scale-90 transition-transform">
+                <span class="material-symbols-outlined text-2xl">home</span>
+            </a>
+        </div>
+        <a href="./nomzodlar.html" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-700">
+            <span class="material-symbols-outlined text-2xl">group</span>
+            <span class="text-[10px]">Nomzodlar</span>
+        </a>
+        <a href="./sozlamalar.html" class="flex flex-col items-center gap-0.5 text-[#006b5c]">
+            <span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">settings</span>
+            <span class="text-[10px] font-bold">Sozlamalar</span>
+        </a>
+    </nav>
+
+    <script>
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            clearTimeout(window._tTimer);
+            window._tTimer = setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // Image upload preview
+        document.getElementById('avatarUpload').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (evt) {
+                    document.getElementById('avatarPreview').src = evt.target.result;
+                    document.getElementById('navAvatar').src = evt.target.result;
+                    showToast('📸 Rasm yuklandi!');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Toggle 2FA listener
+        document.getElementById('toggle2FA').addEventListener('change', function () {
+            showToast(this.checked ? '🔒 2FA SMS himoya yoqildi' : '⚠️ 2FA himoya o\'chirildi');
+        });
+
+        // Save Form
+        function handleSave(e) {
+            if (e) e.preventDefault();
+            const btn = document.getElementById('saveBtn');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<span class="material-symbols-outlined text-base animate-spin">sync</span> Saqlanmoqda...';
+            btn.disabled = true;
+
+            const name = document.getElementById('inputName').value.trim();
+            const email = document.getElementById('inputEmail').value.trim();
+            const role = document.getElementById('inputRole').value.trim();
+
+            setTimeout(() => {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+                document.getElementById('profileNameDisplay').textContent = name;
+
+                const user = {
+                    name: name,
+                    email: email,
+                    role: role,
+                    avatar: document.getElementById('avatarPreview').src
+                };
+                localStorage.setItem('user_profile', JSON.stringify(user));
+                showToast('✅ Barcha sozlamalar muvaffaqiyatli saqlandi!');
+            }, 600);
+        }
+
+        document.getElementById('settingsForm').addEventListener('submit', handleSave);
+        document.getElementById('headerSaveBtn').addEventListener('click', handleSave);
+
+        // Load stored profile
+        document.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem('user_profile');
+            if (saved) {
+                try {
+                    const u = JSON.parse(saved);
+                    if (u.name) {
+                        document.getElementById('inputName').value = u.name;
+                        document.getElementById('profileNameDisplay').textContent = u.name;
+                    }
+                    if (u.email) document.getElementById('inputEmail').value = u.email;
+                    if (u.role) document.getElementById('inputRole').value = u.role;
+                    if (u.avatar) {
+                        document.getElementById('avatarPreview').src = u.avatar;
+                        document.getElementById('navAvatar').src = u.avatar;
+                    }
+                } catch (err) { }
+            }
+        });
+    </script>
+</body>
+
+</html>
