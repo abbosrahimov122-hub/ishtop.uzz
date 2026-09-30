@@ -708,9 +708,9 @@
             map = L.map('jobsMap', { scrollWheelZoom: false, minZoom: 4, maxZoom: 9 });
             map.fitBounds([[37.1, 55.9], [45.6, 73.2]]);
             map.setMaxBounds([[34, 50], [48, 78]]);
-            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
                 maxZoom: 19,
-                attribution: '&copy; OpenStreetMap'
+                attribution: '&copy; OpenStreetMap contributors &copy; CARTO', subdomains: 'abcd'
             }).addTo(map);
             fetch('/uzbekistan-regions.geojson')
                 .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
