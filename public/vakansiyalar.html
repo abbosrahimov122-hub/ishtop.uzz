@@ -683,7 +683,25 @@
         });
 
         // ---- O'zbekiston xaritasi (Leaflet + OpenStreetMap) ----
-        let map = null, markerLayer = null;
+        let map = null, markerLayer = null, geoLayer = null, lastCounts = {};
+        const ISO_TO_KEY = {
+            'UZ-TK': 'toshkent-shahri', 'UZ-TO': 'toshkent-viloyati', 'UZ-AN': 'andijon',
+            'UZ-BU': 'buxoro', 'UZ-FA': 'fargona', 'UZ-JI': 'jizzax', 'UZ-XO': 'xorazm',
+            'UZ-NG': 'namangan', 'UZ-NW': 'navoiy', 'UZ-QA': 'qashqadaryo',
+            'UZ-SA': 'samarqand', 'UZ-SI': 'sirdaryo', 'UZ-SU': 'surxondaryo',
+            'UZ-QR': 'qoraqalpogiston'
+        };
+        function geoStyle(feature) {
+            const key = ISO_TO_KEY[feature.properties.shapeISO];
+            const c = lastCounts[key] || 0;
+            const sel = activeRegion === key;
+            return {
+                color: sel ? '#312e81' : '#4f46e5',
+                weight: sel ? 3 : 1.5,
+                fillColor: sel ? '#4f46e5' : '#6366f1',
+                fillOpacity: sel ? 0.35 : (c ? 0.18 : 0.05)
+            };
+        }
 
         function initMap() {
             if (map || typeof L === 'undefined') return;
@@ -696,10 +714,25 @@
             }).addTo(map);
             fetch('/uzbekistan-regions.geojson')
                 .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-                .then(data => L.geoJSON(data, {
-                    interactive: false,
-                    style: { color: '#4f46e5', weight: 1.5, fillColor: '#6366f1', fillOpacity: 0.06 }
-                }).addTo(map))
+                .then(data => {
+                    geoLayer = L.geoJSON(data, {
+                        style: geoStyle,
+                        onEachFeature: (feature, layer) => {
+                            const key = ISO_TO_KEY[feature.properties.shapeISO];
+                            if (!key) {
+                                console.warn('Moslanmagan poligon:', feature.properties.shapeISO, feature.properties.shapeName);
+                                return;
+                            }
+                            layer.on('click', () => selectRegion(key));
+                            layer.on('mouseover', () => layer.setStyle({ fillOpacity: 0.3 }));
+                            layer.on('mouseout', () => geoLayer.resetStyle(layer));
+                            layer.bindTooltip(() => {
+                                const c = lastCounts[key] || 0;
+                                return `<strong>${escapeHtml(regionName(key))}</strong><br>${c ? c + ' ta vakansiya' : "Vakansiya yo'q"}`;
+                            }, { sticky: true });
+                        }
+                    }).addTo(map);
+                })
                 .catch(err => console.warn('GeoJSON yuklanmadi:', err));
             markerLayer = L.layerGroup().addTo(map);
         }
@@ -710,6 +743,8 @@
             markerLayer.clearLayers();
             const counts = {};
             allJobs.forEach(j => { if (j.region) counts[j.region] = (counts[j.region] || 0) + 1; });
+            lastCounts = counts;
+            if (geoLayer) geoLayer.setStyle(geoStyle);
             regions.forEach(r => {
                 const c = counts[r.key] || 0;
                 const size = c === 0 ? 22 : Math.min(30 + c * 4, 62);
