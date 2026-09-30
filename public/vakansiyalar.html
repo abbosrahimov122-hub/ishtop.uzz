@@ -694,6 +694,13 @@
                 maxZoom: 19,
                 attribution: '&copy; OpenStreetMap'
             }).addTo(map);
+            fetch('/uzbekistan-regions.geojson')
+                .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+                .then(data => L.geoJSON(data, {
+                    interactive: false,
+                    style: { color: '#4f46e5', weight: 1.5, fillColor: '#6366f1', fillOpacity: 0.06 }
+                }).addTo(map))
+                .catch(err => console.warn('GeoJSON yuklanmadi:', err));
             markerLayer = L.layerGroup().addTo(map);
         }
 
