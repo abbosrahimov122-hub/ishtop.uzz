@@ -121,6 +121,12 @@ const webhookLimiter = rateLimit({
 // ==========================================
 // 2) MA'LUMOTLAR BAZASI — SQLite, fayl asosida (orders.db)
 // ==========================================
+// Render'da baza har deployda bo'sh boshlanadi. AUTO_SEED=1 bo'lsa namunalar avtomatik qo'shiladi.
+if (process.env.AUTO_SEED === '1') {
+    const seedRun = require('child_process').spawnSync(
+        process.execPath, [path.join(__dirname, 'seed-vacancies.js')], { stdio: 'inherit' });
+    if (seedRun.status !== 0) console.warn('Seed ishlamadi, status:', seedRun.status);
+}
 const db = new Database(path.join(__dirname, 'orders.db'));
 db.pragma('journal_mode = WAL');
 
