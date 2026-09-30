@@ -1,0 +1,22 @@
+[
+  {
+    "title": "Buxgalter",
+    "company": "Kompaniya nomi",
+    "employee": "Mas'ul shaxs ismi",
+    "region": "toshkent-shahri",
+    "location": "Chilonzor tumani",
+    "salary": "5 000 000 UZS",
+    "type": "full",
+    "desc": "Qisqacha talablar va tavsif."
+  },
+  {
+    "title": "Sotuvchi",
+    "company": "Boshqa kompaniya",
+    "employee": "Ali Valiyev",
+    "region": "samarqand",
+    "location": "Samarqand shahri",
+    "salary": "Kelishiladi",
+    "type": "part",
+    "desc": "Tavsif."
+  }
+]

@@ -7,7 +7,8 @@
  *     (avvalgi versiyada butun loyiha papkasi tasodifan ommaga ochiq edi!)
  *  2. Xavfsizlik HTTP header'lari (helmet)
  *  3. So'rovlar sonini cheklash (rate limit) — to'lov endpoint'lariga hujum qilib
- *     bo'lmaydi
+ *     bo'lmaydi. Oddiy foydalanuvchi endpoint'lari uchun paymentLimiter,
+ *     Payme/Click'dan keladigan webhook'lar uchun alohida webhookLimiter.
  *  4. Server ishga tushishda .env to'liqligini tekshiradi — kalit yetishmasa,
  *     server sukut bilan noto'g'ri ishlash o'rniga aniq xato berib to'xtaydi
  *  5. To'lov summasi endi FAQAT serverdagi ruxsat etilgan tariflar ro'yxati
@@ -18,6 +19,11 @@
  *  7. 12 soatlik tranzaksiya muddati nazorati (Payme talabi)
  *  8. Barcha DB va webhook operatsiyalari try/catch bilan o'ralgan —
  *     server endi noto'g'ri so'rovdan yiqilib qolmaydi
+ *  9. PerformTransaction endi tranzaksiya holatini to'g'ri tekshiradi —
+ *     bekor qilingan/qaytarilgan tranzaksiyani qayta "to'landi"ga
+ *     o'tkazib yubormaydi
+ * 10. Click'dan kelgan click_trans_id endi 'prepare' bosqichida saqlanadi
+ *     (clickTransId ustuni), keyinchalik moslikni tekshirish uchun ishlatiladi
  *
  * O'RNATISH:
  *   npm install
@@ -92,12 +98,24 @@ app.use(express.static(PUBLIC_DIR, { dotfiles: 'deny', index: 'index.html' }));
 
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 300, standardHeaders: true, legacyHeaders: false }));
 
+// Oddiy foydalanuvchi endpoint'lari (login, buyurtma yaratish) uchun.
 const paymentLimiter = rateLimit({
     windowMs: 60 * 1000,
     limit: 20,
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: 'Juda ko\'p so\'rov. Birozdan so\'ng qayta urinib ko\'ring.' }
+});
+
+// To'lov tizimlaridan (Payme/Click) keladigan webhook so'rovlari uchun.
+// Ular haqiqiy IP'lardan keladi, lekin baribir DDoS/xato konfiguratsiyadan
+// himoyalanish uchun yuqoriroq, lekin cheksiz bo'lmagan chegara qo'yamiz.
+const webhookLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    limit: 60, // daqiqasiga 60 ta so'rov — real hisob-kitobga yetarli
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: { code: -32400, message: 'Juda ko\'p so\'rov' } }
 });
 
 // ==========================================
@@ -120,6 +138,7 @@ db.exec(`
   )
 `);
 db.exec(`CREATE INDEX IF NOT EXISTS idx_payme_tx ON orders(paymeTransactionId)`);
+db.exec(`CREATE INDEX IF NOT EXISTS idx_click_tx ON orders(clickTransId)`);
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
@@ -169,6 +188,9 @@ const ordersDb = {
     findByPaymeTransactionId(transactionId) {
         return db.prepare('SELECT * FROM orders WHERE paymeTransactionId = ?').get(transactionId);
     },
+    findByClickTransId(clickTransId) {
+        return db.prepare('SELECT * FROM orders WHERE clickTransId = ?').get(String(clickTransId));
+    },
     create(orderId, { amount, days, userId }) {
         db.prepare(`
             INSERT INTO orders (orderId, amount, days, userId, status, createdAt)
@@ -188,6 +210,12 @@ const ordersDb = {
             UPDATE orders SET paymeTransactionId = ?, status = 'processing', updatedAt = ?
             WHERE orderId = ?
         `).run(transactionId, new Date().toISOString(), orderId);
+    },
+    setClickTransId(orderId, clickTransId) {
+        db.prepare(`
+            UPDATE orders SET clickTransId = ?, updatedAt = ?
+            WHERE orderId = ?
+        `).run(String(clickTransId), new Date().toISOString(), orderId);
     }
 };
 
@@ -350,11 +378,13 @@ app.get('/api/orders/:orderId', paymentLimiter, (req, res) => {
 // ==========================================
 const PAYME_TX_TIMEOUT_MS = 12 * 60 * 60 * 1000; // Payme talabi: 12 soat
 
-app.post('/api/payme/webhook', (req, res) => {
+app.post('/api/payme/webhook', webhookLimiter, (req, res) => {
     try {
         const authHeader = req.headers.authorization || '';
         const expected = 'Basic ' + Buffer.from('Paycom:' + PAYME_SECRET_KEY).toString('base64');
-        if (authHeader !== expected) {
+        const authOk = authHeader.length === expected.length &&
+            crypto.timingSafeEqual(Buffer.from(authHeader), Buffer.from(expected));
+        if (!authOk) {
             return res.status(200).json({ error: { code: -32504, message: 'Ruxsat berilmagan' } });
         }
 
@@ -403,6 +433,13 @@ app.post('/api/payme/webhook', (req, res) => {
                 if (!order) {
                     return res.json({ id, error: { code: -31003, message: 'Tranzaksiya topilmadi' } });
                 }
+
+                // Bekor qilingan yoki qaytarilgan tranzaksiyani qayta
+                // "to'landi"ga o'tkazib yuborish mumkin emas.
+                if (order.status === 'cancelled' || order.status === 'refunded') {
+                    return res.json({ id, error: { code: -31008, message: 'Tranzaksiya bekor qilingan' } });
+                }
+
                 if (order.status !== 'paid') {
                     // TODO: bu yerda VIP obunani real faollashtiring
                     ordersDb.setStatusByPaymeTransactionId(params.id, 'paid');
@@ -506,7 +543,7 @@ function verifyClickSignature(body, secretKey) {
     return a.length === b.length && crypto.timingSafeEqual(a, b); // timing-attack'dan himoya
 }
 
-app.post('/api/click/prepare', (req, res) => {
+app.post('/api/click/prepare', webhookLimiter, (req, res) => {
     try {
         if (!verifyClickSignature(req.body, CLICK_SECRET_KEY)) {
             return res.json({ error: -1, error_note: 'Imzo noto\'g\'ri' });
@@ -519,6 +556,14 @@ app.post('/api/click/prepare', (req, res) => {
         }
         if (order.amount !== Number(req.body.amount)) {
             return res.json({ error: -2, error_note: 'Summa mos kelmadi' });
+        }
+
+        // click_trans_id'ni saqlaymiz — 'complete' bosqichida moslikni
+        // tekshirish va kelajakda tranzaksiyani qidirish uchun kerak bo'ladi.
+        if (!order.clickTransId) {
+            ordersDb.setClickTransId(orderId, req.body.click_trans_id);
+        } else if (order.clickTransId !== String(req.body.click_trans_id)) {
+            return res.json({ error: -8, error_note: 'Boshqa tranzaksiyaga bog\'langan' });
         }
 
         res.json({
@@ -534,7 +579,7 @@ app.post('/api/click/prepare', (req, res) => {
     }
 });
 
-app.post('/api/click/complete', (req, res) => {
+app.post('/api/click/complete', webhookLimiter, (req, res) => {
     try {
         if (!verifyClickSignature(req.body, CLICK_SECRET_KEY)) {
             return res.json({ error: -1, error_note: 'Imzo noto\'g\'ri' });
@@ -544,6 +589,12 @@ app.post('/api/click/complete', (req, res) => {
         const order = ordersDb.get(orderId);
         if (!order) {
             return res.json({ error: -5, error_note: 'Buyurtma topilmadi' });
+        }
+
+        // click_trans_id 'prepare' bosqichida saqlangan qiymat bilan mos
+        // kelishini tekshiramiz — boshqa tranzaksiyani "yakunlab" bo'lmasin.
+        if (order.clickTransId && order.clickTransId !== String(req.body.click_trans_id)) {
+            return res.json({ error: -8, error_note: 'Boshqa tranzaksiyaga bog\'langan' });
         }
 
         if (Number(req.body.error) < 0) {
@@ -557,8 +608,10 @@ app.post('/api/click/complete', (req, res) => {
             });
         }
 
-        // TODO: bu yerda VIP obunani real faollashtiring
-        ordersDb.setStatus(orderId, 'paid');
+        if (order.status !== 'paid') {
+            // TODO: bu yerda VIP obunani real faollashtiring
+            ordersDb.setStatus(orderId, 'paid');
+        }
 
         res.json({
             click_trans_id: req.body.click_trans_id,
@@ -570,6 +623,79 @@ app.post('/api/click/complete', (req, res) => {
     } catch (err) {
         logError('POST /api/click/complete', err);
         res.json({ error: -8, error_note: 'Ichki xato' });
+    }
+});
+
+// ==========================================
+// 5.5) VAKANSIYALAR — haqiqiy ma'lumotlar bazasi (SQLite)
+// ==========================================
+const { REGIONS, ensureSchema } = require('./vacancies-db');
+ensureSchema(db);
+
+const REGION_KEYS = REGIONS.map(r => r.key);
+const VACANCY_TYPES = ["To'liq bandlik", "Yarim bandlik", "Masofaviy", "Gibrid"];
+
+function rowToVacancy(r) {
+    return {
+        id: `VT-${r.id}`,
+        title: r.title,
+        company: r.company,
+        employee: r.employee,
+        region: r.region,
+        location: r.location,
+        salary: r.salary,
+        type: r.type,
+        desc: r.description,
+        source: r.source,
+        createdAt: r.createdAt
+    };
+}
+
+// Hammaga ochiq: faol vakansiyalar va viloyatlar ro'yxati (eng yangisi birinchi)
+app.get('/api/vacancies', (req, res) => {
+    try {
+        const rows = db.prepare(
+            `SELECT * FROM vacancies WHERE status = 'active' ORDER BY createdAt DESC, id DESC LIMIT 1000`
+        ).all();
+        res.json({ items: rows.map(rowToVacancy), regions: REGIONS });
+    } catch (err) {
+        logError('GET /api/vacancies', err);
+        res.status(500).json({ error: 'Ichki server xatosi' });
+    }
+});
+
+// Faqat tizimga kirgan foydalanuvchi vakansiya qo'sha oladi
+app.post('/api/vacancies', paymentLimiter, requireAuth, (req, res) => {
+    try {
+        const b = req.body || {};
+        const clean = (v, max) => String(v == null ? '' : v).trim().slice(0, max);
+
+        const title = clean(b.title, 120);
+        const company = clean(b.company, 120);
+        const employee = clean(b.employee, 120);
+        const location = clean(b.location, 120);
+        const salary = clean(b.salary, 60) || 'Kelishiladi';
+        const description = clean(b.desc, 2000) || "Batafsil ma'lumot suhbat davomida beriladi.";
+        const type = VACANCY_TYPES.includes(b.type) ? b.type : VACANCY_TYPES[0];
+
+        if (!title || !company || !employee || !location) {
+            return res.status(400).json({ error: "Barcha majburiy maydonlarni to'ldiring" });
+        }
+        if (!REGION_KEYS.includes(b.region)) {
+            return res.status(400).json({ error: 'Viloyatni tanlang' });
+        }
+
+        const info = db.prepare(`
+            INSERT INTO vacancies (title, company, employee, region, location, salary, type, description, ownerTelegramId, createdAt, source)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'user')
+        `).run(title, company, employee, b.region, location, salary, type, description,
+               String(req.user.telegramId), new Date().toISOString());
+
+        const row = db.prepare('SELECT * FROM vacancies WHERE id = ?').get(info.lastInsertRowid);
+        res.status(201).json(rowToVacancy(row));
+    } catch (err) {
+        logError('POST /api/vacancies', err);
+        res.status(500).json({ error: 'Ichki server xatosi' });
     }
 });
 
