@@ -1,867 +1,950 @@
-<!DOCTYPE html>
-<html lang="uz">
-
-<head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
-        name="viewport" />
-    <title>Vakansiyalar | ishtop.uz Mini Ilova</title>
-    <meta name="theme-color" content="#002046" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <link rel="manifest" href="/manifest.json" />
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="/telegram.js" defer></script>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap"
-        rel="stylesheet" />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-        rel="stylesheet" />
-
-    <style>
-        * {
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f7f9fb;
-            color: #191c1e;
-        }
-
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-            vertical-align: middle;
-        }
-
-        .card-shadow {
-            box-shadow: 0 4px 20px -2px rgba(0, 32, 70, 0.05), 0 2px 6px -1px rgba(0, 32, 70, 0.03);
-        }
-
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 32, 70, 0.5);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            z-index: 1000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 16px;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: #ffffff;
-            border-radius: 24px;
-            max-width: 580px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative;
-        }
-
-        @keyframes modalIn {
-            from {
-                transform: translateY(20px) scale(0.96);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateY(0) scale(1);
-                opacity: 1;
-            }
-        }
-
-        .toast-message {
-            position: fixed;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%) translateY(20px);
-            background: #002046;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 14px;
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
-            font-weight: 600;
-            font-size: 13px;
-            z-index: 9999;
-            opacity: 0;
-            transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            pointer-events: none;
-            max-width: 90%;
-            text-align: center;
-        }
-
-        .toast-message.show {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
-        #jobsMap { position: relative; z-index: 0; }
-        .region-marker { display: flex; align-items: center; justify-content: center; border-radius: 9999px;
-            background: #006b5c; color: #fff; font-weight: 800; font-size: 13px; border: 3px solid #fff;
-            box-shadow: 0 4px 12px rgba(0, 32, 70, .35); cursor: pointer; transition: transform .15s; }
-        .region-marker:hover { transform: scale(1.12); }
-        .region-marker.empty { background: #94a3b8; font-size: 0; opacity: .75; }
-        .region-marker.selected { background: #002046; box-shadow: 0 0 0 4px rgba(0, 107, 92, .35), 0 4px 12px rgba(0, 32, 70, .35); }
-    </style>
-</head>
-
-<body class="min-h-screen flex flex-col pb-20 md:pb-0">
-
-    <!-- Toast Notification -->
-    <div class="toast-message" id="toast"></div>
-
-    <!-- Header -->
-    <header class="bg-white/95 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200/80 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-            <a href="./dashboard.html" class="flex items-center gap-2">
-                <div
-                    class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#002046] to-[#006b5c] text-white flex items-center justify-center shadow-md">
-                    <span class="material-symbols-outlined text-xl">work_outline</span>
-                </div>
-                <span class="text-xl font-black text-[#002046] tracking-tight">ishtop<span
-                        class="text-[#006b5c]">.uz</span></span>
-            </a>
-
-            <div class="flex items-center gap-2 sm:gap-3">
-                <button id="openAddJobBtn"
-                    class="flex items-center gap-1.5 px-3.5 py-2 bg-[#006b5c] text-white rounded-xl text-xs font-bold hover:bg-[#005145] transition-all active:scale-95 shadow-md shadow-emerald-700/20">
-                    <span class="material-symbols-outlined text-base">add</span>
-                    <span>Vakansiya qo'shish</span>
-                </button>
-                <a href="./dashboard.html" class="p-1 rounded-full">
-                    <img class="w-9 h-9 rounded-full object-cover border-2 border-slate-200"
-                        src="https://ui-avatars.com/api/?name=Alisher+Usmanov&background=002046&color=fff&size=128"
-                        alt="Admin" />
-                </a>
-            </div>
-        </div>
-
-        <!-- Subnav -->
-        <div class="border-t border-slate-100 bg-white">
-            <div class="max-w-7xl mx-auto px-4 flex items-center gap-1 overflow-x-auto">
-                <a href="./dashboard.html"
-                    class="px-4 py-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent whitespace-nowrap flex items-center gap-1.5 transition-colors">
-                    <span class="material-symbols-outlined text-base">dashboard</span>
-                    Boshqaruv paneli
-                </a>
-                <a href="./vakansiyalar.html"
-                    class="px-4 py-2.5 text-xs font-bold text-[#006b5c] border-b-2 border-[#006b5c] whitespace-nowrap flex items-center gap-1.5">
-                    <span class="material-symbols-outlined text-base"
-                        style="font-variation-settings: 'FILL' 1;">work</span>
-                    Vakansiyalar
-                </a>
-                <a href="./nomzodlar.html"
-                    class="px-4 py-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent whitespace-nowrap flex items-center gap-1.5 transition-colors">
-                    <span class="material-symbols-outlined text-base">group</span>
-                    Nomzodlar
-                </a>
-                <a href="./statistika.html"
-                    class="px-4 py-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent whitespace-nowrap flex items-center gap-1.5 transition-colors">
-                    <span class="material-symbols-outlined text-base">bar_chart</span>
-                    Statistika
-                </a>
-                <a href="./sozlamalar.html"
-                    class="px-4 py-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent whitespace-nowrap flex items-center gap-1.5 transition-colors">
-                    <span class="material-symbols-outlined text-base">settings</span>
-                    Sozlamalar
-                </a>
-                <a href="./kartalar.html"
-                    class="ml-auto px-4 py-2.5 text-xs font-bold text-amber-700 bg-amber-50/70 hover:bg-amber-100/70 rounded-t-lg whitespace-nowrap flex items-center gap-1.5 transition-colors">
-                    <span class="material-symbols-outlined text-base text-amber-600">credit_card</span>
-                    💳 Kartalarim
-                </a>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6 space-y-6">
-
-        <!-- Xarita: O'zbekiston bo'ylab vakansiyalar -->
-        <div class="bg-white rounded-2xl card-shadow border border-slate-100 overflow-hidden">
-            <div class="p-4 flex items-center justify-between gap-3 flex-wrap">
-                <div>
-                    <h2 class="text-sm font-bold text-[#002046]">O'zbekiston bo'ylab vakansiyalar xaritasi</h2>
-                    <p class="text-[11px] text-slate-400">Hududni bosing: shu yerdagi vakansiyalar pastdagi ro'yxatda chiqadi</p>
-                </div>
-                <button id="clearRegionBtn" type="button"
-                    class="hidden px-3 py-1.5 bg-[#002046] text-white rounded-full text-xs font-bold">
-                    <span id="regionLabel"></span> ✕
-                </button>
-            </div>
-            <div id="jobsMap" class="w-full h-72 md:h-[26rem] bg-slate-100"></div>
-        </div>
-
-        <!-- Header Stats -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-            <div class="bg-white p-4 rounded-2xl card-shadow border border-slate-100">
-                <span class="text-xs text-slate-400 font-semibold">Jami vakansiyalar</span>
-                <h3 class="text-2xl font-black text-[#002046] mt-1" id="totalJobsCount">112</h3>
-                <span class="text-[11px] font-bold text-emerald-600">+12% yangi</span>
-            </div>
-            <div class="bg-white p-4 rounded-2xl card-shadow border border-slate-100">
-                <span class="text-xs text-slate-400 font-semibold">Faol e'lonlar</span>
-                <h3 class="text-2xl font-black text-emerald-600 mt-1" id="activeJobsCount">86</h3>
-                <span class="text-[11px] text-slate-400">Tasdiqlangan</span>
-            </div>
-            <div class="bg-white p-4 rounded-2xl card-shadow border border-slate-100">
-                <span class="text-xs text-slate-400 font-semibold">Kutilmoqda</span>
-                <h3 class="text-2xl font-black text-amber-600 mt-1" id="moderationCount">0</h3>
-                <span class="text-[11px] text-slate-400">Moderatsiyada</span>
-            </div>
-            <div class="bg-white p-4 rounded-2xl card-shadow border border-slate-100">
-                <span class="text-xs text-slate-400 font-semibold">O'rtacha maosh</span>
-                <h3 class="text-2xl font-black text-[#002046] mt-1" id="avgSalary">—</h3>
-                <span class="text-[11px] text-slate-400">UZS / oy</span>
-            </div>
-        </div>
-
-        <!-- Controls: Search & Filters -->
-        <div class="bg-white p-4 rounded-2xl card-shadow border border-slate-100 space-y-3">
-            <div class="flex flex-col md:flex-row items-center gap-3">
-                <!-- Search Box -->
-                <div class="w-full md:flex-1 relative">
-                    <span
-                        class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">search</span>
-                    <input id="searchInput" type="text"
-                        placeholder="Lavozim, kompaniya, shahar yoki mas'ul shaxs bo'yicha qidirish..."
-                        class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:bg-white focus:border-[#006b5c] outline-none transition-all" />
-                </div>
-
-                <!-- Sort -->
-                <div class="w-full md:w-auto flex items-center gap-2">
-                    <select id="sortSelect"
-                        class="w-full md:w-auto px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none focus:border-[#006b5c]">
-                        <option value="new">Sana: Eng yangi</option>
-                        <option value="old">Sana: Eng eski</option>
-                        <option value="company">Kompaniya (A-Z)</option>
-                        <option value="salary">Maosh bo'yicha</option>
-                    </select>
-
-                    <button id="resetFilterBtn"
-                        class="px-3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors">
-                        Tozalash
-                    </button>
-                </div>
-            </div>
-
-            <!-- Filter Pills -->
-            <div class="flex items-center gap-2 overflow-x-auto pb-1">
-                <button class="filter-pill px-3 py-1.5 rounded-full text-xs font-bold bg-[#002046] text-white"
-                    data-filter="all">Hammasi (<span id="pillAllCount">0</span>)</button>
-                <button
-                    class="filter-pill px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200"
-                    data-filter="toshkent">Toshkent</button>
-                <button
-                    class="filter-pill px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200"
-                    data-filter="samarqand">Samarqand</button>
-                <button
-                    class="filter-pill px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200"
-                    data-filter="fargona">Farg'ona</button>
-                <button
-                    class="filter-pill px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200"
-                    data-filter="it">IT &amp; Dasturlash</button>
-                <button
-                    class="filter-pill px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200"
-                    data-filter="savdo">Savdo</button>
-            </div>
-        </div>
-
-        <!-- Vacancies Table -->
-        <div id="jobsTableCard" class="bg-white rounded-2xl card-shadow border border-slate-100 overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-xs sm:text-sm">
-                    <thead>
-                        <tr class="bg-slate-50/80 border-b border-slate-200/80 text-slate-400 font-semibold text-xs">
-                            <th class="py-3.5 px-4">ID</th>
-                            <th class="py-3.5 px-4">Vakansiya va Hudud</th>
-                            <th class="py-3.5 px-4 hidden sm:table-cell">Kompaniya</th>
-                            <th class="py-3.5 px-4 hidden md:table-cell">Mas'ul xodim</th>
-                            <th class="py-3.5 px-4 hidden lg:table-cell">Sana</th>
-                            <th class="py-3.5 px-4 text-right">Amallar</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100" id="jobsTableBody">
-                        <!-- Populated by JS -->
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Pagination Bar -->
-            <div
-                class="p-4 bg-white border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
-                <p class="text-xs text-slate-400" id="paginationSummary">Ko'rsatilmoqda: 1-10 dan 112 tadan</p>
-                <div class="flex items-center gap-1.5">
-                    <button id="prevBtn"
-                        class="px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40">
-                        Oldingi
-                    </button>
-                    <span id="pageNumbers" class="text-xs font-bold text-slate-700 px-2">1 / 12</span>
-                    <button id="nextBtn"
-                        class="px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50">
-                        Keyingi
-                    </button>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- Modal: Add Vacancy -->
-    <div class="modal-overlay" id="addJobModal">
-        <div class="modal-content p-6">
-            <button class="absolute top-4 right-4 text-slate-400 hover:text-slate-600" id="closeAddJobModal">
-                <span class="material-symbols-outlined">close</span>
-            </button>
-
-            <div class="text-center mb-5">
-                <div
-                    class="w-12 h-12 rounded-2xl bg-emerald-50 text-[#006b5c] flex items-center justify-center mx-auto mb-2">
-                    <span class="material-symbols-outlined text-2xl">post_add</span>
-                </div>
-                <h3 class="text-lg font-bold text-[#002046]">Yangi vakansiya e'lon qilish</h3>
-                <p class="text-xs text-slate-500">Kompaniya va ish o'rni parametrlarini kiriting</p>
-            </div>
-
-            <form id="newJobForm" class="space-y-3.5">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Vakansiya nomi *</label>
-                    <input id="jobTitle" type="text" required
-                        class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none"
-                        placeholder="Masalan: Frontend React Dasturchi" />
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Kompaniya nomi *</label>
-                        <input id="jobCompany" type="text" required
-                            class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none"
-                            placeholder="Masalan: Artel Electronics" />
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Mas'ul xodim *</label>
-                        <input id="jobEmployee" type="text" required
-                            class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none"
-                            placeholder="Masalan: Kamola Shokirova" />
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Viloyat *</label>
-                    <select id="jobRegion" required
-                        class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none">
-                        <option value="">Viloyatni tanlang</option>
-                    </select>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Tuman / manzil *</label>
-                        <input id="jobLocation" type="text" required
-                            class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none"
-                            placeholder="Yunusobod tumani" />
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Maosh (UZS)</label>
-                        <input id="jobSalary" type="text"
-                            class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none"
-                            placeholder="8,000,000" />
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Ish turi</label>
-                    <select id="jobType"
-                        class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none">
-                        <option value="To'liq bandlik">To'liq bandlik (Full-time)</option>
-                        <option value="Yarim bandlik">Yarim bandlik (Part-time)</option>
-                        <option value="Masofaviy">Masofaviy (Remote)</option>
-                        <option value="Gibrid">Gibrid (Toshkent)</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Qisqacha talablar va tavsif</label>
-                    <textarea id="jobDesc" rows="2"
-                        class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none"
-                        placeholder="Nomzoddan 2 yillik tajriba talab qilinadi..."></textarea>
-                </div>
-
-                <button type="submit"
-                    class="w-full mt-2 py-3 bg-[#006b5c] hover:bg-[#005145] text-white font-bold rounded-xl text-sm transition-all active:scale-95 shadow-md shadow-emerald-700/20 flex items-center justify-center gap-1.5">
-                    <span class="material-symbols-outlined text-base">check_circle</span>
-                    E'lonni chop etish
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal: Job Detail View -->
-    <div class="modal-overlay" id="detailModal">
-        <div class="modal-content p-6">
-            <button class="absolute top-4 right-4 text-slate-400 hover:text-slate-600" id="closeDetailModal">
-                <span class="material-symbols-outlined">close</span>
-            </button>
-
-            <div class="flex items-start gap-3 mb-4">
-                <div
-                    class="w-12 h-12 rounded-2xl bg-emerald-50 text-[#006b5c] flex items-center justify-center text-xl font-black">
-                    <span class="material-symbols-outlined text-2xl">work</span>
-                </div>
-                <div>
-                    <h3 class="text-base font-bold text-[#002046]" id="detailTitle">Vakansiya</h3>
-                    <p class="text-xs text-[#006b5c] font-semibold" id="detailCompany">Kompaniya</p>
-                    <span class="inline-block mt-1 text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600"
-                        id="detailLocation">Toshkent</span>
-                </div>
-            </div>
-
-            <div class="space-y-3 text-xs border-y border-slate-100 py-3">
-                <div class="flex justify-between">
-                    <span class="text-slate-400">Maosh:</span>
-                    <strong class="text-emerald-700 text-sm" id="detailSalary">5,000,000 UZS</strong>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-slate-400">Ish turi:</span>
-                    <strong id="detailType">To'liq bandlik</strong>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-slate-400">Mas'ul xodim:</span>
-                    <strong id="detailEmployee">Alisher Usmanov</strong>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-slate-400">E'lon sanasi:</span>
-                    <span class="text-slate-600" id="detailDate">24.05.2026</span>
-                </div>
-            </div>
-
-            <div class="mt-4">
-                <p class="text-xs text-slate-500 font-semibold mb-1">Tavsif:</p>
-                <p class="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl" id="detailDesc">
-                    Kompaniya jamoasiga professional xodim qidirilmoqda. Munosib maosh va qulay mehnat sharoitlari
-                    kafolatlanadi.
-                </p>
-            </div>
-
-            <div class="mt-5 flex gap-2">
-                <a id="detailContactTg" href="https://t.me/" target="_blank"
-                    class="flex-1 py-2.5 bg-[#0088cc] hover:bg-[#0077b5] text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-colors">
-                    <span class="material-symbols-outlined text-base">chat</span>
-                    Telegram orqali bog'lanish
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Mobile Navigation -->
-    <nav
-        class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-slate-200/80 flex items-center justify-around z-30 px-2 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
-        <a href="./dashboard.html" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-700">
-            <span class="material-symbols-outlined text-2xl">dashboard</span>
-            <span class="text-[10px]">Boshqaruv</span>
-        </a>
-        <a href="./vakansiyalar.html" class="flex flex-col items-center gap-0.5 text-[#006b5c]">
-            <span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">work</span>
-            <span class="text-[10px] font-bold">Vakansiyalar</span>
-        </a>
-        <div class="relative -top-3">
-            <button onclick="document.getElementById('openAddJobBtn').click()"
-                class="w-12 h-12 rounded-full bg-[#006b5c] text-white flex items-center justify-center shadow-lg shadow-emerald-700/30 active:scale-90 transition-transform">
-                <span class="material-symbols-outlined text-2xl">add</span>
-            </button>
-        </div>
-        <a href="./nomzodlar.html" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-700">
-            <span class="material-symbols-outlined text-2xl">group</span>
-            <span class="text-[10px]">Nomzodlar</span>
-        </a>
-        <a href="./kartalar.html" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-700">
-            <span class="material-symbols-outlined text-2xl">credit_card</span>
-            <span class="text-[10px]">Kartalar</span>
-        </a>
-    </nav>
-
-    <script>
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            toast.textContent = msg;
-            toast.classList.add('show');
-            clearTimeout(window._tTimer);
-            window._tTimer = setTimeout(() => toast.classList.remove('show'), 3000);
-        }
-
-        // Vakansiyalar serverdan (SQLite bazasidan) olinadi
-        let allJobs = [];
-
-        function escapeHtml(v) {
-            return String(v == null ? '' : v)
-                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-        }
-
-        function formatDate(iso) {
-            const d = new Date(iso);
-            if (isNaN(d)) return '';
-            return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
-        }
-
-        let regions = [];
-        const regionName = key => (regions.find(r => r.key === key) || {}).name || '';
-
-        async function loadJobs() {
-            try {
-                const res = await fetch('/api/vacancies');
-                if (!res.ok) throw new Error('HTTP ' + res.status);
-                const data = await res.json();
-                regions = data.regions || [];
-                allJobs = (data.items || []).map(j => ({ ...j, date: formatDate(j.createdAt) }));
-            } catch (e) {
-                allJobs = [];
-                showToast('Vakansiyalarni yuklab bo\'lmadi');
-            }
-            const sel = document.getElementById('jobRegion');
-            sel.innerHTML = '<option value="">Viloyatni tanlang</option>' +
-                regions.map(r => `<option value="${escapeHtml(r.key)}">${escapeHtml(r.name)}</option>`).join('');
-            currentPage = 1;
-            applyFilters();
-            renderMap();
-        }
-
-        let filteredJobs = [...allJobs];
-        let currentPage = 1;
-        const pageSize = 10;
-
-        function renderTable() {
-            const tbody = document.getElementById('jobsTableBody');
-            const total = filteredJobs.length;
-            const totalPages = Math.ceil(total / pageSize) || 1;
-            if (currentPage > totalPages) currentPage = totalPages;
-            if (currentPage < 1) currentPage = 1;
-
-            const start = (currentPage - 1) * pageSize;
-            const paged = filteredJobs.slice(start, start + pageSize);
-
-            if (paged.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="p-8 text-center text-slate-400">
-                            <span class="material-symbols-outlined text-4xl block mb-2">search_off</span>
-                            Hech qanday mos vakansiya topilmadi
-                        </td>
-                    </tr>
-                `;
-            } else {
-                tbody.innerHTML = paged.map(job => `
-                    <tr class="hover:bg-slate-50/80 transition-colors">
-                        <td class="py-3.5 px-4 font-mono font-bold text-slate-400 text-xs">${job.id}</td>
-                        <td class="py-3.5 px-4">
-                            <div>
-                                <p class="font-bold text-slate-900 leading-tight">${escapeHtml(job.title)}${job.source === 'seed' ? ' <span class="ml-1 px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[9px] font-bold align-middle">NAMUNA</span>' : ''}</p>
-                                <p class="text-[11px] text-[#006b5c] font-semibold mt-0.5">${escapeHtml(job.location)}</p>
-                                <p class="text-[10px] text-slate-400 mt-0.5">💰 ${escapeHtml(job.salary)} · ${escapeHtml(job.type)}</p>
-                            </div>
-                        </td>
-                        <td class="py-3.5 px-4 hidden sm:table-cell">
-                            <div class="flex items-center gap-2">
-                                <div class="w-7 h-7 rounded-lg bg-emerald-50 text-[#006b5c] font-bold text-xs flex items-center justify-center">
-                                    ${escapeHtml(job.company.slice(0, 2).toUpperCase())}
-                                </div>
-                                <span class="font-medium text-slate-800 text-xs">${escapeHtml(job.company)}</span>
-                            </div>
-                        </td>
-                        <td class="py-3.5 px-4 hidden md:table-cell">
-                            <span class="text-xs text-slate-600 font-medium">${escapeHtml(job.employee)}</span>
-                        </td>
-                        <td class="py-3.5 px-4 text-xs text-slate-400 hidden lg:table-cell">${job.date}</td>
-                        <td class="py-3.5 px-4 text-right">
-                            <button onclick="viewJob('${job.id}')" class="px-3 py-1.5 bg-slate-100 hover:bg-[#006b5c] hover:text-white rounded-lg text-xs font-bold transition-all text-slate-700">
-                                Ko'rish
-                            </button>
-                        </td>
-                    </tr>
-                `).join('');
-            }
-
-            // Update stats
-            document.getElementById('totalJobsCount').textContent = allJobs.length;
-            document.getElementById('activeJobsCount').textContent = allJobs.length;
-            document.getElementById('pillAllCount').textContent = allJobs.length;
-            const sal = allJobs.map(salaryValue).filter(n => n >= 100000);
-            document.getElementById('avgSalary').textContent = sal.length
-                ? (sal.reduce((a, b) => a + b, 0) / sal.length / 1e6).toFixed(1) + ' mln' : '—';
-            document.getElementById('paginationSummary').textContent = `Ko'rsatilmoqda: ${total > 0 ? start + 1 : 0}-${Math.min(start + pageSize, total)} dan ${total} tadan`;
-            document.getElementById('pageNumbers').textContent = `${currentPage} / ${totalPages}`;
-            document.getElementById('prevBtn').disabled = currentPage <= 1;
-            document.getElementById('nextBtn').disabled = currentPage >= totalPages;
-        }
-
-        // Pagination buttons
-        document.getElementById('prevBtn').addEventListener('click', () => {
-            if (currentPage > 1) {
-                currentPage--;
-                renderTable();
-            }
-        });
-        document.getElementById('nextBtn').addEventListener('click', () => {
-            const totalPages = Math.ceil(filteredJobs.length / pageSize);
-            if (currentPage < totalPages) {
-                currentPage++;
-                renderTable();
-            }
-        });
-
-        // ---- Filtrlar: qidiruv + kategoriya + xarita hududi + saralash bitta joyda ----
-        const searchInput = document.getElementById('searchInput');
-        const sortSelect = document.getElementById('sortSelect');
-        let activePill = 'all';
-        let activeRegion = null;
-
-        function salaryValue(j) {
-            const m = String(j.salary).match(/\d[\d ,.]*/);
-            const n = m ? parseInt(m[0].replace(/\D/g, ''), 10) : 0;
-            return isNaN(n) ? 0 : n;
-        }
-
-        const PILLS = {
-            all: () => true,
-            toshkent: j => (j.region || '').startsWith('toshkent'),
-            samarqand: j => j.region === 'samarqand',
-            fargona: j => j.region === 'fargona',
-            it: j => /dasturchi|devops|developer|programmist/i.test(j.title),
-            savdo: j => /sotuvchi|savdo|menejer/i.test(j.title)
-        };
-
-        function applyFilters() {
-            const q = searchInput.value.toLowerCase().trim();
-            const pill = PILLS[activePill] || PILLS.all;
-            filteredJobs = allJobs.filter(j =>
-                pill(j) &&
-                (!activeRegion || j.region === activeRegion) &&
-                (!q || [j.title, j.company, j.location, j.employee, regionName(j.region)]
-                    .some(v => String(v || '').toLowerCase().includes(q)))
-            );
-            const s = sortSelect.value;
-            if (s === 'new') filteredJobs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-            else if (s === 'old') filteredJobs.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-            else if (s === 'company') filteredJobs.sort((a, b) => a.company.localeCompare(b.company));
-            else if (s === 'salary') filteredJobs.sort((a, b) => salaryValue(b) - salaryValue(a));
-            currentPage = 1;
-            renderTable();
-            updateRegionUI();
-        }
-
-        searchInput.addEventListener('input', applyFilters);
-        sortSelect.addEventListener('change', applyFilters);
-
-        function setPillStyle(active) {
-            document.querySelectorAll('.filter-pill').forEach(b => {
-                b.className = 'filter-pill px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200';
-            });
-            active.className = 'filter-pill px-3 py-1.5 rounded-full text-xs font-bold bg-[#002046] text-white';
-        }
-        document.querySelectorAll('.filter-pill').forEach(btn => {
-            btn.addEventListener('click', function () {
-                activePill = this.dataset.filter;
-                setPillStyle(this);
-                applyFilters();
-            });
-        });
-
-        document.getElementById('resetFilterBtn').addEventListener('click', () => {
-            searchInput.value = '';
-            sortSelect.value = 'new';
-            activePill = 'all';
-            activeRegion = null;
-            setPillStyle(document.querySelector('.filter-pill[data-filter="all"]'));
-            applyFilters();
-            renderMap();
-            showToast('Filtr tozalandi');
-        });
-
-        // ---- O'zbekiston xaritasi (Leaflet + OpenStreetMap) ----
-        let map = null, markerLayer = null, geoLayer = null, lastCounts = {};
-        const ISO_TO_KEY = {
-            'UZ-TK': 'toshkent-shahri', 'UZ-TO': 'toshkent-viloyati', 'UZ-AN': 'andijon',
-            'UZ-BU': 'buxoro', 'UZ-FA': 'fargona', 'UZ-JI': 'jizzax', 'UZ-XO': 'xorazm',
-            'UZ-NG': 'namangan', 'UZ-NW': 'navoiy', 'UZ-QA': 'qashqadaryo',
-            'UZ-SA': 'samarqand', 'UZ-SI': 'sirdaryo', 'UZ-SU': 'surxondaryo',
-            'UZ-QR': 'qoraqalpogiston'
-        };
-        function geoStyle(feature) {
-            const key = ISO_TO_KEY[feature.properties.shapeISO];
-            const c = lastCounts[key] || 0;
-            const sel = activeRegion === key;
-            return {
-                color: sel ? '#312e81' : '#4f46e5',
-                weight: sel ? 3 : 1.5,
-                fillColor: sel ? '#4f46e5' : '#6366f1',
-                fillOpacity: sel ? 0.35 : (c ? 0.18 : 0.05)
-            };
-        }
-
-        function initMap() {
-            if (map || typeof L === 'undefined') return;
-            map = L.map('jobsMap', { scrollWheelZoom: false, minZoom: 4, maxZoom: 9 });
-            map.fitBounds([[37.1, 55.9], [45.6, 73.2]]);
-            map.setMaxBounds([[34, 50], [48, 78]]);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-                maxZoom: 19,
-                attribution: '&copy; OpenStreetMap contributors &copy; CARTO', subdomains: 'abcd'
-            }).addTo(map);
-            fetch('/uzbekistan-regions.geojson')
-                .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-                .then(data => {
-                    geoLayer = L.geoJSON(data, {
-                        style: geoStyle,
-                        onEachFeature: (feature, layer) => {
-                            const key = ISO_TO_KEY[feature.properties.shapeISO];
-                            if (!key) {
-                                console.warn('Moslanmagan poligon:', feature.properties.shapeISO, feature.properties.shapeName);
-                                return;
-                            }
-                            layer.on('click', () => selectRegion(key));
-                            layer.on('mouseover', () => layer.setStyle({ fillOpacity: 0.3 }));
-                            layer.on('mouseout', () => geoLayer.resetStyle(layer));
-                            layer.bindTooltip(() => {
-                                const c = lastCounts[key] || 0;
-                                return `<strong>${escapeHtml(regionName(key))}</strong><br>${c ? c + ' ta vakansiya' : "Vakansiya yo'q"}`;
-                            }, { sticky: true });
-                        }
-                    }).addTo(map);
-                })
-                .catch(err => console.warn('GeoJSON yuklanmadi:', err));
-            markerLayer = L.layerGroup().addTo(map);
-        }
-
-        function renderMap() {
-            initMap();
-            if (!map) return;
-            markerLayer.clearLayers();
-            const counts = {};
-            allJobs.forEach(j => { if (j.region) counts[j.region] = (counts[j.region] || 0) + 1; });
-            lastCounts = counts;
-            if (geoLayer) geoLayer.setStyle(geoStyle);
-            regions.forEach(r => {
-                const c = counts[r.key] || 0;
-                const size = c === 0 ? 22 : Math.min(30 + c * 4, 62);
-                const cls = 'region-marker' + (c === 0 ? ' empty' : '') + (activeRegion === r.key ? ' selected' : '');
-                const icon = L.divIcon({
-                    className: '',
-                    html: `<div class="${cls}" style="width:${size}px;height:${size}px">${c || ''}</div>`,
-                    iconSize: [size, size],
-                    iconAnchor: [size / 2, size / 2]
-                });
-                const m = L.marker([r.lat, r.lng], { icon, title: r.name }).addTo(markerLayer);
-                m.bindTooltip(`<strong>${escapeHtml(r.name)}</strong><br>${c ? c + ' ta vakansiya' : 'Vakansiya yo\'q'}`,
-                    { direction: 'top', offset: [0, -size / 2] });
-                m.on('click', () => selectRegion(r.key));
-            });
-        }
-
-        function selectRegion(key) {
-            activeRegion = (activeRegion === key) ? null : key;
-            applyFilters();
-            renderMap();
-            if (activeRegion) {
-                document.getElementById('jobsTableCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        }
-
-        function updateRegionUI() {
-            const btn = document.getElementById('clearRegionBtn');
-            if (activeRegion) {
-                document.getElementById('regionLabel').textContent = regionName(activeRegion);
-                btn.classList.remove('hidden');
-            } else {
-                btn.classList.add('hidden');
-            }
-        }
-        document.getElementById('clearRegionBtn').addEventListener('click', () => {
-            activeRegion = null;
-            applyFilters();
-            renderMap();
-        });
-
-        // Add Job Modal
-        const addModal = document.getElementById('addJobModal');
-        document.getElementById('openAddJobBtn').addEventListener('click', () => addModal.classList.add('active'));
-        document.getElementById('closeAddJobModal').addEventListener('click', () => addModal.classList.remove('active'));
-        addModal.addEventListener('click', (e) => { if (e.target === addModal) addModal.classList.remove('active'); });
-
-        document.getElementById('newJobForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const payload = {
-                title: document.getElementById('jobTitle').value.trim(),
-                company: document.getElementById('jobCompany').value.trim(),
-                employee: document.getElementById('jobEmployee').value.trim(),
-                region: document.getElementById('jobRegion').value,
-                location: document.getElementById('jobLocation').value.trim(),
-                salary: (document.getElementById('jobSalary').value.trim() || 'Kelishiladi'),
-                type: document.getElementById('jobType').value,
-                desc: document.getElementById('jobDesc').value.trim()
-            };
-            if (payload.salary !== 'Kelishiladi' && !payload.salary.includes('UZS')) payload.salary += ' UZS';
-
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            if (submitBtn) submitBtn.disabled = true;
-            try {
-                const res = await fetch('/api/vacancies', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                if (res.status === 401) {
-                    showToast('Vakansiya qo\'shish uchun avval tizimga kiring');
-                    return;
-                }
-                const data = await res.json();
-                if (!res.ok) {
-                    showToast(data.error || 'Xatolik yuz berdi');
-                    return;
-                }
-                const newJob = { ...data, date: formatDate(data.createdAt) };
-                allJobs.unshift(newJob);
-                applyFilters();
-                renderMap();
-
-                addModal.classList.remove('active');
-                document.getElementById('newJobForm').reset();
-                showToast(`✅ "${payload.title}" vakansiyasi e'lon qilindi!`);
-            } catch (err) {
-                showToast('Server bilan aloqa yo\'q');
-            } finally {
-                if (submitBtn) submitBtn.disabled = false;
-            }
-        });
-
-        // View Detail Modal
-        const detailModal = document.getElementById('detailModal');
-        document.getElementById('closeDetailModal').addEventListener('click', () => detailModal.classList.remove('active'));
-        detailModal.addEventListener('click', (e) => { if (e.target === detailModal) detailModal.classList.remove('active'); });
-
-        function viewJob(id) {
-            const job = allJobs.find(j => j.id === id);
-            if (!job) return;
-
-            document.getElementById('detailTitle').textContent = job.title;
-            document.getElementById('detailCompany').textContent = job.company + (job.source === 'seed' ? ' · namunaviy e\'lon' : '');
-            document.getElementById('detailLocation').textContent = job.location;
-            document.getElementById('detailSalary').textContent = job.salary;
-            document.getElementById('detailType').textContent = job.type;
-            document.getElementById('detailEmployee').textContent = job.employee;
-            document.getElementById('detailDate').textContent = job.date;
-            document.getElementById('detailDesc').textContent = job.desc;
-            document.getElementById('detailContactTg').href = 'https://t.me/myishtop_bot';
-
-            detailModal.classList.add('active');
-        }
-
-        loadJobs();
-    </script>
-</body>
-
-</html>
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+        name="viewport" />
+    <title>Vakansiyalar | ishtop.uz Mini Ilova</title>
+    <meta name="theme-color" content="#002046" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="/manifest.json" />
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="/telegram.js" defer></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f9fb;
+            color: #191c1e;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+
+        .card-shadow {
+            box-shadow: 0 4px 20px -2px rgba(0, 32, 70, 0.05), 0 2px 6px -1px rgba(0, 32, 70, 0.03);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 32, 70, 0.5);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #ffffff;
+            border-radius: 24px;
+            max-width: 580px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+
+        @keyframes modalIn {
+            from {
+                transform: translateY(20px) scale(0.96);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .toast-message {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #002046;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 14px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+            font-weight: 600;
+            font-size: 13px;
+            z-index: 9999;
+            opacity: 0;
+            transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            pointer-events: none;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        .toast-message.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        #jobsMap { position: relative; z-index: 0; background: #eaf0f6; }
+        #jobsMap .leaflet-container { background: #eaf0f6; font-family: inherit; }
+        .region-marker { display: flex; align-items: center; justify-content: center; border-radius: 9999px;
+            background: #006b5c; color: #fff; font-weight: 800; font-size: 13px; border: 3px solid #fff;
+            box-shadow: 0 4px 12px rgba(0, 32, 70, .35); cursor: pointer; transition: transform .15s; }
+        .region-marker:hover { transform: scale(1.12); }
+        .region-marker.empty { background: #94a3b8; font-size: 0; opacity: .75; }
+        .region-marker.selected { background: #002046; box-shadow: 0 0 0 4px rgba(0, 107, 92, .35), 0 4px 12px rgba(0, 32, 70, .35); }
+        .badge-seed { margin-left: 4px; padding: 2px 6px; border-radius: 4px; background: #fef3c7; color: #b45309; font-size: 9px; font-weight: 700; vertical-align: middle; }
+        .badge-imported { margin-left: 4px; padding: 2px 6px; border-radius: 4px; background: #dbeafe; color: #1d4ed8; font-size: 9px; font-weight: 700; vertical-align: middle; }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col pb-20 md:pb-0">
+
+    <!-- Toast Notification -->
+    <div class="toast-message" id="toast"></div>
+
+    <!-- Header -->
+    <header class="bg-white/95 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200/80 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <a href="./dashboard.html" class="flex items-center gap-2">
+                <div
+                    class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#002046] to-[#006b5c] text-white flex items-center justify-center shadow-md">
+                    <span class="material-symbols-outlined text-xl">work_outline</span>
+                </div>
+                <span class="text-xl font-black text-[#002046] tracking-tight">ishtop<span
+                        class="text-[#006b5c]">.uz</span></span>
+            </a>
+
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button id="openAddJobBtn"
+                    class="flex items-center gap-1.5 px-3.5 py-2 bg-[#006b5c] text-white rounded-xl text-xs font-bold hover:bg-[#005145] transition-all active:scale-95 shadow-md shadow-emerald-700/20">
+                    <span class="material-symbols-outlined text-base">add</span>
+                    <span>Vakansiya qo'shish</span>
+                </button>
+                <a href="./dashboard.html" class="p-1 rounded-full">
+                    <img class="w-9 h-9 rounded-full object-cover border-2 border-slate-200"
+                        src="https://ui-avatars.com/api/?name=Alisher+Usmanov&background=002046&color=fff&size=128"
+                        alt="Admin" />
+                </a>
+            </div>
+        </div>
+
+        <!-- Subnav -->
+        <div class="border-t border-slate-100 bg-white">
+            <div class="max-w-7xl mx-auto px-4 flex items-center gap-1 overflow-x-auto">
+                <a href="./dashboard.html"
+                    class="px-4 py-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent whitespace-nowrap flex items-center gap-1.5 transition-colors">
+                    <span class="material-symbols-outlined text-base">dashboard</span>
+                    Boshqaruv paneli
+                </a>
+                <a href="./vakansiyalar.html"
+                    class="px-4 py-2.5 text-xs font-bold text-[#006b5c] border-b-2 border-[#006b5c] whitespace-nowrap flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-base"
+                        style="font-variation-settings: 'FILL' 1;">work</span>
+                    Vakansiyalar
+                </a>
+                <a href="./nomzodlar.html"
+                    class="px-4 py-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent whitespace-nowrap flex items-center gap-1.5 transition-colors">
+                    <span class="material-symbols-outlined text-base">group</span>
+                    Nomzodlar
+                </a>
+                <a href="./statistika.html"
+                    class="px-4 py-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent whitespace-nowrap flex items-center gap-1.5 transition-colors">
+                    <span class="material-symbols-outlined text-base">bar_chart</span>
+                    Statistika
+                </a>
+                <a href="./sozlamalar.html"
+                    class="px-4 py-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 border-b-2 border-transparent whitespace-nowrap flex items-center gap-1.5 transition-colors">
+                    <span class="material-symbols-outlined text-base">settings</span>
+                    Sozlamalar
+                </a>
+                <a href="./kartalar.html"
+                    class="ml-auto px-4 py-2.5 text-xs font-bold text-amber-700 bg-amber-50/70 hover:bg-amber-100/70 rounded-t-lg whitespace-nowrap flex items-center gap-1.5 transition-colors">
+                    <span class="material-symbols-outlined text-base text-amber-600">credit_card</span>
+                    💳 Kartalarim
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6 space-y-6">
+
+        <!-- Xarita: O'zbekiston bo'ylab vakansiyalar -->
+        <div class="bg-white rounded-2xl card-shadow border border-slate-100 overflow-hidden">
+            <div class="p-4 flex items-center justify-between gap-3 flex-wrap">
+                <div>
+                    <h2 class="text-sm font-bold text-[#002046]">O'zbekiston bo'ylab vakansiyalar xaritasi</h2>
+                    <p class="text-[11px] text-slate-400">Hududni bosing: shu yerdagi vakansiyalar pastdagi ro'yxatda chiqadi</p>
+                </div>
+                <button id="clearRegionBtn" type="button"
+                    class="hidden px-3 py-1.5 bg-[#002046] text-white rounded-full text-xs font-bold">
+                    <span id="regionLabel"></span> ✕
+                </button>
+            </div>
+            <div id="jobsMap" class="w-full h-72 md:h-[26rem] bg-slate-100"></div>
+        </div>
+
+        <!-- Header Stats -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+            <div class="bg-white p-4 rounded-2xl card-shadow border border-slate-100">
+                <span class="text-xs text-slate-400 font-semibold">Jami vakansiyalar</span>
+                <h3 class="text-2xl font-black text-[#002046] mt-1" id="totalJobsCount">112</h3>
+                <span class="text-[11px] font-bold text-emerald-600">+12% yangi</span>
+            </div>
+            <div class="bg-white p-4 rounded-2xl card-shadow border border-slate-100">
+                <span class="text-xs text-slate-400 font-semibold">Faol e'lonlar</span>
+                <h3 class="text-2xl font-black text-emerald-600 mt-1" id="activeJobsCount">86</h3>
+                <span class="text-[11px] text-slate-400">Tasdiqlangan</span>
+            </div>
+            <div class="bg-white p-4 rounded-2xl card-shadow border border-slate-100">
+                <span class="text-xs text-slate-400 font-semibold">Kutilmoqda</span>
+                <h3 class="text-2xl font-black text-amber-600 mt-1" id="moderationCount">0</h3>
+                <span class="text-[11px] text-slate-400">Moderatsiyada</span>
+            </div>
+            <div class="bg-white p-4 rounded-2xl card-shadow border border-slate-100">
+                <span class="text-xs text-slate-400 font-semibold">O'rtacha maosh</span>
+                <h3 class="text-2xl font-black text-[#002046] mt-1" id="avgSalary">—</h3>
+                <span class="text-[11px] text-slate-400">UZS / oy</span>
+            </div>
+        </div>
+
+        <!-- Controls: Search & Filters -->
+        <div class="bg-white p-4 rounded-2xl card-shadow border border-slate-100 space-y-3">
+            <div class="flex flex-col md:flex-row items-center gap-3">
+                <!-- Search Box -->
+                <div class="w-full md:flex-1 relative">
+                    <span
+                        class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                    <input id="searchInput" type="text"
+                        placeholder="Lavozim, kompaniya, shahar yoki mas'ul shaxs bo'yicha qidirish..."
+                        class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:bg-white focus:border-[#006b5c] outline-none transition-all" />
+                </div>
+
+                <!-- Sort -->
+                <div class="w-full md:w-auto flex items-center gap-2">
+                    <select id="sortSelect"
+                        class="w-full md:w-auto px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none focus:border-[#006b5c]">
+                        <option value="new">Sana: Eng yangi</option>
+                        <option value="old">Sana: Eng eski</option>
+                        <option value="company">Kompaniya (A-Z)</option>
+                        <option value="salary">Maosh bo'yicha</option>
+                    </select>
+
+                    <button id="resetFilterBtn"
+                        class="px-3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors">
+                        Tozalash
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filter Pills -->
+            <div class="flex items-center gap-2 overflow-x-auto pb-1">
+                <button class="filter-pill px-3 py-1.5 rounded-full text-xs font-bold bg-[#002046] text-white"
+                    data-filter="all">Hammasi (<span id="pillAllCount">0</span>)</button>
+                <button
+                    class="filter-pill px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    data-filter="toshkent">Toshkent</button>
+                <button
+                    class="filter-pill px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    data-filter="samarqand">Samarqand</button>
+                <button
+                    class="filter-pill px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    data-filter="fargona">Farg'ona</button>
+                <button
+                    class="filter-pill px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    data-filter="it">IT &amp; Dasturlash</button>
+                <button
+                    class="filter-pill px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    data-filter="savdo">Savdo</button>
+            </div>
+        </div>
+
+        <!-- Vacancies Table -->
+        <div id="jobsTableCard" class="bg-white rounded-2xl card-shadow border border-slate-100 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                    <thead>
+                        <tr class="bg-slate-50/80 border-b border-slate-200/80 text-slate-400 font-semibold text-xs">
+                            <th class="py-3.5 px-4">ID</th>
+                            <th class="py-3.5 px-4">Vakansiya va Hudud</th>
+                            <th class="py-3.5 px-4 hidden sm:table-cell">Kompaniya</th>
+                            <th class="py-3.5 px-4 hidden md:table-cell">Mas'ul xodim</th>
+                            <th class="py-3.5 px-4 hidden lg:table-cell">Sana</th>
+                            <th class="py-3.5 px-4 text-right">Amallar</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100" id="jobsTableBody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination Bar -->
+            <div
+                class="p-4 bg-white border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <p class="text-xs text-slate-400" id="paginationSummary">Ko'rsatilmoqda: 1-10 dan 112 tadan</p>
+                <div class="flex items-center gap-1.5">
+                    <button id="prevBtn"
+                        class="px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40">
+                        Oldingi
+                    </button>
+                    <span id="pageNumbers" class="text-xs font-bold text-slate-700 px-2">1 / 12</span>
+                    <button id="nextBtn"
+                        class="px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50">
+                        Keyingi
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal: Add Vacancy -->
+    <div class="modal-overlay" id="addJobModal">
+        <div class="modal-content p-6">
+            <button class="absolute top-4 right-4 text-slate-400 hover:text-slate-600" id="closeAddJobModal">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+
+            <div class="text-center mb-5">
+                <div
+                    class="w-12 h-12 rounded-2xl bg-emerald-50 text-[#006b5c] flex items-center justify-center mx-auto mb-2">
+                    <span class="material-symbols-outlined text-2xl">post_add</span>
+                </div>
+                <h3 class="text-lg font-bold text-[#002046]">Yangi vakansiya e'lon qilish</h3>
+                <p class="text-xs text-slate-500">Kompaniya va ish o'rni parametrlarini kiriting</p>
+            </div>
+
+            <form id="newJobForm" class="space-y-3.5">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Vakansiya nomi *</label>
+                    <input id="jobTitle" type="text" required
+                        class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none"
+                        placeholder="Masalan: Frontend React Dasturchi" />
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Kompaniya nomi *</label>
+                        <input id="jobCompany" type="text" required
+                            class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none"
+                            placeholder="Masalan: Artel Electronics" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Mas'ul xodim *</label>
+                        <input id="jobEmployee" type="text" required
+                            class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none"
+                            placeholder="Masalan: Kamola Shokirova" />
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Viloyat *</label>
+                    <select id="jobRegion" required
+                        class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none">
+                        <option value="">Viloyatni tanlang</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Tuman / manzil *</label>
+                        <input id="jobLocation" type="text" required
+                            class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none"
+                            placeholder="Yunusobod tumani" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Maosh (UZS)</label>
+                        <input id="jobSalary" type="text"
+                            class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none"
+                            placeholder="8,000,000" />
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Ish turi</label>
+                    <select id="jobType"
+                        class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none">
+                        <option value="To'liq bandlik">To'liq bandlik (Full-time)</option>
+                        <option value="Yarim bandlik">Yarim bandlik (Part-time)</option>
+                        <option value="Masofaviy">Masofaviy (Remote)</option>
+                        <option value="Gibrid">Gibrid (Toshkent)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Qisqacha talablar va tavsif</label>
+                    <textarea id="jobDesc" rows="2"
+                        class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none"
+                        placeholder="Nomzoddan 2 yillik tajriba talab qilinadi..."></textarea>
+                </div>
+
+                <button type="submit"
+                    class="w-full mt-2 py-3 bg-[#006b5c] hover:bg-[#005145] text-white font-bold rounded-xl text-sm transition-all active:scale-95 shadow-md shadow-emerald-700/20 flex items-center justify-center gap-1.5">
+                    <span class="material-symbols-outlined text-base">check_circle</span>
+                    E'lonni chop etish
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Job Detail View -->
+    <div class="modal-overlay" id="detailModal">
+        <div class="modal-content p-6">
+            <button class="absolute top-4 right-4 text-slate-400 hover:text-slate-600" id="closeDetailModal">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+
+            <div class="flex items-start gap-3 mb-4">
+                <div
+                    class="w-12 h-12 rounded-2xl bg-emerald-50 text-[#006b5c] flex items-center justify-center text-xl font-black">
+                    <span class="material-symbols-outlined text-2xl">work</span>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-[#002046]" id="detailTitle">Vakansiya</h3>
+                    <p class="text-xs text-[#006b5c] font-semibold" id="detailCompany">Kompaniya</p>
+                    <span class="inline-block mt-1 text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600"
+                        id="detailLocation">Toshkent</span>
+                </div>
+            </div>
+
+            <div class="space-y-3 text-xs border-y border-slate-100 py-3">
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Maosh:</span>
+                    <strong class="text-emerald-700 text-sm" id="detailSalary">5,000,000 UZS</strong>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Ish turi:</span>
+                    <strong id="detailType">To'liq bandlik</strong>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Mas'ul xodim:</span>
+                    <strong id="detailEmployee">Alisher Usmanov</strong>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">E'lon sanasi:</span>
+                    <span class="text-slate-600" id="detailDate">24.05.2026</span>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <p class="text-xs text-slate-500 font-semibold mb-1">Tavsif:</p>
+                <p class="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl" id="detailDesc">
+                    Kompaniya jamoasiga professional xodim qidirilmoqda. Munosib maosh va qulay mehnat sharoitlari
+                    kafolatlanadi.
+                </p>
+            </div>
+
+            <div class="mt-5 flex gap-2">
+                <a id="detailContactTg" href="https://t.me/" target="_blank"
+                    class="flex-1 py-2.5 bg-[#0088cc] hover:bg-[#0077b5] text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-colors">
+                    <span class="material-symbols-outlined text-base">chat</span>
+                    Telegram orqali bog'lanish
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Navigation -->
+    <nav
+        class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-slate-200/80 flex items-center justify-around z-30 px-2 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+        <a href="./dashboard.html" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-700">
+            <span class="material-symbols-outlined text-2xl">dashboard</span>
+            <span class="text-[10px]">Boshqaruv</span>
+        </a>
+        <a href="./vakansiyalar.html" class="flex flex-col items-center gap-0.5 text-[#006b5c]">
+            <span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">work</span>
+            <span class="text-[10px] font-bold">Vakansiyalar</span>
+        </a>
+        <div class="relative -top-3">
+            <button onclick="document.getElementById('openAddJobBtn').click()"
+                class="w-12 h-12 rounded-full bg-[#006b5c] text-white flex items-center justify-center shadow-lg shadow-emerald-700/30 active:scale-90 transition-transform">
+                <span class="material-symbols-outlined text-2xl">add</span>
+            </button>
+        </div>
+        <a href="./nomzodlar.html" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-700">
+            <span class="material-symbols-outlined text-2xl">group</span>
+            <span class="text-[10px]">Nomzodlar</span>
+        </a>
+        <a href="./kartalar.html" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-700">
+            <span class="material-symbols-outlined text-2xl">credit_card</span>
+            <span class="text-[10px]">Kartalar</span>
+        </a>
+    </nav>
+
+    <script>
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            clearTimeout(window._tTimer);
+            window._tTimer = setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // Vakansiyalar serverdan (SQLite bazasidan) olinadi
+        let allJobs = [];
+
+        function escapeHtml(v) {
+            return String(v == null ? '' : v)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+
+        function formatDate(iso) {
+            const d = new Date(iso);
+            if (isNaN(d)) return '';
+            return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
+        }
+
+        let regions = [];
+        const regionName = key => (regions.find(r => r.key === key) || {}).name || '';
+
+        async function loadJobs() {
+            try {
+                const res = await fetch('/api/vacancies');
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const data = await res.json();
+                regions = data.regions || [];
+                allJobs = (data.items || []).map(j => ({ ...j, date: formatDate(j.createdAt) }));
+            } catch (e) {
+                allJobs = [];
+                showToast('Vakansiyalarni yuklab bo\'lmadi');
+            }
+            const sel = document.getElementById('jobRegion');
+            sel.innerHTML = '<option value="">Viloyatni tanlang</option>' +
+                regions.map(r => `<option value="${escapeHtml(r.key)}">${escapeHtml(r.name)}</option>`).join('');
+            currentPage = 1;
+            applyFilters();
+            renderMap();
+        }
+
+        let filteredJobs = [...allJobs];
+        let currentPage = 1;
+        const pageSize = 10;
+
+        function renderTable() {
+            const tbody = document.getElementById('jobsTableBody');
+            const total = filteredJobs.length;
+            const totalPages = Math.ceil(total / pageSize) || 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            const start = (currentPage - 1) * pageSize;
+            const paged = filteredJobs.slice(start, start + pageSize);
+
+            if (paged.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="p-8 text-center text-slate-400">
+                            <span class="material-symbols-outlined text-4xl block mb-2">search_off</span>
+                            Hech qanday mos vakansiya topilmadi
+                        </td>
+                    </tr>
+                `;
+            } else {
+                tbody.innerHTML = paged.map(job => `
+                    <tr class="hover:bg-slate-50/80 transition-colors">
+                        <td class="py-3.5 px-4 font-mono font-bold text-slate-400 text-xs">${job.id}</td>
+                        <td class="py-3.5 px-4">
+                            <div>
+                                <p class="font-bold text-slate-900 leading-tight">${escapeHtml(job.title)}${job.source === 'seed' ? '<span class="badge-seed">NAMUNA</span>' : ''}${job.source === 'imported' ? '<span class="badge-imported">TEKSHIRILMAGAN · tashqi e\'lon</span>' : ''}</p>
+                                <p class="text-[11px] text-[#006b5c] font-semibold mt-0.5">${escapeHtml(job.location)}</p>
+                                <p class="text-[10px] text-slate-400 mt-0.5">💰 ${escapeHtml(job.salary)} · ${escapeHtml(job.type)}</p>
+                            </div>
+                        </td>
+                        <td class="py-3.5 px-4 hidden sm:table-cell">
+                            <div class="flex items-center gap-2">
+                                <div class="w-7 h-7 rounded-lg bg-emerald-50 text-[#006b5c] font-bold text-xs flex items-center justify-center">
+                                    ${escapeHtml(job.company.slice(0, 2).toUpperCase())}
+                                </div>
+                                <span class="font-medium text-slate-800 text-xs">${escapeHtml(job.company)}</span>
+                            </div>
+                        </td>
+                        <td class="py-3.5 px-4 hidden md:table-cell">
+                            <span class="text-xs text-slate-600 font-medium">${escapeHtml(job.employee)}</span>
+                        </td>
+                        <td class="py-3.5 px-4 text-xs text-slate-400 hidden lg:table-cell">${job.date}</td>
+                        <td class="py-3.5 px-4 text-right">
+                            <button onclick="viewJob('${job.id}')" class="px-3 py-1.5 bg-slate-100 hover:bg-[#006b5c] hover:text-white rounded-lg text-xs font-bold transition-all text-slate-700">
+                                Ko'rish
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            // Update stats
+            document.getElementById('totalJobsCount').textContent = allJobs.length;
+            document.getElementById('activeJobsCount').textContent = allJobs.length;
+            document.getElementById('pillAllCount').textContent = allJobs.length;
+            const sal = allJobs.map(salaryValue).filter(n => n >= 100000);
+            document.getElementById('avgSalary').textContent = sal.length
+                ? (sal.reduce((a, b) => a + b, 0) / sal.length / 1e6).toFixed(1) + ' mln' : '—';
+            document.getElementById('paginationSummary').textContent = `Ko'rsatilmoqda: ${total > 0 ? start + 1 : 0}-${Math.min(start + pageSize, total)} dan ${total} tadan`;
+            document.getElementById('pageNumbers').textContent = `${currentPage} / ${totalPages}`;
+            document.getElementById('prevBtn').disabled = currentPage <= 1;
+            document.getElementById('nextBtn').disabled = currentPage >= totalPages;
+        }
+
+        // Pagination buttons
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderTable();
+            }
+        });
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            const totalPages = Math.ceil(filteredJobs.length / pageSize);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderTable();
+            }
+        });
+
+        // ---- Filtrlar: qidiruv + kategoriya + xarita hududi + saralash bitta joyda ----
+        const searchInput = document.getElementById('searchInput');
+        const sortSelect = document.getElementById('sortSelect');
+        let activePill = 'all';
+        let activeRegion = null;
+
+        function salaryValue(j) {
+            const m = String(j.salary).match(/\d[\d ,.]*/);
+            const n = m ? parseInt(m[0].replace(/\D/g, ''), 10) : 0;
+            return isNaN(n) ? 0 : n;
+        }
+
+        const PILLS = {
+            all: () => true,
+            toshkent: j => (j.region || '').startsWith('toshkent'),
+            samarqand: j => j.region === 'samarqand',
+            fargona: j => j.region === 'fargona',
+            it: j => /dasturchi|devops|developer|programmist/i.test(j.title),
+            savdo: j => /sotuvchi|savdo|menejer/i.test(j.title)
+        };
+
+        function applyFilters() {
+            const q = searchInput.value.toLowerCase().trim();
+            const pill = PILLS[activePill] || PILLS.all;
+            filteredJobs = allJobs.filter(j =>
+                pill(j) &&
+                (!activeRegion || j.region === activeRegion) &&
+                (!q || [j.title, j.company, j.location, j.employee, regionName(j.region)]
+                    .some(v => String(v || '').toLowerCase().includes(q)))
+            );
+            const s = sortSelect.value;
+            if (s === 'new') filteredJobs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            else if (s === 'old') filteredJobs.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+            else if (s === 'company') filteredJobs.sort((a, b) => a.company.localeCompare(b.company));
+            else if (s === 'salary') filteredJobs.sort((a, b) => salaryValue(b) - salaryValue(a));
+            currentPage = 1;
+            renderTable();
+            updateRegionUI();
+        }
+
+        searchInput.addEventListener('input', applyFilters);
+        sortSelect.addEventListener('change', applyFilters);
+
+        function setPillStyle(active) {
+            document.querySelectorAll('.filter-pill').forEach(b => {
+                b.className = 'filter-pill px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200';
+            });
+            active.className = 'filter-pill px-3 py-1.5 rounded-full text-xs font-bold bg-[#002046] text-white';
+        }
+        document.querySelectorAll('.filter-pill').forEach(btn => {
+            btn.addEventListener('click', function () {
+                activePill = this.dataset.filter;
+                setPillStyle(this);
+                applyFilters();
+            });
+        });
+
+        document.getElementById('resetFilterBtn').addEventListener('click', () => {
+            searchInput.value = '';
+            sortSelect.value = 'new';
+            activePill = 'all';
+            activeRegion = null;
+            setPillStyle(document.querySelector('.filter-pill[data-filter="all"]'));
+            applyFilters();
+            renderMap();
+            showToast('Filtr tozalandi');
+        });
+
+        // ---- O'zbekiston xaritasi: faqat O'zbekiston viloyatlari (chegaralar GeoJSON'dan) ----
+        // Avval o'z serveringizdagi fayl, bo'lmasa ochiq manbalardan olinadi.
+        const GEO_URLS = [
+            '/uzbekistan-regions.geojson',
+            'https://cdn.jsdelivr.net/gh/wmgeolab/geoBoundaries@9469f09/releaseData/gbOpen/UZB/ADM1/geoBoundaries-UZB-ADM1_simplified.geojson',
+            'https://raw.githubusercontent.com/wmgeolab/geoBoundaries/9469f09/releaseData/gbOpen/UZB/ADM1/geoBoundaries-UZB-ADM1_simplified.geojson'
+        ];
+        // Belgi (raqamli doira) joyi: bir-biriga yaqin Toshkent shahri va viloyati ustma-ust tushmasin
+        const BADGE_POS = { 'toshkent-shahri': [41.16, 69.10], 'toshkent-viloyati': [41.85, 70.25] };
+
+        let map = null, mapReady = null, geoLayer = null, badgeLayer = null;
+
+        async function loadGeo() {
+            for (const url of GEO_URLS) {
+                try {
+                    const r = await fetch(url);
+                    if (!r.ok) continue;
+                    const g = await r.json();
+                    if (g && Array.isArray(g.features) && g.features.length >= 10) return g;
+                } catch (e) { /* keyingi manbani sinaymiz */ }
+            }
+            return null;
+        }
+
+        // Nuqta ko'pburchak ichidami (Polygon / MultiPolygon, teshiklar bilan)
+        function pointInRing(x, y, ring) {
+            let inside = false;
+            for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+                const xi = ring[i][0], yi = ring[i][1], xj = ring[j][0], yj = ring[j][1];
+                if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) inside = !inside;
+            }
+            return inside;
+        }
+        function pointInPolygon(x, y, rings) {
+            if (!pointInRing(x, y, rings[0])) return false;
+            for (let k = 1; k < rings.length; k++) if (pointInRing(x, y, rings[k])) return false;
+            return true;
+        }
+        function pointInGeom(x, y, geom) {
+            if (!geom) return false;
+            if (geom.type === 'Polygon') return pointInPolygon(x, y, geom.coordinates);
+            if (geom.type === 'MultiPolygon') return geom.coordinates.some(poly => pointInPolygon(x, y, poly));
+            return false;
+        }
+        const boundsArea = b => (b.getNorth() - b.getSouth()) * (b.getEast() - b.getWest());
+
+        function regionCounts() {
+            const counts = {};
+            allJobs.forEach(j => { if (j.region) counts[j.region] = (counts[j.region] || 0) + 1; });
+            return counts;
+        }
+
+        function shadeFor(c, max) {
+            const t = max > 1 ? (c - 1) / (max - 1) : 1;      // 0..1
+            const from = [167, 227, 211], to = [0, 107, 92];  // och yashildan to'q yashilgacha
+            const rgb = from.map((f, i) => Math.round(f + (to[i] - f) * t));
+            return `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
+        }
+
+        let _counts = {}, _maxCount = 0;
+        function regionStyle(layer) {
+            const key = layer._rk;
+            const c = _counts[key] || 0;
+            const selected = key && key === activeRegion;
+            return {
+                color: '#ffffff',
+                weight: selected ? 2.5 : 1.3,
+                fillColor: selected ? '#002046' : (c ? shadeFor(c, _maxCount) : '#dfe6ee'),
+                fillOpacity: selected ? 0.95 : 0.92
+            };
+        }
+
+        function buildGeoLayer(geo) {
+            geoLayer = L.geoJSON(geo, {
+                style: () => ({ color: '#ffffff', weight: 1.3, fillColor: '#dfe6ee', fillOpacity: 0.92 }),
+                onEachFeature: (f, layer) => {
+                    layer.on({
+                        click: () => { if (layer._rk) selectRegion(layer._rk); },
+                        mouseover: () => layer._rk && layer.setStyle({ weight: 2.4, fillOpacity: 1 }),
+                        mouseout: () => layer.setStyle(regionStyle(layer))
+                    });
+                    layer.bindTooltip(() => {
+                        if (!layer._rk) return '';
+                        const c = _counts[layer._rk] || 0;
+                        return `<strong>${escapeHtml(regionName(layer._rk))}</strong><br>${c ? c + ' ta vakansiya' : 'Vakansiya yo\'q'}`;
+                    }, { sticky: true });
+                }
+            }).addTo(map);
+
+            // Har bir viloyat markazi qaysi ko'pburchak ichida bo'lsa, o'sha viloyatga bog'laymiz
+            // (nomlarga bog'liq emas). Bir nechta bo'lsa — eng kichigi (masalan, Toshkent shahri).
+            const layers = geoLayer.getLayers();
+            regions.forEach(r => {
+                let best = null, bestArea = Infinity;
+                layers.forEach(l => {
+                    if (pointInGeom(r.lng, r.lat, l.feature.geometry)) {
+                        const a = boundsArea(l.getBounds());
+                        if (a < bestArea) { best = l; bestArea = a; }
+                    }
+                });
+                if (best && !best._rk) best._rk = r.key;
+            });
+            // Kichik ko'pburchaklar ustida tursin (Toshkent shahri viloyat ustida ko'rinsin)
+            layers.slice().sort((a, b) => boundsArea(b.getBounds()) - boundsArea(a.getBounds()))
+                .forEach(l => l.bringToFront());
+
+            const bounds = geoLayer.getBounds();
+            map.fitBounds(bounds, { padding: [8, 8] });
+            map.setMaxBounds(bounds.pad(0.3));
+            map.setMinZoom(map.getZoom() - 1);
+            L.control.attribution({ prefix: false }).addAttribution('Chegaralar: geoBoundaries (CC BY 4.0)').addTo(map);
+        }
+
+        function useTileFallback() {
+            // Chegaralar fayli yuklanmasa: oddiy xarita + belgilar (zaxira variant)
+            map.fitBounds([[37.1, 55.9], [45.6, 73.2]]);
+            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 12, attribution: '&copy; OpenStreetMap' }).addTo(map);
+        }
+
+        async function setupMap() {
+            if (typeof L === 'undefined') return false;
+            map = L.map('jobsMap', { scrollWheelZoom: false, zoomSnap: 0.25, attributionControl: false });
+            badgeLayer = L.layerGroup().addTo(map);
+            const geo = await loadGeo();
+            if (geo) buildGeoLayer(geo);
+            else { useTileFallback(); showToast('Xarita chegaralari yuklanmadi'); }
+            return true;
+        }
+
+        async function renderMap() {
+            if (!mapReady) mapReady = setupMap();
+            if (!(await mapReady)) return;
+
+            _counts = regionCounts();
+            _maxCount = Math.max(0, ...Object.values(_counts));
+            if (geoLayer) geoLayer.eachLayer(l => l.setStyle(regionStyle(l)));
+
+            badgeLayer.clearLayers();
+            regions.forEach(r => {
+                const c = _counts[r.key] || 0;
+                if (!c && geoLayer) return;                 // chegara bor bo'lsa, bo'sh hududga belgi qo'ymaymiz
+                const size = c ? Math.min(26 + c * 3, 46) : 20;
+                const cls = 'region-marker' + (c ? '' : ' empty') + (activeRegion === r.key ? ' selected' : '');
+                const pos = BADGE_POS[r.key] || [r.lat, r.lng];
+                const m = L.marker(pos, {
+                    icon: L.divIcon({
+                        className: '',
+                        html: `<div class="${cls}" style="width:${size}px;height:${size}px">${c || ''}</div>`,
+                        iconSize: [size, size], iconAnchor: [size / 2, size / 2]
+                    }),
+                    keyboard: false, title: r.name
+                }).addTo(badgeLayer);
+                m.bindTooltip(`<strong>${escapeHtml(r.name)}</strong><br>${c ? c + ' ta vakansiya' : 'Vakansiya yo\'q'}`,
+                    { direction: 'top', offset: [0, -size / 2] });
+                m.on('click', () => selectRegion(r.key));
+            });
+        }
+
+        function selectRegion(key) {
+            activeRegion = (activeRegion === key) ? null : key;
+            applyFilters();
+            renderMap();
+            if (activeRegion) {
+                document.getElementById('jobsTableCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        function updateRegionUI() {
+            const btn = document.getElementById('clearRegionBtn');
+            if (activeRegion) {
+                document.getElementById('regionLabel').textContent = regionName(activeRegion);
+                btn.classList.remove('hidden');
+            } else {
+                btn.classList.add('hidden');
+            }
+        }
+        document.getElementById('clearRegionBtn').addEventListener('click', () => {
+            activeRegion = null;
+            applyFilters();
+            renderMap();
+        });
+
+        // Add Job Modal
+        const addModal = document.getElementById('addJobModal');
+        document.getElementById('openAddJobBtn').addEventListener('click', () => addModal.classList.add('active'));
+        document.getElementById('closeAddJobModal').addEventListener('click', () => addModal.classList.remove('active'));
+        addModal.addEventListener('click', (e) => { if (e.target === addModal) addModal.classList.remove('active'); });
+
+        document.getElementById('newJobForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                title: document.getElementById('jobTitle').value.trim(),
+                company: document.getElementById('jobCompany').value.trim(),
+                employee: document.getElementById('jobEmployee').value.trim(),
+                region: document.getElementById('jobRegion').value,
+                location: document.getElementById('jobLocation').value.trim(),
+                salary: (document.getElementById('jobSalary').value.trim() || 'Kelishiladi'),
+                type: document.getElementById('jobType').value,
+                desc: document.getElementById('jobDesc').value.trim()
+            };
+            if (payload.salary !== 'Kelishiladi' && !payload.salary.includes('UZS')) payload.salary += ' UZS';
+
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            if (submitBtn) submitBtn.disabled = true;
+            try {
+                const res = await fetch('/api/vacancies', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (res.status === 401) {
+                    showToast('Vakansiya qo\'shish uchun avval tizimga kiring');
+                    return;
+                }
+                const data = await res.json();
+                if (!res.ok) {
+                    showToast(data.error || 'Xatolik yuz berdi');
+                    return;
+                }
+                const newJob = { ...data, date: formatDate(data.createdAt) };
+                allJobs.unshift(newJob);
+                applyFilters();
+                renderMap();
+
+                addModal.classList.remove('active');
+                document.getElementById('newJobForm').reset();
+                showToast(`✅ "${payload.title}" vakansiyasi e'lon qilindi!`);
+            } catch (err) {
+                showToast('Server bilan aloqa yo\'q');
+            } finally {
+                if (submitBtn) submitBtn.disabled = false;
+            }
+        });
+
+        // View Detail Modal
+        const detailModal = document.getElementById('detailModal');
+        document.getElementById('closeDetailModal').addEventListener('click', () => detailModal.classList.remove('active'));
+        detailModal.addEventListener('click', (e) => { if (e.target === detailModal) detailModal.classList.remove('active'); });
+
+        function viewJob(id) {
+            const job = allJobs.find(j => j.id === id);
+            if (!job) return;
+
+            document.getElementById('detailTitle').textContent = job.title;
+            document.getElementById('detailCompany').textContent = job.company +
+                (job.source === 'seed' ? ' · namunaviy e\'lon' :
+                 job.source === 'imported' ? ' · tashqi manbadan olingan, tasdiqlanmagan' : '');
+            document.getElementById('detailLocation').textContent = job.location;
+            document.getElementById('detailSalary').textContent = job.salary;
+            document.getElementById('detailType').textContent = job.type;
+            document.getElementById('detailEmployee').textContent = job.employee;
+            document.getElementById('detailDate').textContent = job.date;
+            document.getElementById('detailDesc').textContent = job.desc;
+            document.getElementById('detailContactTg').href = 'https://t.me/myishtop_bot';
+
+            detailModal.classList.add('active');
+        }
+
+        loadJobs();
+    </script>
+</body>
+
+</html>
