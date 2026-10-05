@@ -647,7 +647,8 @@ app.post('/api/click/complete', webhookLimiter, (req, res) => {
 // ==========================================
 const { REGIONS, ensureSchema } = require('./vacancies-db');
 ensureSchema(db);
-
+const { seedFromJson } = require('./seed-from-json');
+seedFromJson(db);
 const REGION_KEYS = REGIONS.map(r => r.key);
 const VACANCY_TYPES = ["To'liq bandlik", "Yarim bandlik", "Masofaviy", "Gibrid"];
 
