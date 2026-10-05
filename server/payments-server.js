@@ -252,6 +252,16 @@ function requireAuth(req, res, next) {
     next();
 }
 
+// Admin: faqat .env dagi ADMIN_TELEGRAM_IDS ro'yxatidagi Telegram ID'lar (vergul bilan ajratiladi)
+const ADMIN_IDS = (process.env.ADMIN_TELEGRAM_IDS || '').split(',').map(x => x.trim()).filter(Boolean);
+function isAdminUser(req) {
+    return !!(req.user && ADMIN_IDS.includes(String(req.user.telegramId)));
+}
+function adminOnly(req, res, next) {
+    if (!isAdminUser(req)) return res.status(403).json({ error: 'Ruxsat yo\'q' });
+    next();
+}
+
 // ==========================================
 // TELEGRAM AUTENTIFIKATSIYA
 // ==========================================
@@ -691,16 +701,52 @@ app.post('/api/vacancies', paymentLimiter, requireAuth, (req, res) => {
             return res.status(400).json({ error: 'Viloyatni tanlang' });
         }
 
+        // Admin e'loni darhol faol; boshqalarniki admin tasdiqlaguncha 'pending' (saytda ko'rinmaydi).
+        const admin = isAdminUser(req);
+        if (!admin) {
+            const n = db.prepare(`SELECT COUNT(*) AS n FROM vacancies WHERE ownerTelegramId = ? AND status = 'pending'`)
+                .get(String(req.user.telegramId)).n;
+            if (n >= 5) {
+                return res.status(429).json({ error: "Tekshiruvda 5 ta e'lon bor. Tasdiqlanishini kuting." });
+            }
+        }
+        const status = admin ? 'active' : 'pending';
+
         const info = db.prepare(`
-            INSERT INTO vacancies (title, company, employee, region, location, salary, type, description, ownerTelegramId, createdAt, source)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'user')
+            INSERT INTO vacancies (title, company, employee, region, location, salary, type, description, ownerTelegramId, createdAt, source, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'user', ?)
         `).run(title, company, employee, b.region, location, salary, type, description,
-               String(req.user.telegramId), new Date().toISOString());
+            String(req.user.telegramId), new Date().toISOString(), status);
 
         const row = db.prepare('SELECT * FROM vacancies WHERE id = ?').get(info.lastInsertRowid);
-        res.status(201).json(rowToVacancy(row));
+        res.status(201).json({ ...rowToVacancy(row), status });
     } catch (err) {
         logError('POST /api/vacancies', err);
+        res.status(500).json({ error: 'Ichki server xatosi' });
+    }
+});
+
+// Admin: tekshiruvdagi e'lonlar va tasdiqlash / rad etish
+app.get('/api/admin/vacancies/pending', paymentLimiter, requireAuth, adminOnly, (req, res) => {
+    try {
+        const rows = db.prepare(`SELECT * FROM vacancies WHERE status = 'pending' ORDER BY createdAt, id`).all();
+        res.json({ items: rows.map(rowToVacancy) });
+    } catch (err) {
+        logError('GET /api/admin/vacancies/pending', err);
+        res.status(500).json({ error: 'Ichki server xatosi' });
+    }
+});
+
+app.post('/api/admin/vacancies/:id/:action', paymentLimiter, requireAuth, adminOnly, (req, res) => {
+    try {
+        const status = { approve: 'active', reject: 'rejected' }[req.params.action];
+        if (!status) return res.status(404).json({ error: 'Noma\'lum amal' });
+        const id = Number(String(req.params.id).replace(/^VT-/, ''));
+        const r = db.prepare('UPDATE vacancies SET status = ? WHERE id = ?').run(status, id);
+        if (!r.changes) return res.status(404).json({ error: 'Topilmadi' });
+        res.json({ ok: true, status });
+    } catch (err) {
+        logError('POST /api/admin/vacancies/:id/:action', err);
         res.status(500).json({ error: 'Ichki server xatosi' });
     }
 });
