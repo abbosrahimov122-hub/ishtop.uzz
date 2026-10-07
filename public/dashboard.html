@@ -357,14 +357,11 @@
                 </svg>
                 <div class="relative flex items-center justify-between">
                     <p class="text-xs font-semibold text-white/70">Jami nomzodlar</p>
-                    <span
-                        class="text-[11px] font-bold text-white bg-white/15 px-2 py-0.5 rounded-full flex items-center gap-0.5">
-                        <span class="material-symbols-outlined text-xs">trending_up</span> +24.1%
-                    </span>
+
                 </div>
-                <h3 class="relative text-4xl mt-2" style="font-family:'Fraunces',serif; font-weight:700;">42,590</h3>
-                <p class="relative text-xs text-white/60 mt-1">Haftalik o'sish 1.2k &middot; Bugun 47 ta yangi vakansiya
-                    qo'shildi</p>
+                <h3 class="relative text-4xl mt-2" style="font-family:'Fraunces',serif; font-weight:700;"><span
+                        id="statCandidates">…</span></h3>
+                <p class="relative text-xs text-white/60 mt-1" id="statCandidatesNote">Yuklanmoqda…</p>
             </div>
 
             <!-- Three flat compact stats, hairline-separated instead of individually shadowed -->
@@ -374,33 +371,23 @@
                         <span class="material-symbols-outlined text-lg text-[#0B5C46]">work</span>
                         <div>
                             <p class="text-xs font-semibold text-slate-500">Faol vakansiyalar</p>
-                            <h4 class="text-lg font-bold text-[#0F1B2D] leading-tight">1,284</h4>
+                            <h4 class="text-lg font-bold text-[#0F1B2D] leading-tight"><span id="statVacancies">…</span>
+                            </h4>
                         </div>
                     </div>
-                    <span class="text-[11px] font-bold text-emerald-600">+12.4%</span>
+
                 </div>
                 <div class="flex items-center justify-between px-4 py-3">
                     <div class="flex items-center gap-2.5">
-                        <span class="material-symbols-outlined text-lg text-amber-600">payments</span>
+                        <span class="material-symbols-outlined text-lg text-amber-600">person_add</span>
                         <div>
-                            <p class="text-xs font-semibold text-slate-500">Oylik daromad</p>
-                            <h4 class="text-lg font-bold text-[#0F1B2D] leading-tight">84.2 mln UZS</h4>
+                            <p class="text-xs font-semibold text-slate-500">Oxirgi 7 kunda yangi nomzodlar</p>
+                            <h4 class="text-lg font-bold text-[#0F1B2D] leading-tight"><span id="statNewWeek">…</span>
+                            </h4>
                         </div>
                     </div>
-                    <span class="text-[11px] font-bold text-amber-600">108%</span>
                 </div>
-                <div class="flex items-center justify-between px-4 py-3">
-                    <div class="flex items-center gap-2.5">
-                        <span class="material-symbols-outlined text-lg text-teal-700">travel_explore</span>
-                        <div>
-                            <p class="text-xs font-semibold text-slate-500">Platforma trafigi</p>
-                            <h4 class="text-lg font-bold text-[#0F1B2D] leading-tight">312.4k</h4>
-                        </div>
-                    </div>
-                    <span class="text-[11px] font-bold text-teal-700 flex items-center gap-1">
-                        <span class="w-1.5 h-1.5 rounded-full bg-teal-500"></span> Faol
-                    </span>
-                </div>
+
             </div>
         </div>
 
@@ -547,40 +534,16 @@
                     </div>
                     <div>
                         <h4 class="text-sm font-bold text-red-700">Firibgarlikdan himoya</h4>
-                        <p class="text-[11px] text-slate-400">AI Xavfsizlik monitoringi 24/7</p>
+                        <p class="text-[11px] text-slate-400">Qo'lda tekshiruv</p>
                     </div>
                 </div>
 
-                <p class="text-xs text-slate-600 mb-3">
-                    So'nggi 24 soatda Toshkent hududida 2 ta ish beruvchida shubhali soxta so'rovlar aniqlanib
-                    bloklandi.
-                </p>
+                <p class="text-xs text-slate-600 mb-3">Hozircha avtomatik monitoring ulanmagan. Shubhali e'lonlar qo'lda
+                    tekshiriladi.</p>
 
-                <div class="space-y-2 mb-4">
-                    <div
-                        class="flex items-center justify-between p-2.5 rounded-xl bg-red-50/70 border border-red-200/70">
-                        <div class="text-xs font-bold text-slate-800">
-                            FastCash Invest MChJ
-                            <p class="text-[10px] font-normal text-slate-500">Oldindan to'lov talab qilgan</p>
-                        </div>
-                        <span
-                            class="px-2 py-0.5 bg-red-600 text-white rounded-md text-[10px] font-bold">Bloklandi</span>
-                    </div>
-                    <div
-                        class="flex items-center justify-between p-2.5 rounded-xl bg-amber-50/70 border border-amber-200/70">
-                        <div class="text-xs font-bold text-slate-800">
-                            GlobalExpress Taxi
-                            <p class="text-[10px] font-normal text-slate-500">STIR tekshiruvda</p>
-                        </div>
-                        <span
-                            class="px-2 py-0.5 bg-amber-600 text-white rounded-md text-[10px] font-bold">Shubhali</span>
-                    </div>
-                </div>
+                <div class="mb-4"></div>
 
-                <button onclick="showToast('🔍 Shubhali akkauntlar ro\'yxati tekshirildi', 'info')"
-                    class="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-xs transition-all active:scale-95 shadow-md shadow-red-600/20">
-                    Xavfsizlik hisobotini ko'rish
-                </button>
+
             </div>
         </div>
 
@@ -596,9 +559,7 @@
                         class="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-colors">Barchasi</button>
                     <button onclick="filterTable('yangi')"
                         class="px-3 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-lg text-xs font-semibold transition-colors">Yangi</button>
-                    <button onclick="filterTable('jarayonda')"
-                        class="px-3 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg text-xs font-semibold transition-colors">Ko'rib
-                        chiqilmoqda</button>
+
                 </div>
             </div>
 
@@ -614,81 +575,8 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-xs" id="tableBody">
-                        <tr class="hover:bg-slate-50/80 transition-colors">
-                            <td class="py-3 px-3 font-semibold text-slate-800 flex items-center gap-2.5">
-                                <img class="w-7 h-7 rounded-full object-cover"
-                                    src="https://ui-avatars.com/api/?name=Jasur+Alimov&background=0F1B2D&color=fff&size=64"
-                                    alt="Jasur" />
-                                <div>
-                                    Jasur Alimov
-                                    <p class="text-[10px] text-slate-400 font-normal">+998 90 123 45 67</p>
-                                </div>
-                            </td>
-                            <td class="py-3 px-3 font-medium text-slate-700">Sotuv menejeri</td>
-                            <td class="py-3 px-3 text-slate-400 hidden sm:table-cell">Bugun, 10:24</td>
-                            <td class="py-3 px-3">
-                                <span
-                                    class="px-2.5 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-full text-[10px]">🟢
-                                    Yangi</span>
-                            </td>
-                            <td class="py-3 px-3 text-right">
-                                <button
-                                    onclick="showCandidateQuickView('Jasur Alimov', 'Sotuv menejeri', 'Toshkent', '+998 90 123 45 67')"
-                                    class="px-2.5 py-1 text-slate-600 hover:text-[#0B5C46] hover:bg-slate-100 rounded-lg font-semibold transition-colors">
-                                    Ko'rish
-                                </button>
-                            </td>
-                        </tr>
-                        <!-- ISHTOP_SAVED_ROWS_ANCHOR -->
-                        <tr class="hover:bg-slate-50/80 transition-colors">
-                            <td class="py-3 px-3 font-semibold text-slate-800 flex items-center gap-2.5">
-                                <img class="w-7 h-7 rounded-full object-cover"
-                                    src="https://ui-avatars.com/api/?name=Madina+Kamalova&background=0B5C46&color=fff&size=64"
-                                    alt="Madina" />
-                                <div>
-                                    Madina Kamalova
-                                    <p class="text-[10px] text-slate-400 font-normal">+998 91 345 67 89</p>
-                                </div>
-                            </td>
-                            <td class="py-3 px-3 font-medium text-slate-700">Buxgalter yordamchisi</td>
-                            <td class="py-3 px-3 text-slate-400 hidden sm:table-cell">Bugun, 09:15</td>
-                            <td class="py-3 px-3">
-                                <span
-                                    class="px-2.5 py-1 bg-amber-50 text-amber-700 font-bold rounded-full text-[10px]">🟡
-                                    Ko'rib chiqilmoqda</span>
-                            </td>
-                            <td class="py-3 px-3 text-right">
-                                <button
-                                    onclick="showCandidateQuickView('Madina Kamalova', 'Buxgalter yordamchisi', 'Samarqand', '+998 91 345 67 89')"
-                                    class="px-2.5 py-1 text-slate-600 hover:text-[#0B5C46] hover:bg-slate-100 rounded-lg font-semibold transition-colors">
-                                    Ko'rish
-                                </button>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-slate-50/80 transition-colors">
-                            <td class="py-3 px-3 font-semibold text-slate-800 flex items-center gap-2.5">
-                                <img class="w-7 h-7 rounded-full object-cover"
-                                    src="https://ui-avatars.com/api/?name=Botir+Mirzayev&background=ba1a1a&color=fff&size=64"
-                                    alt="Botir" />
-                                <div>
-                                    Botir Mirzayev
-                                    <p class="text-[10px] text-slate-400 font-normal">+998 93 456 78 90</p>
-                                </div>
-                            </td>
-                            <td class="py-3 px-3 font-medium text-slate-700">Ombor nazoratchisi</td>
-                            <td class="py-3 px-3 text-slate-400 hidden sm:table-cell">Kecha, 18:40</td>
-                            <td class="py-3 px-3">
-                                <span
-                                    class="px-2.5 py-1 bg-slate-100 text-slate-600 font-bold rounded-full text-[10px]">⚪
-                                    Arxiv</span>
-                            </td>
-                            <td class="py-3 px-3 text-right">
-                                <button
-                                    onclick="showCandidateQuickView('Botir Mirzayev', 'Ombor nazoratchisi', 'Farg\'ona', '+998 93 456 78 90')"
-                                    class="px-2.5 py-1 text-slate-600 hover:text-[#0B5C46] hover:bg-slate-100 rounded-lg font-semibold transition-colors">
-                                    Ko'rish
-                                </button>
-                            </td>
+                        <tr>
+                            <td colspan="5" class="py-6 px-3 text-center text-slate-400">Yuklanmoqda…</td>
                         </tr>
                     </tbody>
                 </table>
@@ -919,103 +807,79 @@
 
         // Add Modal
         const addModal = document.getElementById('addModal');
-        document.getElementById('openAddModalBtn').addEventListener('click', () => addModal.classList.add('active'));
+        document.getElementById('openAddModalBtn').addEventListener('click', () => window.open('./nomzod-royxatdan-otish.html', '_blank'));
         document.getElementById('closeAddModal').addEventListener('click', () => addModal.classList.remove('active'));
         addModal.addEventListener('click', (e) => { if (e.target === addModal) addModal.classList.remove('active'); });
 
         // ==========================================
-        // Persisted candidates (localStorage)
+        // Haqiqiy ma'lumotlar (server bazasidan)
         // ==========================================
-        const SAVED_CANDIDATES_KEY = 'ishtop_added_candidates';
+        function esc(v) {
+            return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
 
-        function getSavedCandidates() {
+        async function loadRealData() {
+            const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+            const body = document.getElementById('tableBody');
+
             try {
-                return JSON.parse(localStorage.getItem(SAVED_CANDIDATES_KEY)) || [];
-            } catch (err) {
-                return [];
+                const vr = await fetch('/api/vacancies');
+                const vd = await vr.json();
+                const items = Array.isArray(vd) ? vd : (vd.items || []);
+                set('statVacancies', items.length);
+            } catch (e) { set('statVacancies', '—'); }
+
+            let cands = [], locked = true, regions = [];
+            try {
+                const key = sessionStorage.getItem('adminKey') || '';
+                const r = await fetch('/api/candidates', { headers: { 'x-admin-key': key } });
+                const d = await r.json();
+                locked = !!d.locked;
+                cands = d.items || [];
+                regions = d.regions || [];
+            } catch (e) { /* server javob bermadi */ }
+
+            if (locked) {
+                set('statCandidates', '—');
+                set('statNewWeek', '—');
+                set('statCandidatesNote', "Nomzodlar ma'lumoti himoyalangan: Nomzodlar sahifasida admin kalitini kiriting");
+                body.innerHTML = '<tr><td colspan="5" class="py-6 px-3 text-center text-slate-400">Nomzodlarni ko\'rish uchun <a href="./nomzodlar.html" class="text-[#0B5C46] font-bold underline">Nomzodlar</a> sahifasida admin kalitini kiriting.</td></tr>';
+                return;
             }
+
+            const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+            const fresh = cands.filter(c => new Date(c.createdAt).getTime() >= weekAgo).length;
+            set('statCandidates', cands.length);
+            set('statNewWeek', fresh);
+            set('statCandidatesNote', cands.length ? "Ro'yxatdan o'tgan haqiqiy nomzodlar" : "Hali hech kim ro'yxatdan o'tmagan");
+
+            if (!cands.length) {
+                body.innerHTML = '<tr><td colspan="5" class="py-6 px-3 text-center text-slate-400">Hozircha nomzodlar yo\'q.</td></tr>';
+                return;
+            }
+            const regionName = k => (regions.find(r => r.key === k) || {}).name || k;
+            body.innerHTML = cands.slice(0, 10).map((c, i) => {
+                const isNew = new Date(c.createdAt).getTime() >= weekAgo;
+                const when = new Date(c.createdAt).toLocaleString('uz-UZ', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+                return `<tr class="hover:bg-slate-50/80 transition-colors">
+                    <td class="py-3 px-3 font-semibold text-slate-800 flex items-center gap-2.5">
+                        <img class="w-7 h-7 rounded-full object-cover" src="https://ui-avatars.com/api/?name=${encodeURIComponent(c.fullName)}&background=0B5C46&color=fff&size=64" alt="" />
+                        <div>${esc(c.fullName)}<p class="text-[10px] text-slate-400 font-normal">${esc(c.phone)}</p></div>
+                    </td>
+                    <td class="py-3 px-3 font-medium text-slate-700">${esc(c.desiredRole)}</td>
+                    <td class="py-3 px-3 text-slate-400 hidden sm:table-cell">${esc(when)}</td>
+                    <td class="py-3 px-3"><span class="px-2.5 py-1 ${isNew ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'} font-bold rounded-full text-[10px]">${isNew ? '🟢 Yangi' : '⚪ Faol'}</span></td>
+                    <td class="py-3 px-3 text-right"><button data-i="${i}" class="view-cand px-2.5 py-1 text-slate-600 hover:text-[#0B5C46] hover:bg-slate-100 rounded-lg font-semibold transition-colors">Ko'rish</button></td>
+                </tr>`;
+            }).join('');
+            body.querySelectorAll('.view-cand').forEach(btn => btn.addEventListener('click', () => {
+                const c = cands[parseInt(btn.dataset.i, 10)];
+                showCandidateQuickView(c.fullName, c.desiredRole, regionName(c.region), c.phone);
+            }));
         }
+        loadRealData();
 
-        function setSavedCandidates(list) {
-            localStorage.setItem(SAVED_CANDIDATES_KEY, JSON.stringify(list));
-        }
-
-        function buildCandidateRow(cand) {
-            const row = document.createElement('tr');
-            row.className = 'hover:bg-slate-50/80 transition-colors bg-emerald-50/40';
-            row.dataset.candId = cand.id;
-            row.innerHTML = `
-                <td class="py-3 px-3 font-semibold text-slate-800 flex items-center gap-2.5">
-                    <img class="w-7 h-7 rounded-full object-cover" src="https://ui-avatars.com/api/?name=${encodeURIComponent(cand.name)}&background=0B5C46&color=fff&size=64" alt="${cand.name}" />
-                    <div>
-                        ${cand.name}
-                        <p class="text-[10px] text-slate-400 font-normal">${cand.phone}</p>
-                    </div>
-                </td>
-                <td class="py-3 px-3 font-medium text-slate-700">${cand.role}</td>
-                <td class="py-3 px-3 text-slate-400 hidden sm:table-cell">${cand.addedLabel || 'Hozirgina'}</td>
-                <td class="py-3 px-3">
-                    <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-full text-[10px]">🟢 Yangi</span>
-                </td>
-                <td class="py-3 px-3 text-right flex items-center justify-end gap-1">
-                    <button onclick="showCandidateQuickView('${cand.name}', '${cand.role}', '${cand.loc}', '${cand.phone}')" class="px-2.5 py-1 text-slate-600 hover:text-[#0B5C46] hover:bg-slate-100 rounded-lg font-semibold transition-colors">
-                        Ko'rish
-                    </button>
-                    <button onclick="deleteSavedCandidate('${cand.id}')" title="O'chirish" class="px-2 py-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                        <span class="material-symbols-outlined text-base">delete</span>
-                    </button>
-                </td>
-            `;
-            return row;
-        }
-
-        function renderSavedCandidates() {
-            const anchor = Array.from(document.querySelectorAll('#tableBody')[0].childNodes)
-                .find(n => n.nodeType === Node.COMMENT_NODE && n.textContent.trim() === 'ISHTOP_SAVED_ROWS_ANCHOR');
-            document.querySelectorAll('#tableBody tr[data-cand-id]').forEach(r => r.remove());
-            const saved = getSavedCandidates();
-            saved.slice().reverse().forEach(cand => {
-                const row = buildCandidateRow(cand);
-                if (anchor && anchor.parentNode) {
-                    anchor.parentNode.insertBefore(row, anchor.nextSibling);
-                } else {
-                    document.getElementById('tableBody').prepend(row);
-                }
-            });
-        }
-
-        function deleteSavedCandidate(id) {
-            const saved = getSavedCandidates().filter(c => c.id !== id);
-            setSavedCandidates(saved);
-            renderSavedCandidates();
-            showToast("🗑️ Nomzod o'chirildi");
-        }
-
-        renderSavedCandidates();
-
-        document.getElementById('addUserForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const name = document.getElementById('newUserName').value.trim();
-            const role = document.getElementById('newUserRole').value.trim();
-            const phone = document.getElementById('newUserPhone').value.trim();
-            const loc = document.getElementById('newUserLocation').value;
-            const status = document.getElementById('newUserStatus').value;
-
-            const cand = {
-                id: 'c_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
-                name, role, phone, loc, status,
-                addedLabel: 'Hozirgina'
-            };
-
-            const saved = getSavedCandidates();
-            saved.push(cand);
-            setSavedCandidates(saved);
-            renderSavedCandidates();
-
-            addModal.classList.remove('active');
-            document.getElementById('addUserForm').reset();
-            showToast(`✅ ${name} muvaffaqiyatli qo'shildi!`);
-        });
 
         // Quick View Modal
         const viewModal = document.getElementById('viewModal');
@@ -1027,7 +891,7 @@
             document.getElementById('viewModalRole').textContent = role;
             document.getElementById('viewModalLoc').textContent = loc;
             document.getElementById('viewModalPhone').textContent = phone;
-            document.getElementById('viewModalTgLink').href = 'https://t.me/+' + phone.replace(/\D/g, '');
+            document.getElementById('viewModalTgLink').href = 'tel:' + phone.replace(/[^+\d]/g, '');
             viewModal.classList.add('active');
         }
 
