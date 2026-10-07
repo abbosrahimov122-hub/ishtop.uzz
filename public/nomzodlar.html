@@ -183,7 +183,7 @@
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
             <div class="bg-white p-4 rounded-2xl card-shadow border border-slate-100 text-center">
                 <span class="text-xs text-slate-400 font-semibold">Jami nomzodlar</span>
-                <h3 class="text-2xl font-black text-[#002046] mt-1" id="totalCandidatesDisplay">243</h3>
+                <h3 class="text-2xl font-black text-[#002046] mt-1" id="totalCandidatesDisplay">0</h3>
                 <span class="text-[11px] text-emerald-600 font-bold">100% faol baza</span>
             </div>
             <div class="bg-white p-4 rounded-2xl card-shadow border border-slate-100 text-center">
@@ -198,9 +198,21 @@
             </div>
             <div class="bg-white p-4 rounded-2xl card-shadow border border-slate-100 text-center">
                 <span class="text-xs text-slate-400 font-semibold">Saqlanganlar</span>
-                <h3 class="text-2xl font-black text-amber-600 mt-1" id="bookmarkedCount">12</h3>
-                <span class="text-[11px] text-slate-400">Tanlanganlar</span>
+                <h3 class="text-2xl font-black text-amber-600 mt-1" id="bookmarkedCount">0</h3>
+                <span class="text-[11px] text-slate-400">So'nggi 7 kun</span>
             </div>
+        </div>
+
+        <div
+            class="bg-emerald-50 border border-emerald-200/70 rounded-2xl p-4 flex items-center justify-between gap-3 flex-wrap">
+            <div>
+                <h2 class="text-sm font-bold text-[#002046]">Nomzodlar shu yerda o'zlari ro'yxatdan o'tadi</h2>
+                <p class="text-[11px] text-slate-500">Havolani ish qidiruvchilarga yuboring, ular to'ldirgach shu yerda
+                    ko'rinadi.</p>
+            </div>
+            <a href="./nomzod-royxatdan-otish.html" target="_blank"
+                class="px-3 py-1.5 bg-[#006b5c] text-white rounded-full text-xs font-bold whitespace-nowrap">Ro'yxatdan
+                o'tish havolasi</a>
         </div>
 
         <!-- Search and Region Controls -->
@@ -226,28 +238,9 @@
             <!-- Region Filter Chips -->
             <div class="flex items-center gap-1.5 overflow-x-auto pb-1" id="regionPills">
                 <button class="region-btn px-3 py-1.5 rounded-full text-xs font-bold bg-[#006b5c] text-white"
-                    data-region="all">Barchasi (243)</button>
-                <button
-                    class="region-btn px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200"
-                    data-region="toshkent">Toshkent</button>
-                <button
-                    class="region-btn px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200"
-                    data-region="samarqand">Samarqand</button>
-                <button
-                    class="region-btn px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200"
-                    data-region="fargona">Farg'ona</button>
-                <button
-                    class="region-btn px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200"
-                    data-region="andijon">Andijon</button>
-                <button
-                    class="region-btn px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200"
-                    data-region="buxoro">Buxoro</button>
-                <button
-                    class="region-btn px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200"
-                    data-region="namangan">Namangan</button>
+                    data-region="all">Barchasi (<span id="pillAllCount">0</span>)</button>
             </div>
         </div>
-
         <!-- Candidates Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="candidateCardsGrid">
             <!-- Populated by JS -->
@@ -436,46 +429,70 @@
             window._tTimer = setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        // 243 ta kengaytirilgan haqiqiy nomzodlar ro'yxati
-        const firstNames = ['Azamat', 'Dilnoza', 'Jasur', 'Malika', 'Shahzod', 'Gulnoza', 'Bobur', 'Madina', 'Sardor', 'Umida', 'Rustam', 'Nilufar', 'Farrux', 'Kamola', 'Temur', 'Shahlo', 'Nodir', 'Zarina', 'Otabek', 'Dildora'];
-        const lastNames = ['Karimov', 'Sodiqova', 'Rustamov', 'Ergasheva', 'Aliyev', 'Toshmatova', 'Murodov', 'Usmanova', 'Ismailov', 'Nazarova', 'Mirzayev', 'Sobirova', 'Qobilov', 'Hasanova', 'Rahmonov'];
-        const roles = [
-            'Katta sotuvchi-maslahatchi', 'Fullstack Dasturchi', 'Buxgalter', 'Ofitsiant-kassir', 'Marketing menejeri',
-            'Ombor nazoratchisi', 'Logistika koordinatori', 'Grafik dizayner', 'Elektr montajchi', 'Haydovchi-yetkazuvchi',
-            'HR menejeri', 'Mijozlarga xizmat ko\'rsatish mutaxassisi', 'Qurilish masteri', 'SMM Menejeri', 'DevOps Muhandisi'
-        ];
-        const regions = ['Toshkent', 'Samarqand', 'Farg\'ona', 'Andijon', 'Buxoro', 'Namangan', 'Qashqadaryo'];
-        const sectors = ['savdo', 'it', 'qurilish', 'xizmat', 'logistika'];
+        let regions = [];
+        const regionName = key => (regions.find(r => r.key === key) || {}).name || key;
 
-        let candidates = [];
-        for (let i = 0; i < 243; i++) {
-            const fn = firstNames[i % firstNames.length];
-            const ln = lastNames[i % lastNames.length];
-            const fullName = `${fn} ${ln}`;
-            const role = roles[i % roles.length];
-            const loc = regions[i % regions.length];
-            const sec = sectors[i % sectors.length];
-            const expYears = (i % 9);
-            const phone = `+998 9${(i % 9) + 0} ${String(100 + (i * 13) % 900)} ${String(10 + (i * 7) % 90)} ${String(20 + (i * 11) % 80)}`;
-
-            candidates.push({
-                id: i + 1,
-                name: fullName,
-                role: role,
-                location: loc,
-                sector: sec,
-                experience: expYears === 0 ? 'Tajribasiz' : `${expYears} yil tajriba`,
-                expYears: expYears,
-                phone: phone,
-                email: `${fn.toLowerCase()}.${ln.toLowerCase()}@email.uz`,
-                avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=${(i % 2 === 0) ? '006b5c' : '002046'}&color=fff&size=128`,
-                bookmarked: (i < 12),
-                about: `${fullName} — ${role} sifatida faoliyat yuritadi. O'z ishiga mas'uliyatli, qat'iyatli va jamoa bilan samarali til topishadi.`
-            });
+        function escapeHtml(v) {
+            return String(v == null ? '' : v)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         }
 
-        let filteredCandidates = [...candidates];
+        let candidates = [];
+        let filteredCandidates = [];
         let visibleCount = 12;
+
+        async function loadCandidates() {
+            try {
+                let adminKey = sessionStorage.getItem('adminKey') || '';
+                if (!adminKey) {
+                    adminKey = (window.prompt('Admin kalitini kiriting (nomzodlar ma\'lumoti himoyalangan):') || '').trim();
+                }
+                const res = await fetch('/api/candidates', { headers: { 'x-admin-key': adminKey } });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const data = await res.json();
+                if (data.locked) {
+                    sessionStorage.removeItem('adminKey');
+                    showToast(adminKey ? "Admin kaliti noto'g'ri" : "Nomzodlar ro'yxati faqat admin uchun");
+                } else {
+                    sessionStorage.setItem('adminKey', adminKey);
+                }
+                regions = data.regions || [];
+                candidates = (data.items || []).map((c, i) => ({
+                    id: c.id,
+                    name: c.fullName,
+                    role: c.desiredRole,
+                    location: regionName(c.region),
+                    regionKey: c.region,
+                    expYears: c.experienceYears || 0,
+                    experience: c.experienceYears ? `${c.experienceYears} yil tajriba` : 'Tajribasiz',
+                    phone: c.phone,
+                    telegramUsername: c.telegramUsername,
+                    about: c.about || "Nomzod o'zi haqida qo'shimcha ma'lumot qoldirmagan.",
+                    createdAt: c.createdAt,
+                    avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(c.fullName)}&background=${(i % 2 === 0) ? '006b5c' : '002046'}&color=fff&size=128`
+                }));
+            } catch (e) {
+                candidates = [];
+                showToast("Nomzodlar ro'yxatini yuklab bo'lmadi");
+            }
+
+            // Region chips (dinamik)
+            const pillsWrap = document.getElementById('regionPills');
+            const used = [...new Set(candidates.map(c => c.regionKey))];
+            pillsWrap.innerHTML = `<button class="region-btn px-3 py-1.5 rounded-full text-xs font-bold bg-[#006b5c] text-white" data-region="all">Barchasi (<span id="pillAllCount">${candidates.length}</span>)</button>` +
+                used.map(rk => `<button class="region-btn px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200" data-region="${rk}">${escapeHtml(regionName(rk))}</button>`).join('');
+            bindRegionPills();
+
+            document.getElementById('totalCandidatesDisplay').textContent = candidates.length;
+            const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+            document.getElementById('bookmarkedCount').textContent =
+                candidates.filter(c => new Date(c.createdAt).getTime() >= weekAgo).length;
+
+            filteredCandidates = [...candidates];
+            visibleCount = 12;
+            renderCandidates();
+        }
 
         function renderCandidates() {
             const grid = document.getElementById('candidateCardsGrid');
@@ -485,7 +502,7 @@
                 grid.innerHTML = `
                     <div class="col-span-full p-12 text-center text-slate-400 bg-white rounded-2xl border border-slate-100">
                         <span class="material-symbols-outlined text-5xl block mb-2">person_search</span>
-                        <p class="text-sm font-semibold">Hech qanday nomzod topilmadi</p>
+                        <p class="text-sm font-semibold">Hali hech kim ro'yxatdan o'tmagan</p>
                     </div>
                 `;
             } else {
@@ -494,40 +511,30 @@
                         <div>
                             <div class="flex items-start justify-between gap-2 mb-3">
                                 <div class="flex items-center gap-3">
-                                    <img class="w-12 h-12 rounded-2xl object-cover shadow-sm group-hover:scale-105 transition-transform" src="${c.avatar}" alt="${c.name}" />
+                                    <img class="w-12 h-12 rounded-2xl object-cover shadow-sm group-hover:scale-105 transition-transform" src="${c.avatar}" alt="${escapeHtml(c.name)}" />
                                     <div>
-                                        <h4 class="text-sm font-bold text-[#002046] leading-tight">${c.name}</h4>
-                                        <p class="text-xs text-slate-500 font-medium">${c.role}</p>
+                                        <h4 class="text-sm font-bold text-[#002046] leading-tight">${escapeHtml(c.name)}</h4>
+                                        <p class="text-xs text-slate-500 font-medium">${escapeHtml(c.role)}</p>
                                     </div>
                                 </div>
-                                <button onclick="toggleBookmark(${c.id})" class="p-1 text-slate-300 hover:text-amber-500 transition-colors" title="Saqlash">
-                                    <span class="material-symbols-outlined text-xl ${c.bookmarked ? 'text-amber-500 font-fill' : ''}" style="${c.bookmarked ? 'font-variation-settings: \'FILL\' 1;' : ''}">
-                                        bookmark
-                                    </span>
-                                </button>
                             </div>
 
                             <div class="flex flex-wrap gap-1.5 mb-3">
-                                <span class="px-2 py-0.5 rounded-md bg-emerald-50 text-[#006b5c] text-[10px] font-bold">${c.experience}</span>
-                                <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[10px] font-medium">${c.location}</span>
+                                <span class="px-2 py-0.5 rounded-md bg-emerald-50 text-[#006b5c] text-[10px] font-bold">${escapeHtml(c.experience)}</span>
+                                <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[10px] font-medium">${escapeHtml(c.location)}</span>
                             </div>
                         </div>
 
                         <div class="flex gap-2 pt-2 border-t border-slate-100">
-                            <button onclick="openProfileModal(${c.id})" class="flex-1 py-2 bg-slate-100 hover:bg-[#002046] hover:text-white text-slate-700 text-xs font-bold rounded-xl transition-all">
+                            <button onclick="openProfileModal('${c.id}')" class="flex-1 py-2 bg-slate-100 hover:bg-[#002046] hover:text-white text-slate-700 text-xs font-bold rounded-xl transition-all">
                                 Profil
                             </button>
-                            <a href="https://t.me/+${c.phone.replace(/\D/g, '')}" target="_blank" class="px-3 py-2 bg-emerald-50 hover:bg-[#006b5c] text-[#006b5c] hover:text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1">
-                                <span class="material-symbols-outlined text-sm">chat</span> Xabar
-                            </a>
+                            ${c.telegramUsername ? `<a href="https://t.me/${encodeURIComponent(c.telegramUsername)}" target="_blank" class="px-3 py-2 bg-emerald-50 hover:bg-[#006b5c] text-[#006b5c] hover:text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1"><span class="material-symbols-outlined text-sm">chat</span> Telegram</a>`
+                        : `<a href="tel:${encodeURIComponent(c.phone)}" class="px-3 py-2 bg-emerald-50 hover:bg-[#006b5c] text-[#006b5c] hover:text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1"><span class="material-symbols-outlined text-sm">call</span> Qo'ng'iroq</a>`}
                         </div>
                     </div>
                 `).join('');
             }
-
-            // Update bookmarks count
-            const bCount = candidates.filter(c => c.bookmarked).length;
-            document.getElementById('bookmarkedCount').textContent = bCount;
 
             const loadMoreBtn = document.getElementById('loadMoreBtn');
             if (visibleCount >= filteredCandidates.length) {
@@ -537,68 +544,48 @@
             }
         }
 
-        // Toggle bookmark
-        function toggleBookmark(id) {
-            const cand = candidates.find(c => c.id === id);
-            if (!cand) return;
-            cand.bookmarked = !cand.bookmarked;
-            showToast(cand.bookmarked ? `⭐️ ${cand.name} saqlanganlarga qo'shildi` : `Olib tashlandi`);
-            renderCandidates();
-        }
-
-        // Load More
         document.getElementById('loadMoreBtn').addEventListener('click', () => {
             visibleCount += 12;
             renderCandidates();
         });
 
-        // Search
         const searchInput = document.getElementById('candidateSearchInput');
         searchInput.addEventListener('input', () => {
             const q = searchInput.value.toLowerCase().trim();
-            filteredCandidates = candidates.filter(c => {
-                return c.name.toLowerCase().includes(q) ||
-                    c.role.toLowerCase().includes(q) ||
-                    c.location.toLowerCase().includes(q);
-            });
+            filteredCandidates = candidates.filter(c =>
+                c.name.toLowerCase().includes(q) ||
+                c.role.toLowerCase().includes(q) ||
+                c.location.toLowerCase().includes(q)
+            );
             visibleCount = 12;
             renderCandidates();
         });
 
-        // Sort
         document.getElementById('sortCandidateSelect').addEventListener('change', function () {
             const val = this.value;
-            if (val === 'new') {
-                filteredCandidates.sort((a, b) => b.id - a.id);
-            } else if (val === 'exp') {
-                filteredCandidates.sort((a, b) => b.expYears - a.expYears);
-            } else if (val === 'name') {
-                filteredCandidates.sort((a, b) => a.name.localeCompare(b.name));
-            }
+            if (val === 'new') filteredCandidates.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            else if (val === 'exp') filteredCandidates.sort((a, b) => b.expYears - a.expYears);
+            else if (val === 'name') filteredCandidates.sort((a, b) => a.name.localeCompare(b.name));
             renderCandidates();
             showToast('Nomzodlar saralandi');
         });
 
-        // Region pills
-        document.querySelectorAll('.region-btn').forEach(btn => {
-            btn.addEventListener('click', function () {
-                document.querySelectorAll('.region-btn').forEach(b => {
-                    b.className = 'region-btn px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200';
+        function bindRegionPills() {
+            document.querySelectorAll('.region-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    document.querySelectorAll('.region-btn').forEach(b => {
+                        b.className = 'region-btn px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200';
+                    });
+                    this.className = 'region-btn px-3 py-1.5 rounded-full text-xs font-bold bg-[#006b5c] text-white';
+
+                    const r = this.dataset.region;
+                    filteredCandidates = (r === 'all') ? [...candidates] : candidates.filter(c => c.regionKey === r);
+                    visibleCount = 12;
+                    renderCandidates();
                 });
-                this.className = 'region-btn px-3 py-1.5 rounded-full text-xs font-bold bg-[#006b5c] text-white';
-
-                const r = this.dataset.region;
-                if (r === 'all') {
-                    filteredCandidates = [...candidates];
-                } else {
-                    filteredCandidates = candidates.filter(c => c.location.toLowerCase().includes(r));
-                }
-                visibleCount = 12;
-                renderCandidates();
             });
-        });
+        }
 
-        // Profile Modal
         const profileModal = document.getElementById('profileModal');
         document.getElementById('closeProfileModal').addEventListener('click', () => profileModal.classList.remove('active'));
         profileModal.addEventListener('click', (e) => { if (e.target === profileModal) profileModal.classList.remove('active'); });
@@ -611,11 +598,12 @@
             document.getElementById('modalRole').textContent = c.role;
             document.getElementById('modalExp').textContent = c.experience;
             document.getElementById('modalPhone').textContent = c.phone;
-            document.getElementById('modalEmail').textContent = c.email;
-            document.getElementById('modalLocation').textContent = c.location + ' viloyati';
-            document.getElementById('modalSector').textContent = c.sector.toUpperCase();
+            document.getElementById('modalEmail').textContent = c.telegramUsername ? '@' + c.telegramUsername : '—';
+            document.getElementById('modalLocation').textContent = c.location;
+            document.getElementById('modalSector').textContent = '';
             document.getElementById('modalAbout').textContent = c.about;
-            document.getElementById('modalTelegramLink').href = `https://t.me/+${c.phone.replace(/\D/g, '')}`;
+            document.getElementById('modalTelegramLink').href = c.telegramUsername
+                ? `https://t.me/${encodeURIComponent(c.telegramUsername)}` : `tel:${encodeURIComponent(c.phone)}`;
 
             profileModal.classList.add('active');
         }
@@ -629,18 +617,12 @@
         document.getElementById('advancedFilterForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const expVal = document.querySelector('input[name="expFilter"]:checked').value;
-            const sectorVal = document.getElementById('sectorSelect').value;
 
             filteredCandidates = candidates.filter(c => {
-                let matchExp = true;
-                if (expVal === '0') matchExp = c.expYears === 0;
-                else if (expVal === '1-3') matchExp = c.expYears >= 1 && c.expYears <= 3;
-                else if (expVal === '4+') matchExp = c.expYears >= 4;
-
-                let matchSec = true;
-                if (sectorVal !== 'all') matchSec = c.sector === sectorVal;
-
-                return matchExp && matchSec;
+                if (expVal === '0') return c.expYears === 0;
+                if (expVal === '1-3') return c.expYears >= 1 && c.expYears <= 3;
+                if (expVal === '4+') return c.expYears >= 4;
+                return true;
             });
 
             visibleCount = 12;
@@ -649,7 +631,7 @@
             showToast(`Filtr qo'llandi: ${filteredCandidates.length} ta nomzod`);
         });
 
-        renderCandidates();
+        loadCandidates();
     </script>
 </body>
 

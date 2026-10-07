@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+        name="viewport" />
+    <title>Nomzod sifatida ro'yxatdan o'tish | ishtop.uz</title>
+    <meta name="theme-color" content="#002046" />
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="/telegram.js" defer></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap"
+        rel="stylesheet" />
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f7f9fb; color: #191c1e; }
+        .card-shadow { box-shadow: 0 4px 20px -2px rgba(0, 32, 70, 0.05), 0 2px 6px -1px rgba(0, 32, 70, 0.03); }
+        .toast-message {
+            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+            background: #002046; color: #fff; padding: 12px 20px; border-radius: 12px; font-weight: 600;
+            font-size: 13px; z-index: 9999; opacity: 0; transition: all .3s ease; pointer-events: none; max-width: 90%; text-align: center;
+        }
+        .toast-message.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col">
+    <div class="toast-message" id="toast"></div>
+
+    <header class="bg-white border-b border-slate-200/80">
+        <div class="max-w-xl mx-auto px-4 h-16 flex items-center gap-2">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#002046] to-[#006b5c] text-white flex items-center justify-center font-black">İ</div>
+            <span class="text-lg font-black text-[#002046]">ishtop.uz</span>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-xl w-full mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl card-shadow border border-slate-100 p-6">
+            <h1 class="text-xl font-black text-[#002046] mb-1">Nomzod sifatida ro'yxatdan o'ting</h1>
+            <p class="text-xs text-slate-500 mb-6">Ma'lumotlaringiz ish beruvchilarga ko'rinadi. Faqat haqiqiy ma'lumotlaringizni kiriting.</p>
+
+            <form id="candidateForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">To'liq ismingiz *</label>
+                    <input id="fFullName" type="text" required maxlength="120"
+                        class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none"
+                        placeholder="Masalan: Sardor Rustamov" />
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Telefon raqamingiz *</label>
+                    <input id="fPhone" type="tel" required maxlength="30"
+                        class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none"
+                        placeholder="+998 90 123 45 67" />
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Telegram foydalanuvchi nomi</label>
+                    <input id="fTelegram" type="text" maxlength="40"
+                        class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none"
+                        placeholder="@username (ixtiyoriy)" />
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Viloyat *</label>
+                    <select id="fRegion" required
+                        class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none">
+                        <option value="">Viloyatni tanlang</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Qaysi lavozimda ishlamoqchisiz? *</label>
+                    <input id="fRole" type="text" required maxlength="120"
+                        class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none"
+                        placeholder="Masalan: Sotuvchi-konsultant" />
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Ish tajribangiz (yil)</label>
+                    <input id="fExp" type="number" min="0" max="60" value="0"
+                        class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none" />
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">O'zingiz haqingizda qisqacha</label>
+                    <textarea id="fAbout" rows="3" maxlength="1000"
+                        class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none"
+                        placeholder="Ko'nikmalaringiz, oldingi tajribangiz..."></textarea>
+                </div>
+
+                <button type="submit" id="submitBtn"
+                    class="w-full py-3 bg-[#006b5c] hover:bg-[#00584c] text-white font-bold rounded-xl text-sm transition-all active:scale-95">
+                    Ro'yxatdan o'tish
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            clearTimeout(window._tTimer);
+            window._tTimer = setTimeout(() => t.classList.remove('show'), 3500);
+        }
+
+        async function loadRegions() {
+            try {
+                const res = await fetch('/api/candidates');
+                const data = await res.json();
+                const sel = document.getElementById('fRegion');
+                sel.innerHTML = '<option value="">Viloyatni tanlang</option>' +
+                    (data.regions || []).map(r => `<option value="${r.key}">${r.name}</option>`).join('');
+            } catch (e) { showToast("Viloyatlar ro'yxatini yuklab bo'lmadi"); }
+        }
+        loadRegions();
+
+        document.getElementById('candidateForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                fullName: document.getElementById('fFullName').value.trim(),
+                phone: document.getElementById('fPhone').value.trim(),
+                telegramUsername: document.getElementById('fTelegram').value.trim(),
+                region: document.getElementById('fRegion').value,
+                desiredRole: document.getElementById('fRole').value.trim(),
+                experienceYears: document.getElementById('fExp').value,
+                about: document.getElementById('fAbout').value.trim()
+            };
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            try {
+                const res = await fetch('/api/candidates', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (!res.ok) { showToast(data.error || 'Xatolik yuz berdi'); return; }
+                showToast("✅ Ro'yxatdan muvaffaqiyatli o'tdingiz!");
+                document.getElementById('candidateForm').reset();
+            } catch (err) {
+                showToast("Server bilan aloqa yo'q");
+            } finally {
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+
+</html>

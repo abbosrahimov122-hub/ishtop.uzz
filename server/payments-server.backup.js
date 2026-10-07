@@ -121,6 +121,12 @@ const webhookLimiter = rateLimit({
 // ==========================================
 // 2) MA'LUMOTLAR BAZASI — SQLite, fayl asosida (orders.db)
 // ==========================================
+// Render'da baza har deployda bo'sh boshlanadi. AUTO_SEED=1 bo'lsa namunalar avtomatik qo'shiladi.
+if (process.env.AUTO_SEED !== '0') {
+    const seedRun = require('child_process').spawnSync(
+        process.execPath, [path.join(__dirname, 'seed-vacancies.js')], { stdio: 'inherit' });
+    if (seedRun.status !== 0) console.warn('Seed ishlamadi, status:', seedRun.status);
+}
 const db = new Database(path.join(__dirname, 'orders.db'));
 db.pragma('journal_mode = WAL');
 
@@ -243,6 +249,16 @@ function requireAuth(req, res, next) {
     const payload = session.verify(req.cookies[SESSION_COOKIE], SESSION_SECRET);
     if (!payload) return res.status(401).json({ error: 'Tizimga kirilmagan' });
     req.user = payload;
+    next();
+}
+
+// Admin: faqat .env dagi ADMIN_TELEGRAM_IDS ro'yxatidagi Telegram ID'lar (vergul bilan ajratiladi)
+const ADMIN_IDS = (process.env.ADMIN_TELEGRAM_IDS || '').split(',').map(x => x.trim()).filter(Boolean);
+function isAdminUser(req) {
+    return !!(req.user && ADMIN_IDS.includes(String(req.user.telegramId)));
+}
+function adminOnly(req, res, next) {
+    if (!isAdminUser(req)) return res.status(403).json({ error: 'Ruxsat yo\'q' });
     next();
 }
 
@@ -685,154 +701,52 @@ app.post('/api/vacancies', paymentLimiter, requireAuth, (req, res) => {
             return res.status(400).json({ error: 'Viloyatni tanlang' });
         }
 
+        // Admin e'loni darhol faol; boshqalarniki admin tasdiqlaguncha 'pending' (saytda ko'rinmaydi).
+        const admin = isAdminUser(req);
+        if (!admin) {
+            const n = db.prepare(`SELECT COUNT(*) AS n FROM vacancies WHERE ownerTelegramId = ? AND status = 'pending'`)
+                .get(String(req.user.telegramId)).n;
+            if (n >= 5) {
+                return res.status(429).json({ error: "Tekshiruvda 5 ta e'lon bor. Tasdiqlanishini kuting." });
+            }
+        }
+        const status = admin ? 'active' : 'pending';
+
         const info = db.prepare(`
-            INSERT INTO vacancies (title, company, employee, region, location, salary, type, description, ownerTelegramId, createdAt, source)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'user')
+            INSERT INTO vacancies (title, company, employee, region, location, salary, type, description, ownerTelegramId, createdAt, source, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'user', ?)
         `).run(title, company, employee, b.region, location, salary, type, description,
-            String(req.user.telegramId), new Date().toISOString());
+            String(req.user.telegramId), new Date().toISOString(), status);
 
         const row = db.prepare('SELECT * FROM vacancies WHERE id = ?').get(info.lastInsertRowid);
-        res.status(201).json(rowToVacancy(row));
+        res.status(201).json({ ...rowToVacancy(row), status });
     } catch (err) {
         logError('POST /api/vacancies', err);
         res.status(500).json({ error: 'Ichki server xatosi' });
     }
 });
 
-// ==========================================
-// 5.5.1) NOMZODLAR — ro'yxatdan o'tish va ro'yxat
-// ==========================================
-const { ensureCandidatesSchema } = require('./candidates-db');
-ensureCandidatesSchema(db);
-
-function rowToCandidate(r) {
-    return {
-        id: `NM-${r.id}`,
-        fullName: r.fullName,
-        phone: r.phone,
-        telegramUsername: r.telegramUsername,
-        region: r.region,
-        desiredRole: r.desiredRole,
-        experienceYears: r.experienceYears,
-        about: r.about,
-        createdAt: r.createdAt
-    };
-}
-
-// Viloyatlar ro'yxati hammaga ochiq (ro'yxatdan o'tish formasi uchun).
-// Nomzodlarning ism/telefoni FAQAT ADMIN_KEY bilan (x-admin-key sarlavhasi) beriladi.
-// ADMIN_KEY sozlanmagan bo'lsa, ro'yxat hech kimga berilmaydi.
-app.get('/api/candidates', (req, res) => {
+// Admin: tekshiruvdagi e'lonlar va tasdiqlash / rad etish
+app.get('/api/admin/vacancies/pending', paymentLimiter, requireAuth, adminOnly, (req, res) => {
     try {
-        const key = process.env.ADMIN_KEY;
-        const given = String(req.headers['x-admin-key'] || '');
-        let isAdmin = false;
-        if (key && given) {
-            const a = Buffer.from(given), b = Buffer.from(key);
-            isAdmin = a.length === b.length && crypto.timingSafeEqual(a, b);
-        }
-        if (!isAdmin) {
-            // Kalit yo'q yoki noto'g'ri: faqat viloyatlar, shaxsiy ma'lumot yo'q
-            return res.json({ items: [], regions: REGIONS, locked: true });
-        }
-        const rows = db.prepare(
-            `SELECT * FROM candidates WHERE status != 'removed' ORDER BY createdAt DESC, id DESC LIMIT 1000`
-        ).all();
-        res.json({ items: rows.map(rowToCandidate), regions: REGIONS, locked: false });
+        const rows = db.prepare(`SELECT * FROM vacancies WHERE status = 'pending' ORDER BY createdAt, id`).all();
+        res.json({ items: rows.map(rowToVacancy) });
     } catch (err) {
-        logError('GET /api/candidates', err);
+        logError('GET /api/admin/vacancies/pending', err);
         res.status(500).json({ error: 'Ichki server xatosi' });
     }
 });
 
-// Hammaga ochiq: o'zini nomzod sifatida ro'yxatdan o'tkazish
-app.post('/api/candidates', paymentLimiter, (req, res) => {
+app.post('/api/admin/vacancies/:id/:action', paymentLimiter, requireAuth, adminOnly, (req, res) => {
     try {
-        const b = req.body || {};
-        const clean = (v, max) => String(v == null ? '' : v).trim().slice(0, max);
-
-        const fullName = clean(b.fullName, 120);
-        const phone = clean(b.phone, 30);
-        const telegramUsername = clean(b.telegramUsername, 40).replace(/^@/, '');
-        const desiredRole = clean(b.desiredRole, 120);
-        const about = clean(b.about, 1000);
-        let experienceYears = parseInt(b.experienceYears, 10);
-        if (!Number.isFinite(experienceYears) || experienceYears < 0) experienceYears = 0;
-        if (experienceYears > 60) experienceYears = 60;
-
-        if (!fullName || !phone || !desiredRole) {
-            return res.status(400).json({ error: "Ism, telefon va lavozim majburiy" });
-        }
-        if (!REGION_KEYS.includes(b.region)) {
-            return res.status(400).json({ error: 'Viloyatni tanlang' });
-        }
-        if (!/^[+0-9][0-9\s\-()]{6,}$/.test(phone)) {
-            return res.status(400).json({ error: "Telefon raqami noto'g'ri formatda" });
-        }
-
-        const info = db.prepare(`
-            INSERT INTO candidates (fullName, phone, telegramUsername, region, desiredRole, experienceYears, about, ownerTelegramId, createdAt)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `).run(fullName, phone, telegramUsername || null, b.region, desiredRole, experienceYears, about || null,
-            req.user ? String(req.user.telegramId) : null, new Date().toISOString());
-
-        const row = db.prepare('SELECT * FROM candidates WHERE id = ?').get(info.lastInsertRowid);
-        res.status(201).json(rowToCandidate(row));
+        const status = { approve: 'active', reject: 'rejected' }[req.params.action];
+        if (!status) return res.status(404).json({ error: 'Noma\'lum amal' });
+        const id = Number(String(req.params.id).replace(/^VT-/, ''));
+        const r = db.prepare('UPDATE vacancies SET status = ? WHERE id = ?').run(status, id);
+        if (!r.changes) return res.status(404).json({ error: 'Topilmadi' });
+        res.json({ ok: true, status });
     } catch (err) {
-        logError('POST /api/candidates', err);
-        res.status(500).json({ error: 'Ichki server xatosi' });
-    }
-});
-
-// ==========================================
-// 5.6) VAKANSIYALARNI BIR YO'LA IMPORT QILISH (IMPORT_KEY bilan himoyalangan)
-// ==========================================
-// PowerShell'dan Invoke-RestMethod bilan chaqiriladi, --source va h.k. maydonlari
-// vakansiya.js dagi kabi tekshiriladi. IMPORT_KEY muhit o'zgaruvchisi sozlanmagan
-// bo'lsa, bu yo'l butunlay o'chirilgan hisoblanadi (xavfsizlik uchun).
-app.post('/api/vacancies/bulk-import', paymentLimiter, (req, res) => {
-    try {
-        const key = process.env.IMPORT_KEY;
-        if (!key) return res.status(403).json({ error: "IMPORT_KEY sozlanmagan" });
-        if (req.headers['x-import-key'] !== key) return res.status(403).json({ error: "Noto'g'ri kalit" });
-
-        const list = Array.isArray(req.body) ? req.body : req.body.items;
-        if (!Array.isArray(list) || !list.length) {
-            return res.status(400).json({ error: "Massiv ({items:[...]} yoki to'g'ridan-to'g'ri [...]) kerak" });
-        }
-
-        const clean = (v, max) => String(v == null ? '' : v).trim().slice(0, max);
-        const checked = list.map((j, i) => {
-            const v = {
-                title: clean(j.title, 120), company: clean(j.company, 120), employee: clean(j.employee, 120),
-                location: clean(j.location, 120), salary: clean(j.salary, 60) || 'Kelishiladi',
-                description: clean(j.desc || j.description, 2000) || "Batafsil ma'lumot suhbat davomida beriladi.",
-                region: clean(j.region, 40)
-            };
-            v.type = VACANCY_TYPES.includes(j.type) ? j.type :
-                ({ full: "To'liq bandlik", part: 'Yarim bandlik', remote: 'Masofaviy', hybrid: 'Gibrid' }[j.type] || VACANCY_TYPES[0]);
-            v.source = (clean(j.source, 20) === 'imported') ? 'imported' : 'admin';
-            if (!v.title || !v.company || !v.employee || !v.location) return { i, error: "majburiy maydon bo'sh" };
-            if (!REGION_KEYS.includes(v.region)) return { i, error: `noto'g'ri viloyat: ${v.region}` };
-            return { i, value: v };
-        });
-        const bad = checked.filter(c => c.error);
-        if (bad.length) return res.status(400).json({ error: "Ba'zi yozuvlar noto'g'ri", details: bad });
-
-        const insert = db.prepare(`
-            INSERT INTO vacancies (title, company, employee, region, location, salary, type, description, ownerTelegramId, createdAt, source)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'import', ?, ?)
-        `);
-        db.exec('BEGIN');
-        try {
-            checked.forEach(c => insert.run(c.value.title, c.value.company, c.value.employee, c.value.region,
-                c.value.location, c.value.salary, c.value.type, c.value.description, new Date().toISOString(), c.value.source));
-            db.exec('COMMIT');
-        } catch (e) { db.exec('ROLLBACK'); throw e; }
-
-        res.json({ ok: true, added: checked.length });
-    } catch (err) {
-        logError('POST /api/vacancies/bulk-import', err);
+        logError('POST /api/admin/vacancies/:id/:action', err);
         res.status(500).json({ error: 'Ichki server xatosi' });
     }
 });
