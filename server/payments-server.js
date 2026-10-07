@@ -632,6 +632,15 @@ app.post('/api/click/complete', webhookLimiter, (req, res) => {
 const { REGIONS, ensureSchema } = require('./vacancies-db');
 ensureSchema(db);
 
+// Baza bo'sh bo'lsa (masalan, Render'da yangi deploy'dan keyin), haqiqiy
+// vakansiyalarni server/vacancies.json dan bir marta yuklaymiz.
+// Jadvalda kamida bitta yozuv bo'lsa, hech narsa qilmaydi (takrorlanmaydi).
+try {
+    require('./seed-from-json').seedFromJson(db);
+} catch (e) {
+    console.error('Vakansiyalarni boshlang\'ich yuklashda xato:', e.message);
+}
+
 const REGION_KEYS = REGIONS.map(r => r.key);
 const VACANCY_TYPES = ["To'liq bandlik", "Yarim bandlik", "Masofaviy", "Gibrid"];
 
