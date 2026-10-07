@@ -711,8 +711,10 @@ app.post('/api/vacancies', paymentLimiter, requireAuth, (req, res) => {
 // ==========================================
 // 5.5.1) NOMZODLAR — ro'yxatdan o'tish va ro'yxat
 // ==========================================
-const { ensureCandidatesSchema } = require('./candidates-db');
-ensureCandidatesSchema(db);
+const { createCandidatesStore } = require('./candidates-store');
+const candidatesStore = createCandidatesStore(db);
+console.log(`Nomzodlar ombori: ${candidatesStore.kind === 'postgres' ? 'PostgreSQL (doimiy)' : "SQLite (Render Free'da har deploy'da tozalanadi!)"}`);
+Promise.resolve(candidatesStore.init()).catch(e => console.error('Nomzodlar omborini tayyorlashda xato:', e.message));
 
 function rowToCandidate(r) {
     return {
@@ -731,7 +733,7 @@ function rowToCandidate(r) {
 // Viloyatlar ro'yxati hammaga ochiq (ro'yxatdan o'tish formasi uchun).
 // Nomzodlarning ism/telefoni FAQAT ADMIN_KEY bilan (x-admin-key sarlavhasi) beriladi.
 // ADMIN_KEY sozlanmagan bo'lsa, ro'yxat hech kimga berilmaydi.
-app.get('/api/candidates', (req, res) => {
+app.get('/api/candidates', async (req, res) => {
     try {
         const key = process.env.ADMIN_KEY;
         const given = String(req.headers['x-admin-key'] || '');
@@ -744,9 +746,7 @@ app.get('/api/candidates', (req, res) => {
             // Kalit yo'q yoki noto'g'ri: faqat viloyatlar, shaxsiy ma'lumot yo'q
             return res.json({ items: [], regions: REGIONS, locked: true });
         }
-        const rows = db.prepare(
-            `SELECT * FROM candidates WHERE status != 'removed' ORDER BY createdAt DESC, id DESC LIMIT 1000`
-        ).all();
+        const rows = await candidatesStore.list();
         res.json({ items: rows.map(rowToCandidate), regions: REGIONS, locked: false });
     } catch (err) {
         logError('GET /api/candidates', err);
@@ -755,7 +755,7 @@ app.get('/api/candidates', (req, res) => {
 });
 
 // Hammaga ochiq: o'zini nomzod sifatida ro'yxatdan o'tkazish
-app.post('/api/candidates', paymentLimiter, (req, res) => {
+app.post('/api/candidates', paymentLimiter, async (req, res) => {
     try {
         const b = req.body || {};
         const clean = (v, max) => String(v == null ? '' : v).trim().slice(0, max);
@@ -779,13 +779,11 @@ app.post('/api/candidates', paymentLimiter, (req, res) => {
             return res.status(400).json({ error: "Telefon raqami noto'g'ri formatda" });
         }
 
-        const info = db.prepare(`
-            INSERT INTO candidates (fullName, phone, telegramUsername, region, desiredRole, experienceYears, about, ownerTelegramId, createdAt)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `).run(fullName, phone, telegramUsername || null, b.region, desiredRole, experienceYears, about || null,
-            req.user ? String(req.user.telegramId) : null, new Date().toISOString());
-
-        const row = db.prepare('SELECT * FROM candidates WHERE id = ?').get(info.lastInsertRowid);
+        const row = await candidatesStore.insert({
+            fullName, phone, telegramUsername, region: b.region, desiredRole,
+            experienceYears, about,
+            ownerTelegramId: req.user ? String(req.user.telegramId) : null
+        });
         res.status(201).json(rowToCandidate(row));
     } catch (err) {
         logError('POST /api/candidates', err);
