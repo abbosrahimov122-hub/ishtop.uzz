@@ -209,7 +209,8 @@
 
                     <div class="text-center sm:text-left flex-1">
                         <h3 class="text-base font-bold text-[#002046]" id="profileNameDisplay">Alisher Usmanov</h3>
-                        <p class="text-xs text-slate-400">Bosh Administrator · HR Departament</p>
+                        <p class="text-xs text-slate-400" id="profileRoleDisplay">Bosh Administrator · HR Departament
+                        </p>
                         <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-2">
                             <span
                                 class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold">Verifikatsiyadan
@@ -266,17 +267,17 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Tashkilot nomi</label>
-                        <input type="text" value="ishtop.uz MChJ"
+                        <input id="inputCompany" type="text" value="ishtop.uz MChJ"
                             class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none transition-all" />
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">STIR (INN raqami)</label>
-                        <input type="text" value="309124872"
+                        <input id="inputStir" type="text" value="309124872"
                             class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none transition-all" />
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Faoliyat sohasi</label>
-                        <select
+                        <select id="inputSector"
                             class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none transition-all">
                             <option>HR &amp; Bandlik xizmatlari</option>
                             <option>IT &amp; Dasturiy ta'minot</option>
@@ -286,7 +287,7 @@
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Bosh ofis manzili</label>
-                        <input type="text" value="Toshkent shahri, Amir Temur shox ko'chasi 107B"
+                        <input id="inputAddress" type="text" value="Toshkent shahri, Amir Temur shox ko'chasi 107B"
                             class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none transition-all" />
                     </div>
                 </div>
@@ -390,74 +391,117 @@
             window._tTimer = setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        // Image upload preview
-        document.getElementById('avatarUpload').addEventListener('change', function (e) {
-            const file = e.target.files[0];
-            if (file) {
+        const PROFILE_KEY = 'user_profile';
+        const $ = (id) => document.getElementById(id);
+
+        // Rasmni kichraytirib (256x256, JPEG) data-URL qaytaradi.
+        // Kattaligi ~15-30 KB bo'ladi, localStorage (5 MB) to'lib qolmaydi.
+        function resizeImage(file, size) {
+            return new Promise((resolve, reject) => {
                 const reader = new FileReader();
-                reader.onload = function (evt) {
-                    document.getElementById('avatarPreview').src = evt.target.result;
-                    document.getElementById('navAvatar').src = evt.target.result;
-                    showToast('📸 Rasm yuklandi!');
+                reader.onerror = () => reject(new Error('read'));
+                reader.onload = () => {
+                    const img = new Image();
+                    img.onerror = () => reject(new Error('img'));
+                    img.onload = () => {
+                        const side = Math.min(img.width, img.height);
+                        const sx = (img.width - side) / 2, sy = (img.height - side) / 2;
+                        const c = document.createElement('canvas');
+                        c.width = c.height = size;
+                        c.getContext('2d').drawImage(img, sx, sy, side, side, 0, 0, size, size);
+                        resolve(c.toDataURL('image/jpeg', 0.85));
+                    };
+                    img.src = reader.result;
                 };
                 reader.readAsDataURL(file);
+            });
+        }
+
+        function readProfile() {
+            try { return JSON.parse(localStorage.getItem(PROFILE_KEY)) || {}; } catch (e) { return {}; }
+        }
+
+        function collectProfile(avatar) {
+            return {
+                name: $('inputName').value.trim(),
+                email: $('inputEmail').value.trim(),
+                phone: $('inputPhone').value.trim(),
+                role: $('inputRole').value.trim(),
+                company: $('inputCompany').value.trim(),
+                stir: $('inputStir').value.trim(),
+                sector: $('inputSector').value,
+                address: $('inputAddress').value.trim(),
+                avatar: avatar
+            };
+        }
+
+        function persist(profile) {
+            try {
+                localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        function applyDisplay(profile) {
+            if (profile.name) $('profileNameDisplay').textContent = profile.name;
+            if (profile.role) $('profileRoleDisplay').textContent = profile.role;
+            if (profile.avatar) {
+                $('avatarPreview').src = profile.avatar;
+                $('navAvatar').src = profile.avatar;
+            }
+        }
+
+        let currentAvatar = readProfile().avatar || '';
+
+        // Rasm tanlanganda: kichraytirib, darrov saqlaydi
+        $('avatarUpload').addEventListener('change', async function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (!file.type.startsWith('image/')) { showToast('⚠️ Faqat rasm fayli tanlang'); return; }
+            if (file.size > 10 * 1024 * 1024) { showToast('⚠️ Rasm 10 MB dan kichik bo\'lsin'); return; }
+            try {
+                currentAvatar = await resizeImage(file, 256);
+                const profile = Object.assign(readProfile(), { avatar: currentAvatar });
+                applyDisplay(profile);
+                showToast(persist(profile) ? '📸 Rasm saqlandi!' : '⚠️ Rasmni saqlab bo\'lmadi (xotira to\'la)');
+            } catch (err) {
+                showToast('⚠️ Rasmni o\'qib bo\'lmadi, boshqasini tanlang');
             }
         });
 
-        // Toggle 2FA listener
-        document.getElementById('toggle2FA').addEventListener('change', function () {
+        $('toggle2FA').addEventListener('change', function () {
             showToast(this.checked ? '🔒 2FA SMS himoya yoqildi' : '⚠️ 2FA himoya o\'chirildi');
         });
 
-        // Save Form
         function handleSave(e) {
             if (e) e.preventDefault();
-            const btn = document.getElementById('saveBtn');
-            const originalHtml = btn.innerHTML;
-            btn.innerHTML = '<span class="material-symbols-outlined text-base animate-spin">sync</span> Saqlanmoqda...';
-            btn.disabled = true;
-
-            const name = document.getElementById('inputName').value.trim();
-            const email = document.getElementById('inputEmail').value.trim();
-            const role = document.getElementById('inputRole').value.trim();
-
-            setTimeout(() => {
-                btn.innerHTML = originalHtml;
-                btn.disabled = false;
-                document.getElementById('profileNameDisplay').textContent = name;
-
-                const user = {
-                    name: name,
-                    email: email,
-                    role: role,
-                    avatar: document.getElementById('avatarPreview').src
-                };
-                localStorage.setItem('user_profile', JSON.stringify(user));
-                showToast('✅ Barcha sozlamalar muvaffaqiyatli saqlandi!');
-            }, 600);
+            const profile = collectProfile(currentAvatar);
+            if (!profile.name) { showToast('⚠️ Ism-sharif bo\'sh bo\'lmasin'); return; }
+            if (profile.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(profile.email)) {
+                showToast('⚠️ Elektron pochta noto\'g\'ri'); return;
+            }
+            if (persist(profile)) {
+                applyDisplay(profile);
+                showToast('✅ Ma\'lumotlar saqlandi');
+            } else {
+                showToast('⚠️ Saqlab bo\'lmadi: brauzer xotirasi to\'la yoki yopiq');
+            }
         }
 
-        document.getElementById('settingsForm').addEventListener('submit', handleSave);
-        document.getElementById('headerSaveBtn').addEventListener('click', handleSave);
+        $('settingsForm').addEventListener('submit', handleSave);
+        $('headerSaveBtn').addEventListener('click', handleSave);
 
-        // Load stored profile
+        // Sahifa ochilganda saqlangan ma'lumotlarni qaytaradi
         document.addEventListener('DOMContentLoaded', () => {
-            const saved = localStorage.getItem('user_profile');
-            if (saved) {
-                try {
-                    const u = JSON.parse(saved);
-                    if (u.name) {
-                        document.getElementById('inputName').value = u.name;
-                        document.getElementById('profileNameDisplay').textContent = u.name;
-                    }
-                    if (u.email) document.getElementById('inputEmail').value = u.email;
-                    if (u.role) document.getElementById('inputRole').value = u.role;
-                    if (u.avatar) {
-                        document.getElementById('avatarPreview').src = u.avatar;
-                        document.getElementById('navAvatar').src = u.avatar;
-                    }
-                } catch (err) { }
-            }
+            const u = readProfile();
+            const map = {
+                name: 'inputName', email: 'inputEmail', phone: 'inputPhone', role: 'inputRole',
+                company: 'inputCompany', stir: 'inputStir', sector: 'inputSector', address: 'inputAddress'
+            };
+            Object.keys(map).forEach(k => { if (u[k]) $(map[k]).value = u[k]; });
+            applyDisplay(u);
         });
     </script>
 </body>

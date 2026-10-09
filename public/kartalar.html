@@ -201,17 +201,17 @@
                     <span class="text-[11px] font-bold text-amber-800 uppercase tracking-wider">A'zolik holati</span>
                     <span class="text-[10px] bg-amber-200 text-amber-900 font-black px-1.5 py-0.5 rounded">VIP</span>
                 </div>
-                <p class="text-lg font-black text-amber-900">Faol</p>
-                <p class="text-[11px] text-amber-700 mt-0.5">Amal qilish muddati: 26.09.2026 gacha</p>
+                <p class="text-lg font-black text-amber-900" id="vipState">Yuklanmoqda…</p>
+                <p class="text-[11px] text-amber-700 mt-0.5" id="vipUntil"></p>
             </div>
 
             <div class="bg-white p-4 rounded-2xl card-shadow border border-slate-100">
                 <div class="flex items-center gap-1.5 text-slate-400 mb-1">
                     <span class="material-symbols-outlined text-base text-[#006b5c]">calendar_month</span>
-                    <span class="text-[11px] font-semibold">Keyingi to'lov</span>
+                    <span class="text-[11px] font-semibold">Qolgan muddat</span>
                 </div>
-                <h3 class="text-xl sm:text-2xl font-black text-[#002046]">29,000 UZS</h3>
-                <p class="text-[11px] text-slate-400 mt-0.5">26.09.2026</p>
+                <h3 class="text-xl sm:text-2xl font-black text-[#002046]" id="vipDaysLeft">—</h3>
+                <p class="text-[11px] text-slate-400 mt-0.5" id="vipDaysNote"></p>
             </div>
 
             <div class="bg-white p-4 rounded-2xl card-shadow border border-slate-100 col-span-2 lg:col-span-1">
@@ -286,18 +286,7 @@
             </div>
 
             <div class="divide-y divide-slate-100" id="txList">
-                <div class="py-3 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-blue-50 text-[#002046] flex items-center justify-center">
-                            <span class="material-symbols-outlined text-lg">receipt_long</span>
-                        </div>
-                        <div>
-                            <p class="text-xs font-bold text-slate-800">VIP A'zolik to'lovi · Payme</p>
-                            <p class="text-[10px] text-slate-400">30 kunlik obuna · 26.08.2026</p>
-                        </div>
-                    </div>
-                    <span class="text-xs font-bold text-slate-700">-29,000 UZS</span>
-                </div>
+                <p id="txEmpty" class="py-3 text-xs text-slate-400">Yuklanmoqda…</p>
             </div>
         </div>
     </main>
@@ -340,24 +329,14 @@
         }
 
         // ==========================================
-        // PAYME / CLICK CHECKOUT INTEGRATION
-        //
-        // MUHIM: Bu yerda faqat OMMAVIY identifikatorlar
-        // (Merchant ID, Service ID) ishlatiladi. Secret Key
-        // hech qachon brauzer kodiga qo'yilmaydi — u faqat
-        // serverda, webhook imzosini tekshirish uchun kerak.
-        // Real order_id ham serverda yaratilishi kerak
-        // (bu yerda demo uchun vaqtinchalik ID ishlatilgan).
-        // Backend namunasi uchun: server/payments-server.js
+        // VIP SOTIB OLISH
+        // Narx, merchant ID va to'lov havolalari SERVERda hal qilinadi (payments-server.js).
+        // Brauzer faqat tarifni (amount + days) yuboradi, server uni ruxsat etilgan ro'yxatdan tekshiradi.
         // ==========================================
-
-        const PAYME_MERCHANT_ID = '64f1a2b3c4d5e6f7a8b9c0d1'; // faqat ommaviy ID (test/sandbox)
-        const CLICK_MERCHANT_ID = '12345'; // faqat ommaviy ID (test/sandbox)
-        const CLICK_SERVICE_ID = '67890';   // faqat ommaviy ID (test/sandbox)
-        const RETURN_URL = window.location.origin + '/kartalar.html?payment=success';
-
         let selectedAmount = 99000;
         let selectedDays = 30;
+        const fmt = n => Number(n).toLocaleString('en-US');
+        const fmtDate = iso => new Date(iso).toLocaleDateString('ru-RU');
 
         document.querySelectorAll('.plan-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -372,69 +351,102 @@
             });
         });
 
-        // Buyurtmani serverda yaratadi va haqiqiy orderId'ni qaytaradi.
-        // Server /api/orders endpoint'i buyurtmani bazaga (orders.db) yozadi.
-        async function createOrderOnServer(amountUzs, days) {
-            const res = await fetch('/api/orders', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ amount: amountUzs, days, userId: window.currentUserId || 'anonymous' })
-            });
-            if (!res.ok) {
-                throw new Error('Buyurtma yaratib bo\'lmadi');
-            }
-            const data = await res.json();
-            return data.orderId;
-        }
-
-        function buildPaymeUrl(amountUzs, orderId) {
-            const amountTiyin = amountUzs * 100; // Payme summani tiyin (1/100 so'm)da kutadi
-            const params = `m=${PAYME_MERCHANT_ID};ac.order_id=${orderId};a=${amountTiyin};c=${encodeURIComponent(RETURN_URL)}`;
-            const encoded = btoa(params);
-            return `https://checkout.paycom.uz/${encoded}`;
-        }
-
-        function buildClickUrl(amountUzs, orderId) {
-            const params = new URLSearchParams({
-                service_id: CLICK_SERVICE_ID,
-                merchant_id: CLICK_MERCHANT_ID,
-                amount: amountUzs,
-                transaction_param: orderId,
-                return_url: RETURN_URL
-            });
-            return `https://my.click.uz/services/pay?${params.toString()}`;
-        }
-
-        document.getElementById('payWithPayme').addEventListener('click', async () => {
-            if (PAYME_MERCHANT_ID.includes('BU_YERGA')) {
-                showToast('⚠️ Avval PAYME_MERCHANT_ID ni sozlang (backend orqali)');
-                return;
-            }
+        async function startCheckout(provider) {
+            const buttons = [document.getElementById('payWithPayme'), document.getElementById('payWithClick')];
+            buttons.forEach(b => b.disabled = true);
             try {
-                const orderId = await createOrderOnServer(selectedAmount, selectedDays);
-                window.location.href = buildPaymeUrl(selectedAmount, orderId);
+                const res = await fetch('/api/orders', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount: selectedAmount, days: selectedDays })
+                });
+                const data = await res.json().catch(() => ({}));
+                if (res.status === 401) { showToast("⚠️ To'lov uchun avval tizimga kiring"); return; }
+                if (!res.ok) { showToast('⚠️ ' + (data.error || "Buyurtma yaratib bo'lmadi")); return; }
+                const url = provider === 'payme' ? data.paymeUrl : data.clickUrl;
+                if (!url) { showToast("⚠️ Bu to'lov usuli serverda hali sozlanmagan"); return; }
+                window.location.href = url;
             } catch (e) {
-                showToast('⚠️ Buyurtma yaratishda xatolik yuz berdi. Qayta urinib ko\'ring.');
+                showToast("⚠️ Server bilan aloqa yo'q. Qayta urinib ko'ring.");
+            } finally {
+                buttons.forEach(b => b.disabled = false);
             }
-        });
-
-        document.getElementById('payWithClick').addEventListener('click', async () => {
-            if (CLICK_MERCHANT_ID.includes('BU_YERGA')) {
-                showToast('⚠️ Avval CLICK_MERCHANT_ID va CLICK_SERVICE_ID ni sozlang (backend orqali)');
-                return;
-            }
-            try {
-                const orderId = await createOrderOnServer(selectedAmount, selectedDays);
-                window.location.href = buildClickUrl(selectedAmount, orderId);
-            } catch (e) {
-                showToast('⚠️ Buyurtma yaratishda xatolik yuz berdi. Qayta urinib ko\'ring.');
-            }
-        });
-
-        // To'lov muvaffaqiyatli qaytgandan so'ng xabar ko'rsatish (return_url orqali)
-        if (new URLSearchParams(window.location.search).get('payment') === 'success') {
-            showToast('✅ To\'lov qabul qilindi! VIP obunangiz yangilandi.');
         }
+        document.getElementById('payWithPayme').addEventListener('click', () => startCheckout('payme'));
+        document.getElementById('payWithClick').addEventListener('click', () => startCheckout('click'));
+
+        // ==========================================
+        // HAQIQIY HOLAT: VIP muddati va to'lovlar tarixi serverdan
+        // ==========================================
+        async function loadVip() {
+            const state = document.getElementById('vipState');
+            const until = document.getElementById('vipUntil');
+            const left = document.getElementById('vipDaysLeft');
+            const note = document.getElementById('vipDaysNote');
+            const list = document.getElementById('txList');
+            try {
+                const res = await fetch('/api/vip/me', { credentials: 'same-origin' });
+                if (res.status === 401) {
+                    state.textContent = 'Kirilmagan';
+                    until.textContent = "Holatni ko'rish va to'lash uchun tizimga kiring";
+                    left.textContent = '—'; note.textContent = '';
+                    list.innerHTML = '<p class="py-3 text-xs text-slate-400">Tizimga kiring</p>';
+                    return;
+                }
+                if (!res.ok) throw new Error('status ' + res.status);
+                const d = await res.json();
+                if (d.vip) {
+                    state.textContent = 'Faol';
+                    until.textContent = 'Amal qilish muddati: ' + fmtDate(d.vipUntil) + ' gacha';
+                    const days = Math.ceil((Date.parse(d.vipUntil) - Date.now()) / 86400000);
+                    left.textContent = days + ' kun'; note.textContent = fmtDate(d.vipUntil);
+                } else {
+                    state.textContent = 'Faol emas';
+                    until.textContent = d.vipUntil ? 'Muddati ' + fmtDate(d.vipUntil) + ' da tugagan' : 'Hali VIP sotib olinmagan';
+                    left.textContent = '—'; note.textContent = '';
+                }
+                if (!d.orders.length) {
+                    list.innerHTML = '<p class="py-3 text-xs text-slate-400">Hali to\'lovlar yo\'q</p>';
+                } else {
+                    list.innerHTML = d.orders.map(o => `
+                        <div class="py-3 flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-bold text-slate-800">VIP a'zolik · ${Number(o.days)} kun</p>
+                                <p class="text-[10px] text-slate-400">${fmtDate(o.updatedAt)}</p>
+                            </div>
+                            <span class="text-xs font-bold text-slate-700">-${fmt(o.amount)} UZS</span>
+                        </div>`).join('');
+                }
+            } catch (e) {
+                state.textContent = 'Noma\'lum';
+                until.textContent = "Holatni yuklab bo'lmadi";
+                list.innerHTML = '<p class="py-3 text-xs text-slate-400">Yuklab bo\'lmadi</p>';
+            }
+        }
+
+        // To'lovdan qaytganda ?order=... bo'yicha SERVERdan holatni tekshiramiz.
+        // URL'dagi so'zga ishonmaymiz: faqat server "paid" desa, tasdiqlaymiz.
+        async function checkReturnedOrder() {
+            const orderId = new URLSearchParams(window.location.search).get('order');
+            if (!orderId) return;
+            history.replaceState(null, '', window.location.pathname);
+            showToast("To'lov tekshirilmoqda…");
+            for (let i = 0; i < 10; i++) {
+                try {
+                    const res = await fetch('/api/orders/' + encodeURIComponent(orderId));
+                    if (res.ok) {
+                        const o = await res.json();
+                        if (o.status === 'paid') { showToast('✅ To\'lov qabul qilindi! VIP yangilandi.'); loadVip(); return; }
+                        if (o.status === 'cancelled' || o.status === 'refunded') { showToast("⚠️ To'lov bekor qilingan"); return; }
+                    }
+                } catch (e) { }
+                await new Promise(r => setTimeout(r, 2000));
+            }
+            showToast("To'lov hali tasdiqlanmadi. Birozdan so'ng sahifani yangilang.");
+        }
+
+        loadVip().then(checkReturnedOrder);
     </script>
 </body>
 

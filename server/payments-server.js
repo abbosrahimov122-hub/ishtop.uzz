@@ -69,9 +69,9 @@ const SESSION_MAX_AGE_SEC = 30 * 24 * 60 * 60; // 30 kun
 // tasdiqlaymiz. Aks holda kimdir fetch('/api/orders', {amount: 1}) deb
 // arzon buyurtma yaratishi mumkin edi.
 const ALLOWED_PLANS = [
-    { amount: 29000, days: 30 },
-    { amount: 79000, days: 90 },
-    { amount: 279000, days: 365 }
+    { amount: 99000, days: 30 },
+    { amount: 250000, days: 90 },
+    { amount: 950000, days: 365 }
 ];
 function isValidPlan(amount, days) {
     return ALLOWED_PLANS.some(p => p.amount === amount && p.days === days);
@@ -123,6 +123,9 @@ const webhookLimiter = rateLimit({
 // ==========================================
 const db = new Database(path.join(__dirname, 'orders.db'));
 db.pragma('journal_mode = WAL');
+
+const { ensureVipTable, activateVip, isVip } = require('./vip');
+ensureVipTable(db);
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS orders (
@@ -342,7 +345,12 @@ app.post('/api/auth/logout', (req, res) => {
 // ==========================================
 app.post('/api/orders', paymentLimiter, (req, res) => {
     try {
-        const { amount, days, userId } = req.body || {};
+        const { amount, days } = req.body || {};
+
+        // Buyurtma faqat tizimga kirgan foydalanuvchiga ochiladi; userId brauzerdan emas, sessiyadan olinadi
+        const sess = session.verify(req.cookies[SESSION_COOKIE], SESSION_SECRET);
+        if (!sess) return res.status(401).json({ error: "To'lov uchun avval tizimga kiring" });
+        const userId = String(sess.telegramId);
 
         if (!Number.isInteger(amount) || !Number.isInteger(days)) {
             return res.status(400).json({ error: 'amount va days butun son bo\'lishi kerak' });
@@ -354,9 +362,42 @@ app.post('/api/orders', paymentLimiter, (req, res) => {
         const orderId = 'ord_' + crypto.randomBytes(8).toString('hex');
         ordersDb.create(orderId, { amount, days, userId: String(userId || 'anonymous').slice(0, 100) });
 
-        res.json({ orderId });
+        // To'lov havolalari serverda, serverning O'Z merchant ID'lari bilan yasaladi
+        const base = `${req.protocol}://${req.get('host')}`;
+        const returnUrl = `${base}/kartalar.html?order=${orderId}`;
+        let paymeUrl = null, clickUrl = null;
+        if (process.env.PAYME_MERCHANT_ID) {
+            const paymeBase = process.env.PAYME_CHECKOUT_URL || 'https://checkout.paycom.uz';
+            const p = `m=${process.env.PAYME_MERCHANT_ID};ac.order_id=${orderId};a=${amount * 100};c=${encodeURIComponent(returnUrl)}`;
+            paymeUrl = `${paymeBase}/${Buffer.from(p).toString('base64')}`;
+        }
+        if (process.env.CLICK_MERCHANT_ID && process.env.CLICK_SERVICE_ID) {
+            clickUrl = 'https://my.click.uz/services/pay?' + new URLSearchParams({
+                service_id: process.env.CLICK_SERVICE_ID,
+                merchant_id: process.env.CLICK_MERCHANT_ID,
+                amount: String(amount),
+                transaction_param: orderId,
+                return_url: returnUrl
+            }).toString();
+        }
+        res.json({ orderId, paymeUrl, clickUrl });
     } catch (err) {
         logError('POST /api/orders', err);
+        res.status(500).json({ error: 'Ichki server xatosi' });
+    }
+});
+
+// Foydalanuvchining VIP holati va to'langan buyurtmalari (kartalar.html shu yerdan o'qiydi)
+app.get('/api/vip/me', requireAuth, (req, res) => {
+    try {
+        const uid = String(req.user.telegramId);
+        const row = db.prepare('SELECT vipUntil FROM vip_users WHERE userId = ?').get(uid);
+        const orders = db.prepare(
+            "SELECT orderId, amount, days, updatedAt FROM orders WHERE userId = ? AND status = 'paid' ORDER BY updatedAt DESC LIMIT 20"
+        ).all(uid);
+        res.json({ vip: isVip(db, uid), vipUntil: row ? row.vipUntil : null, orders });
+    } catch (err) {
+        logError('GET /api/vip/me', err);
         res.status(500).json({ error: 'Ichki server xatosi' });
     }
 });
@@ -441,8 +482,11 @@ app.post('/api/payme/webhook', webhookLimiter, (req, res) => {
                 }
 
                 if (order.status !== 'paid') {
-                    // TODO: bu yerda VIP obunani real faollashtiring
-                    ordersDb.setStatusByPaymeTransactionId(params.id, 'paid');
+                    // Holat va VIP muddati bitta tranzaksiyada: biri yozilib, ikkinchisi yozilmay qolmaydi
+                    db.transaction(() => {
+                        ordersDb.setStatusByPaymeTransactionId(params.id, 'paid');
+                        activateVip(db, order);
+                    })();
                 }
                 return res.json({
                     id,
@@ -609,8 +653,10 @@ app.post('/api/click/complete', webhookLimiter, (req, res) => {
         }
 
         if (order.status !== 'paid') {
-            // TODO: bu yerda VIP obunani real faollashtiring
-            ordersDb.setStatus(orderId, 'paid');
+            db.transaction(() => {
+                ordersDb.setStatus(orderId, 'paid');
+                activateVip(db, order);
+            })();
         }
 
         res.json({
