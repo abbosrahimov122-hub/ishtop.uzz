@@ -316,6 +316,142 @@ app.post('/api/auth/telegram-widget', paymentLimiter, (req, res) => {
     }
 });
 
+// ==========================================
+// TELEGRAM ORQALI KOD BILAN KIRISH (haqiqiy Telegram bot orqali)
+//  1) Sayt /api/auth/tg/start dan bir martalik havola oladi (t.me/<bot>?start=<nonce>)
+//  2) Foydalanuvchi Telegramda botda "Start" bosadi -> Telegram webhook'ga xabar yuboradi
+//  3) Server 6 xonali kodni botdan foydalanuvchining O'ZIGA yuboradi
+//  4) Foydalanuvchi kodni saytga kiritadi -> /api/auth/tg/verify -> haqiqiy sessiya
+// Holat xotirada saqlanadi (5 daqiqalik); server qayta ishga tushsa, jarayon boshidan boshlanadi.
+// ==========================================
+const TG_API = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}`;
+const TG_BOT_USERNAME = process.env.TELEGRAM_BOT_USERNAME || 'myishtop_bot';
+const TG_WEBHOOK_SECRET = crypto.createHmac('sha256', SESSION_SECRET).update('tg-webhook').digest('hex');
+const LOGIN_TTL_MS = 5 * 60 * 1000;
+const loginAttempts = new Map(); // nonce -> { expires, code, user, tries }
+
+function pruneLoginAttempts() {
+    const now = Date.now();
+    for (const [k, v] of loginAttempts) if (v.expires < now) loginAttempts.delete(k);
+}
+setInterval(pruneLoginAttempts, 60 * 1000).unref();
+
+async function tgSend(chatId, text) {
+    try {
+        const r = await fetch(`${TG_API}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' })
+        });
+        if (!r.ok) console.error(`[${new Date().toISOString()}] Telegram sendMessage: HTTP ${r.status}`);
+        return r.ok;
+    } catch (e) {
+        logError('Telegram sendMessage', e);
+        return false;
+    }
+}
+
+app.post('/api/auth/tg/start', paymentLimiter, (req, res) => {
+    pruneLoginAttempts();
+    if (loginAttempts.size > 5000) return res.status(503).json({ error: "Hozir band, birozdan so'ng urinib ko'ring" });
+    const nonce = crypto.randomBytes(16).toString('hex');
+    loginAttempts.set(nonce, { expires: Date.now() + LOGIN_TTL_MS, code: null, user: null, tries: 0 });
+    res.json({ nonce, link: `https://t.me/${TG_BOT_USERNAME}?start=${nonce}`, expiresInSec: LOGIN_TTL_MS / 1000 });
+});
+
+// Telegram shu manzilga botga yozilgan xabarlarni yuboradi (secret_token bilan imzolangan)
+app.post('/api/telegram/webhook', webhookLimiter, async (req, res) => {
+    try {
+        const given = Buffer.from(String(req.headers['x-telegram-bot-api-secret-token'] || ''));
+        const want = Buffer.from(TG_WEBHOOK_SECRET);
+        if (given.length !== want.length || !crypto.timingSafeEqual(given, want)) return res.sendStatus(403);
+
+        const msg = req.body && req.body.message;
+        if (msg && msg.chat && msg.chat.type === 'private' && msg.from && !msg.from.is_bot) {
+            const m = /^\/start(?:\s+([a-f0-9]{32}))?$/.exec(String(msg.text || '').trim());
+            if (m && !m[1]) {
+                await tgSend(msg.chat.id, "Salom! ishtop.uz saytida «Telegram orqali kod bilan kirish» tugmasini bosing, kod shu yerga keladi.");
+            } else if (m) {
+                const entry = loginAttempts.get(m[1]);
+                if (!entry || entry.expires < Date.now()) {
+                    await tgSend(msg.chat.id, "Havola eskirgan. Saytda qaytadan «Telegram orqali kod bilan kirish» ni bosing.");
+                } else if (entry.code) {
+                    await tgSend(msg.chat.id, "Kod allaqachon yuborilgan. Saytga kiriting yoki saytda qaytadan boshlang.");
+                } else {
+                    entry.code = String(crypto.randomInt(100000, 1000000));
+                    entry.user = {
+                        id: msg.from.id, first_name: msg.from.first_name,
+                        last_name: msg.from.last_name, username: msg.from.username
+                    };
+                    await tgSend(msg.chat.id,
+                        `ishtop.uz kirish kodingiz: <code>${entry.code}</code>\n\nKod 5 daqiqa amal qiladi. Uni hech kimga bermang. Agar siz so'ramagan bo'lsangiz, e'tibor bermang.`);
+                }
+            }
+        }
+        res.sendStatus(200); // Telegram qayta yubormasligi uchun doim 200
+    } catch (err) {
+        logError('POST /api/telegram/webhook', err);
+        res.sendStatus(200);
+    }
+});
+
+app.post('/api/auth/tg/verify', paymentLimiter, (req, res) => {
+    try {
+        const nonce = String((req.body && req.body.nonce) || '');
+        const code = String((req.body && req.body.code) || '').trim();
+        const entry = loginAttempts.get(nonce);
+        if (!entry || entry.expires < Date.now()) {
+            return res.status(400).json({ error: "Muddati tugagan. Qaytadan boshlang." });
+        }
+        if (!entry.code) {
+            return res.status(409).json({ error: "Avval Telegramda botni ochib, Start tugmasini bosing", waiting: true });
+        }
+        entry.tries++;
+        if (entry.tries > 5) {
+            loginAttempts.delete(nonce);
+            return res.status(429).json({ error: "Juda ko'p noto'g'ri urinish. Qaytadan boshlang." });
+        }
+        const a = Buffer.from(code), b = Buffer.from(entry.code);
+        if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
+            return res.status(401).json({ error: "Kod noto'g'ri" });
+        }
+        loginAttempts.delete(nonce);
+        const user = usersDb.upsert(entry.user);
+        setSessionCookie(res, entry.user);
+        res.json({
+            ok: true,
+            user: { id: user.telegramId, firstName: user.firstName, lastName: user.lastName, username: user.username }
+        });
+    } catch (err) {
+        logError('POST /api/auth/tg/verify', err);
+        res.status(500).json({ error: 'Ichki server xatosi' });
+    }
+});
+
+async function registerTelegramWebhook() {
+    const base = process.env.RENDER_EXTERNAL_URL || process.env.SITE_URL || '';
+    if (!/^https:\/\//.test(base)) {
+        console.log("⚠️ Telegram webhook o'rnatilmadi: HTTPS manzil yo'q (RENDER_EXTERNAL_URL yoki SITE_URL)");
+        return;
+    }
+    try {
+        const r = await fetch(`${TG_API}/setWebhook`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                url: base.replace(/\/$/, '') + '/api/telegram/webhook',
+                secret_token: TG_WEBHOOK_SECRET,
+                allowed_updates: ['message'],
+                drop_pending_updates: true
+            })
+        });
+        const j = await r.json().catch(() => ({}));
+        console.log(j.ok ? "✅ Telegram webhook o'rnatildi" : '⚠️ Telegram webhook xatosi: ' + (j.description || r.status));
+    } catch (e) {
+        logError('setWebhook', e);
+    }
+}
+
 // 3) Joriy foydalanuvchini tekshirish — himoyalangan sahifalar shu endpoint'ni
 //    chaqirib, sessiya haqiqiy ekanini tasdiqlaydi.
 app.get('/api/auth/me', (req, res) => {
@@ -905,6 +1041,7 @@ const PORT = process.env.PORT || 3000;
 const server = app.listen(PORT, () => {
     console.log(`✅ To'lov serveri ${PORT}-portda ishga tushdi (${NODE_ENV})`);
     console.log(`   Statik fayllar: ${PUBLIC_DIR}`);
+    registerTelegramWebhook();
 });
 
 process.on('SIGINT', () => {

@@ -834,7 +834,11 @@
                     </button>
                 </form>
 
-                <a href="./nomzod-royxatdan-otish.html" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;padding:13px 16px;border:2px solid #006b5c;border-radius:12px;color:#006b5c;font-weight:700;font-size:14px;text-decoration:none;background:#f0fdf9;"><span class="material-symbols-outlined" style="font-size:20px;">person_add</span><span>Ish qidiryapsizmi? Nomzod sifatida ro'yxatdan o'ting</span></a><!-- Quick Navigation to internal pages -->
+                <a href="./nomzod-royxatdan-otish.html"
+                    style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;padding:13px 16px;border:2px solid #006b5c;border-radius:12px;color:#006b5c;font-weight:700;font-size:14px;text-decoration:none;background:#f0fdf9;"><span
+                        class="material-symbols-outlined" style="font-size:20px;">person_add</span><span>Ish
+                        qidiryapsizmi? Nomzod sifatida ro'yxatdan
+                        o'ting</span></a><!-- Quick Navigation to internal pages -->
                 <div class="quick-nav-links">
                     <p>Platforma bo'limlariga to'g'ridan-to'g'ri o'tish:</p>
                     <div class="links">
@@ -1236,18 +1240,79 @@
             telegramWebAppBtn.addEventListener('click', loginWithTelegramWebApp);
             loginWithTelegramWebApp();
         } else {
-            // Oddiy brauzer — Telegram'ning rasmiy Login Widget'ini ko'rsatamiz.
-            // MUHIM: bu ishlashi uchun @BotFather'da botingizga ushbu saytning
-            // domenini bog'lashingiz kerak: @BotFather -> /setdomain -> @myishtop_bot
-            const widgetScript = document.createElement('script');
-            widgetScript.async = true;
-            widgetScript.src = 'https://telegram.org/js/telegram-widget.js?22';
-            widgetScript.setAttribute('data-telegram-login', 'myishtop_bot');
-            widgetScript.setAttribute('data-size', 'large');
-            widgetScript.setAttribute('data-radius', '12');
-            widgetScript.setAttribute('data-onauth', 'onTelegramAuth(user)');
-            widgetScript.setAttribute('data-request-access', 'write');
-            telegramWidgetContainer.appendChild(widgetScript);
+            // Oddiy brauzer — Telegram'dan 6 xonali kod keladi (bot orqali).
+            // Domen sozlash (/setdomain) kerak emas; server webhook'ni o'zi o'rnatadi.
+            telegramWidgetContainer.style.flexDirection = 'column';
+            telegramWidgetContainer.style.gap = '10px';
+            telegramWidgetContainer.innerHTML = `
+                <button type="button" id="tgCodeStartBtn" class="telegram-btn">
+                    <svg viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                    <span>Telegram orqali kod bilan kirish</span>
+                </button>
+                <div id="tgCodeStep" style="display:none; font-family:'Inter',sans-serif;">
+                    <p style="font-size:12px; color:#475569; margin:0 0 8px;">
+                        1) Telegramni oching va botda <b>Start</b> tugmasini bosing.<br>
+                        2) Bot sizga 6 xonali kod yuboradi, uni shu yerga kiriting.
+                    </p>
+                    <a id="tgOpenLink" href="#" target="_blank" rel="noopener"
+                        style="display:block; text-align:center; font-size:13px; font-weight:700; color:#1A87D6; margin-bottom:10px;">Telegramni ochish &rarr;</a>
+                    <input id="tgCodeInput" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6 xonali kod"
+                        style="width:100%; padding:12px 14px; font-size:18px; letter-spacing:6px; text-align:center; border:1px solid #cbd5e1; border-radius:12px; outline:none; box-sizing:border-box;" />
+                    <button type="button" id="tgVerifyBtn"
+                        style="width:100%; margin-top:8px; padding:12px; border:none; border-radius:12px; background:#006b5c; color:#fff; font-weight:700; font-size:14px; cursor:pointer;">Tasdiqlash</button>
+                </div>`;
+
+            let tgNonce = null;
+            const tgStartBtn = document.getElementById('tgCodeStartBtn');
+            const tgStep = document.getElementById('tgCodeStep');
+            const tgInput = document.getElementById('tgCodeInput');
+            const tgVerifyBtn = document.getElementById('tgVerifyBtn');
+
+            tgStartBtn.addEventListener('click', async () => {
+                tgStartBtn.disabled = true;
+                try {
+                    const res = await fetch('/api/auth/tg/start', { method: 'POST', credentials: 'same-origin' });
+                    const data = await res.json();
+                    if (!res.ok) { showToast('❌ ' + (data.error || 'Boshlab bo\'lmadi'), 'error'); return; }
+                    tgNonce = data.nonce;
+                    document.getElementById('tgOpenLink').href = data.link;
+                    tgStep.style.display = 'block';
+                    tgInput.value = '';
+                    tgInput.focus();
+                    window.open(data.link, '_blank', 'noopener');
+                } catch (e) {
+                    showToast('Server bilan bog\'lanishda xato. Qaytadan urinib ko\'ring.', 'error');
+                } finally {
+                    tgStartBtn.disabled = false;
+                }
+            });
+
+            async function verifyTgCode() {
+                const code = tgInput.value.trim();
+                if (!tgNonce || code.length !== 6) { showToast('6 xonali kodni kiriting', 'error'); return; }
+                tgVerifyBtn.disabled = true;
+                try {
+                    const res = await fetch('/api/auth/tg/verify', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'same-origin',
+                        body: JSON.stringify({ nonce: tgNonce, code })
+                    });
+                    const data = await res.json();
+                    if (!res.ok) { showToast('❌ ' + (data.error || 'Tasdiqlanmadi'), 'error'); return; }
+                    showToast(`✅ Xush kelibsiz, ${data.user.firstName || data.user.username || 'foydalanuvchi'}!`, 'success');
+                    setTimeout(() => { window.location.href = './dashboard.html'; }, 400);
+                } catch (e) {
+                    showToast('Server bilan bog\'lanishda xato. Qaytadan urinib ko\'ring.', 'error');
+                } finally {
+                    tgVerifyBtn.disabled = false;
+                }
+            }
+            tgVerifyBtn.addEventListener('click', verifyTgCode);
+            tgInput.addEventListener('input', () => {
+                tgInput.value = tgInput.value.replace(/\D/g, '').slice(0, 6);
+                if (tgInput.value.length === 6) verifyTgCode();
+            });
         }
 
         // ==========================================
