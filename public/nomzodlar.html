@@ -184,22 +184,22 @@
             <div class="bg-white p-4 rounded-2xl card-shadow border border-slate-100 text-center">
                 <span class="text-xs text-slate-400 font-semibold">Jami nomzodlar</span>
                 <h3 class="text-2xl font-black text-[#002046] mt-1" id="totalCandidatesDisplay">0</h3>
-                <span class="text-[11px] text-emerald-600 font-bold">100% faol baza</span>
+                <span class="text-[11px] text-emerald-600 font-bold">Ro'yxatdan o'tganlar</span>
             </div>
             <div class="bg-white p-4 rounded-2xl card-shadow border border-slate-100 text-center">
                 <span class="text-xs text-slate-400 font-semibold">Yangi (7 kun)</span>
-                <h3 class="text-2xl font-black text-emerald-600 mt-1">+47</h3>
-                <span class="text-[11px] text-slate-400">Tekshirilgan</span>
+                <h3 class="text-2xl font-black text-emerald-600 mt-1" id="bookmarkedCount">0</h3>
+                <span class="text-[11px] text-slate-400">Oxirgi 7 kunda</span>
             </div>
             <div class="bg-white p-4 rounded-2xl card-shadow border border-slate-100 text-center">
-                <span class="text-xs text-slate-400 font-semibold">Intervyuda</span>
-                <h3 class="text-2xl font-black text-blue-600 mt-1">89</h3>
-                <span class="text-[11px] text-slate-400">Jarayonda</span>
+                <span class="text-xs text-slate-400 font-semibold">Viloyatlar</span>
+                <h3 class="text-2xl font-black text-blue-600 mt-1" id="statRegions">0</h3>
+                <span class="text-[11px] text-slate-400">Nomzodlar bor hududlar</span>
             </div>
             <div class="bg-white p-4 rounded-2xl card-shadow border border-slate-100 text-center">
-                <span class="text-xs text-slate-400 font-semibold">Saqlanganlar</span>
-                <h3 class="text-2xl font-black text-amber-600 mt-1" id="bookmarkedCount">0</h3>
-                <span class="text-[11px] text-slate-400">So'nggi 7 kun</span>
+                <span class="text-xs text-slate-400 font-semibold">O'rtacha tajriba</span>
+                <h3 class="text-2xl font-black text-amber-600 mt-1" id="statAvgExp">—</h3>
+                <span class="text-[11px] text-slate-400">Nomzodlar bo'yicha</span>
             </div>
         </div>
 
@@ -484,7 +484,7 @@
                 used.map(rk => `<button class="region-btn px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200" data-region="${rk}">${escapeHtml(regionName(rk))}</button>`).join('');
             bindRegionPills();
 
-            document.getElementById('totalCandidatesDisplay').textContent = candidates.length;
+            document.getElementById('totalCandidatesDisplay').textContent = candidates.length; document.getElementById('statRegions').textContent = used.length; document.getElementById('statAvgExp').textContent = candidates.length ? (candidates.reduce((s, c) => s + (Number(c.expYears) || 0), 0) / candidates.length).toFixed(1) + ' yil' : '—';
             const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
             document.getElementById('bookmarkedCount').textContent =
                 candidates.filter(c => new Date(c.createdAt).getTime() >= weekAgo).length;
