@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Arizalar (admin) | ishtop.uz</title>
+    <meta name="theme-color" content="#1e1b4b" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/theme.css" />
+    <style>.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#1e1b4b;color:#fff;padding:12px 20px;border-radius:14px;font-weight:600;font-size:13px;opacity:0;transition:all .3s;pointer-events:none;z-index:50}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}</style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <div class="toast" id="toast"></div>
+    <header class="bg-white border-b border-slate-200/80 sticky top-0 z-40">
+        <div class="max-w-3xl mx-auto px-4 h-16 flex items-center gap-2">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#1e1b4b] to-[#4f46e5] text-white flex items-center justify-center font-black">İ</div>
+            <span class="text-lg font-black text-[#1e1b4b]">Arizalar</span>
+            <a href="./nomzodlar.html" class="ml-auto text-xs font-bold text-[#4f46e5] hover:underline">&larr; Nomzodlar</a>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-3xl w-full mx-auto px-4 py-6 space-y-4">
+        <section id="denied" class="hidden bg-white rounded-3xl card-shadow border border-slate-100 p-6 text-center">
+            <h1 class="text-lg font-black text-[#1e1b4b]">Bu sahifa faqat admin uchun</h1>
+            <p id="deniedMsg" class="text-sm text-slate-500 mt-2"></p>
+            <a href="./index.html" class="inline-block mt-4 px-5 py-3 rounded-xl bg-[#4f46e5] text-white font-bold text-sm">Kirish</a>
+        </section>
+
+        <section id="panel" class="hidden space-y-4">
+            <div class="flex flex-wrap gap-2" id="filters"></div>
+            <div id="list" class="space-y-3"></div>
+        </section>
+    </main>
+
+    <script>
+        const $ = id => document.getElementById(id);
+        const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(window._t); window._t = setTimeout(() => t.classList.remove('show'), 3500); }
+        const STATUS = { kutilmoqda: ['Kutilmoqda', 'bg-amber-100 text-amber-800'], qabul: ['Qabul qilindi', 'bg-indigo-100 text-indigo-800'], rad: ['Rad etildi', 'bg-rose-100 text-rose-800'] };
+        let items = [], filter = 'kutilmoqda';
+
+        function render() {
+            const counts = { kutilmoqda: 0, qabul: 0, rad: 0 };
+            items.forEach(a => counts[a.status] = (counts[a.status] || 0) + 1);
+            $('filters').innerHTML = Object.keys(STATUS).map(k =>
+                `<button data-f="${k}" class="px-3 py-1.5 rounded-full text-xs font-bold ${filter === k ? 'bg-[#4f46e5] text-white' : 'bg-slate-100 text-slate-600'}">${STATUS[k][0]} (${counts[k] || 0})</button>`).join('');
+            document.querySelectorAll('#filters button').forEach(b => b.onclick = () => { filter = b.dataset.f; render(); });
+            const rows = items.filter(a => a.status === filter);
+            $('list').innerHTML = rows.length ? rows.map(a => `
+                <div class="bg-white rounded-2xl card-shadow border border-slate-100 p-4">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <p class="text-sm font-black text-[#1e1b4b]">${esc(a.fullName)}</p>
+                            <p class="text-xs text-slate-500">${esc(a.vacancyTitle)} · ${esc(a.company)}</p>
+                        </div>
+                        <span class="text-[11px] font-bold px-2.5 py-1 rounded-full ${STATUS[a.status][1]}">${STATUS[a.status][0]}</span>
+                    </div>
+                    <p class="text-xs text-slate-600 mt-2"><a class="font-bold text-[#4f46e5]" href="tel:${esc(a.phone)}">${esc(a.phone)}</a> · ${new Date(a.createdAt).toLocaleString('ru-RU')}</p>
+                    ${a.message ? `<p class="text-sm text-slate-700 mt-2 whitespace-pre-line">${esc(a.message)}</p>` : ''}
+                    <div class="flex gap-2 mt-3">
+                        ${a.status !== 'qabul' ? `<button data-id="${a.id}" data-s="qabul" class="act px-4 py-2 rounded-xl bg-[#4f46e5] text-white text-xs font-bold">Qabul qilish</button>` : ''}
+                        ${a.status !== 'rad' ? `<button data-id="${a.id}" data-s="rad" class="act px-4 py-2 rounded-xl border border-rose-300 text-rose-700 text-xs font-bold">Rad etish</button>` : ''}
+                    </div>
+                </div>`).join('') : '<p class="text-sm text-slate-400 text-center py-8">Bu bo\'limda ariza yo\'q</p>';
+            document.querySelectorAll('.act').forEach(b => b.onclick = () => setStatus(b));
+        }
+
+        async function setStatus(btn) {
+            btn.disabled = true;
+            try {
+                const r = await fetch('/api/applications/' + btn.dataset.id, {
+                    method: 'PATCH', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: btn.dataset.s })
+                });
+                const d = await r.json().catch(() => ({}));
+                if (!r.ok) { toast('⚠️ ' + (d.error || 'Xatolik')); btn.disabled = false; return; }
+                const a = items.find(x => String(x.id) === btn.dataset.id); if (a) a.status = d.status;
+                toast(d.status === 'qabul' ? '✅ Qabul qilindi' : '❌ Rad etildi');
+                render();
+            } catch (e) { toast("Server bilan aloqa yo'q"); btn.disabled = false; }
+        }
+
+        async function init() {
+            const r = await fetch('/api/applications', { credentials: 'same-origin' });
+            if (r.ok) {
+                items = (await r.json()).items;
+                $('panel').classList.remove('hidden');
+                render();
+                return;
+            }
+            $('denied').classList.remove('hidden');
+            const me = await fetch('/api/auth/me', { credentials: 'same-origin' });
+            if (me.ok) {
+                const u = await me.json();
+                $('deniedMsg').innerHTML = `Siz tizimga kirgansiz, lekin admin emassiz. Admin bo'lish uchun Render → Environment dagi <b>ADMIN_IDS</b> ga shu ID ni qo'shing: <b class="text-[#4f46e5]">${esc(u.id)}</b>`;
+            } else {
+                $('deniedMsg').textContent = 'Admin hisobi bilan tizimga kiring.';
+            }
+        }
+        init();
+    </script>
+</body>
+</html>

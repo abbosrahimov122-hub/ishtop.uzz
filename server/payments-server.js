@@ -588,7 +588,8 @@ app.get('/api/auth/me', (req, res) => {
         firstName: user.firstName,
         lastName: user.lastName,
         username: user.username,
-        photoUrl: user.photoUrl
+        photoUrl: user.photoUrl,
+        isAdmin: ADMIN_IDS.has(String(user.telegramId))
     });
 });
 
@@ -1040,14 +1041,7 @@ function rowToCandidate(r) {
 // ADMIN_KEY sozlanmagan bo'lsa, ro'yxat hech kimga berilmaydi.
 app.get('/api/candidates', async (req, res) => {
     try {
-        const key = process.env.ADMIN_KEY;
-        const given = String(req.headers['x-admin-key'] || '');
-        let isAdmin = false;
-        if (key && given) {
-            const a = Buffer.from(given), b = Buffer.from(key);
-            isAdmin = a.length === b.length && crypto.timingSafeEqual(a, b);
-        }
-        if (!isAdmin) {
+        if (!isAdminReq(req)) {
             // Kalit yo'q yoki noto'g'ri: faqat viloyatlar, shaxsiy ma'lumot yo'q
             return res.json({ items: [], regions: REGIONS, locked: true });
         }
@@ -1104,6 +1098,102 @@ app.post('/api/candidates', paymentLimiter, async (req, res) => {
 // PowerShell'dan Invoke-RestMethod bilan chaqiriladi, --source va h.k. maydonlari
 // vakansiya.js dagi kabi tekshiriladi. IMPORT_KEY muhit o'zgaruvchisi sozlanmagan
 // bo'lsa, bu yo'l butunlay o'chirilgan hisoblanadi (xavfsizlik uchun).
+// ==========================================
+// ARIZALAR: nomzod vakansiyaga ariza yuboradi, FAQAT admin qabul qiladi yoki rad etadi.
+// Admin = sessiyadagi id ADMIN_IDS ro'yxatida (Render env: ADMIN_IDS=123456789,p998901234567).
+// Admin kaliti (x-admin-key) eski usul sifatida ishlayveradi, lekin sahifalar uni so'ramaydi.
+// ==========================================
+const ADMIN_IDS = new Set(String(process.env.ADMIN_IDS || '').split(',').map(x => x.trim()).filter(Boolean));
+const APP_STATUSES = ['kutilmoqda', 'qabul', 'rad'];
+const escHtml = x => String(x).replace(/[&<>]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch]));
+
+function isAdminReq(req) {
+    const p = session.verify(req.cookies[SESSION_COOKIE], SESSION_SECRET);
+    if (p && ADMIN_IDS.has(String(p.telegramId))) return true;
+    const key = process.env.ADMIN_KEY, given = String(req.headers['x-admin-key'] || '');
+    if (key && given) {
+        const a = Buffer.from(given), b = Buffer.from(key);
+        return a.length === b.length && crypto.timingSafeEqual(a, b);
+    }
+    return false;
+}
+function requireAdmin(req, res, next) {
+    if (!isAdminReq(req)) return res.status(403).json({ error: 'Faqat admin uchun' });
+    next();
+}
+function appToJson(r) {
+    return {
+        id: r.id, vacancyId: r.vacancyId, vacancyTitle: r.vacancyTitle, company: r.company, fullName: r.fullName,
+        phone: r.phone, message: r.message, status: r.status, createdAt: r.createdAt
+    };
+}
+
+app.post('/api/applications', paymentLimiter, requireAuth, async (req, res) => {
+    try {
+        const b = req.body || {};
+        const clean = (v, max) => String(v == null ? '' : v).trim().slice(0, max);
+        const fullName = clean(b.fullName, 120), phone = clean(b.phone, 30), message = clean(b.message, 1000);
+        if (fullName.length < 2) return res.status(400).json({ error: 'Ismingizni kiriting' });
+        if (phone.replace(/\D/g, '').length < 7) return res.status(400).json({ error: "Telefon raqami noto'g'ri" });
+        const vid = parseInt(String(b.vacancyId || '').replace(/\D/g, ''), 10);
+        const vac = Number.isInteger(vid)
+            ? db.prepare("SELECT id, title, company FROM vacancies WHERE id = ? AND status = 'active'").get(vid) : null;
+        if (!vac) return res.status(404).json({ error: 'Vakansiya topilmadi' });
+
+        const uid = String(req.user.telegramId);
+        const mine = await candidatesStore.appMine(uid);
+        if (mine.some(a => a.vacancyId === String(vac.id) && a.status !== 'rad')) {
+            return res.status(409).json({ error: 'Bu vakansiyaga ariza yuborgansiz' });
+        }
+        if (mine.filter(a => a.status === 'kutilmoqda').length >= 20) {
+            return res.status(429).json({ error: "Kutilayotgan arizalar ko'p. Avval ular ko'rib chiqilsin." });
+        }
+        const row = await candidatesStore.appInsert({
+            vacancyId: String(vac.id), vacancyTitle: vac.title, company: vac.company,
+            fullName, phone, message, applicantId: uid
+        });
+
+        const base = `${req.protocol}://${req.get('host')}`;
+        for (const id of ADMIN_IDS) {
+            if (/^\d+$/.test(id)) tgSend(id, `📥 Yangi ariza\n<b>${escHtml(fullName)}</b> → ${escHtml(vac.title)} (${escHtml(vac.company)})\nTel: ${escHtml(phone)}\n${base}/arizalar.html`);
+        }
+        res.status(201).json(appToJson(row));
+    } catch (err) {
+        logError('POST /api/applications', err);
+        res.status(500).json({ error: 'Ichki server xatosi' });
+    }
+});
+
+app.get('/api/applications/mine', requireAuth, async (req, res) => {
+    try {
+        const rows = await candidatesStore.appMine(String(req.user.telegramId));
+        res.json({ items: rows.map(appToJson) });
+    } catch (err) { logError('GET /api/applications/mine', err); res.status(500).json({ error: 'Ichki server xatosi' }); }
+});
+
+app.get('/api/applications', requireAdmin, async (req, res) => {
+    try {
+        const rows = await candidatesStore.appList();
+        res.json({ items: rows.map(appToJson) });
+    } catch (err) { logError('GET /api/applications', err); res.status(500).json({ error: 'Ichki server xatosi' }); }
+});
+
+app.patch('/api/applications/:id', requireAdmin, async (req, res) => {
+    try {
+        const id = parseInt(req.params.id, 10);
+        const status = String((req.body && req.body.status) || '');
+        if (!Number.isInteger(id) || !APP_STATUSES.includes(status)) return res.status(400).json({ error: "Noto'g'ri so'rov" });
+        const row = await candidatesStore.appSetStatus(id, status);
+        if (!row) return res.status(404).json({ error: 'Ariza topilmadi' });
+        if (/^\d+$/.test(String(row.applicantId)) && status !== 'kutilmoqda') {
+            tgSend(row.applicantId, status === 'qabul'
+                ? `✅ Arizangiz qabul qilindi: <b>${escHtml(row.vacancyTitle || '')}</b>`
+                : `❌ Arizangiz rad etildi: <b>${escHtml(row.vacancyTitle || '')}</b>`);
+        }
+        res.json(appToJson(row));
+    } catch (err) { logError('PATCH /api/applications', err); res.status(500).json({ error: 'Ichki server xatosi' }); }
+});
+
 app.post('/api/vacancies/bulk-import', paymentLimiter, (req, res) => {
     try {
         const key = process.env.IMPORT_KEY;
