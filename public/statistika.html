@@ -6,7 +6,7 @@
     <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
         name="viewport" />
     <title>Statistika va Tahlil | ishtop.uz Mini Ilova</title>
-    <meta name="theme-color" content="#002046" />
+    <meta name="theme-color" content="#1e1b4b" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="manifest" href="/manifest.json" />
@@ -92,7 +92,7 @@
             bottom: 80px;
             left: 50%;
             transform: translateX(-50%) translateY(20px);
-            background: #002046;
+            background: #1e1b4b;
             color: white;
             padding: 12px 24px;
             border-radius: 14px;
@@ -112,6 +112,7 @@
             transform: translateX(-50%) translateY(0);
         }
     </style>
+    <link rel="stylesheet" href="/theme.css" />
 </head>
 
 <body class="min-h-screen flex flex-col pb-20 md:pb-0">
@@ -124,16 +125,16 @@
         <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
             <a href="./dashboard.html" class="flex items-center gap-2">
                 <div
-                    class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#002046] to-[#006b5c] text-white flex items-center justify-center shadow-md">
+                    class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#1e1b4b] to-[#4f46e5] text-white flex items-center justify-center shadow-md">
                     <span class="material-symbols-outlined text-xl">work_outline</span>
                 </div>
-                <span class="text-xl font-black text-[#002046] tracking-tight">ishtop<span
-                        class="text-[#006b5c]">.uz</span></span>
+                <span class="text-xl font-black text-[#1e1b4b] tracking-tight">ishtop<span
+                        class="text-[#4f46e5]">.uz</span></span>
             </a>
 
             <div class="flex items-center gap-2 sm:gap-3">
                 <button id="openExportModalBtn"
-                    class="flex items-center gap-1.5 px-3.5 py-2 bg-[#006b5c] text-white rounded-xl text-xs font-bold hover:bg-[#005145] transition-all active:scale-95 shadow-md shadow-emerald-700/20">
+                    class="flex items-center gap-1.5 px-3.5 py-2 bg-[#4f46e5] text-white rounded-xl text-xs font-bold hover:bg-[#3730a3] transition-all active:scale-95 shadow-md shadow-indigo-700/20">
                     <span class="material-symbols-outlined text-base">download</span>
                     <span>Hisobot yuklash</span>
                 </button>
@@ -164,7 +165,7 @@
                     Nomzodlar
                 </a>
                 <a href="./statistika.html"
-                    class="px-4 py-2.5 text-xs font-bold text-[#006b5c] border-b-2 border-[#006b5c] whitespace-nowrap flex items-center gap-1.5">
+                    class="px-4 py-2.5 text-xs font-bold text-[#4f46e5] border-b-2 border-[#4f46e5] whitespace-nowrap flex items-center gap-1.5">
                     <span class="material-symbols-outlined text-base"
                         style="font-variation-settings: 'FILL' 1;">bar_chart</span>
                     Statistika
@@ -190,14 +191,14 @@
         <div
             class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl card-shadow border border-slate-100">
             <div>
-                <h1 class="text-xl font-black text-[#002046]">Statistika va Analitika</h1>
+                <h1 class="text-xl font-black text-[#1e1b4b]">Statistika va Analitika</h1>
                 <p class="text-xs text-slate-500">Platformadagi dinamika va asosiy ko'rsatkichlar</p>
             </div>
             <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl" id="timePeriodSelector">
                 <button class="period-btn px-3 py-1.5 text-xs font-bold rounded-lg transition-all" data-period="7">7
                     kun</button>
                 <button
-                    class="period-btn px-3 py-1.5 text-xs font-bold bg-white text-[#002046] shadow-sm rounded-lg transition-all"
+                    class="period-btn px-3 py-1.5 text-xs font-bold bg-white text-[#1e1b4b] shadow-sm rounded-lg transition-all"
                     data-period="30">30 kun</button>
                 <button class="period-btn px-3 py-1.5 text-xs font-bold rounded-lg transition-all" data-period="90">90
                     kun</button>
@@ -209,40 +210,41 @@
         <!-- 4 Key Stat Metric Cards -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <div onclick="showMetricDetail('Yangi vakansiyalar', '1,284', '+12.4%', 'O\'tgan oyga nisbatan 142 ta ko\'proq vakansiya')"
-                class="bg-white p-4 rounded-2xl card-shadow border border-slate-100 cursor-pointer hover:border-emerald-300 transition-all">
+                class="bg-white p-4 rounded-2xl card-shadow border border-slate-100 cursor-pointer hover:border-indigo-300 transition-all">
                 <div class="flex justify-between items-start mb-2">
-                    <span class="w-9 h-9 rounded-xl bg-emerald-50 text-[#006b5c] flex items-center justify-center">
+                    <span class="w-9 h-9 rounded-xl bg-indigo-50 text-[#4f46e5] flex items-center justify-center">
                         <span class="material-symbols-outlined text-lg">work</span>
                     </span>
                     <span
-                        class="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">+12.4%</span>
+                        class="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">+12.4%</span>
                 </div>
                 <p class="text-xs font-semibold text-slate-500">Yangi vakansiyalar</p>
-                <h3 class="text-2xl font-black text-[#002046] mt-0.5" id="statJobsCount">1,284</h3>
+                <h3 class="text-2xl font-black text-[#1e1b4b] mt-0.5" id="statJobsCount">1,284</h3>
             </div>
 
             <div onclick="showMetricDetail('Ro\'yxatdan o\'tganlar', '4,592', '+8.1%', 'Bu oy 4.5k yangi talabgor profil ochdi')"
                 class="bg-white p-4 rounded-2xl card-shadow border border-slate-100 cursor-pointer hover:border-blue-300 transition-all">
                 <div class="flex justify-between items-start mb-2">
-                    <span class="w-9 h-9 rounded-xl bg-blue-50 text-[#002046] flex items-center justify-center">
+                    <span class="w-9 h-9 rounded-xl bg-blue-50 text-[#1e1b4b] flex items-center justify-center">
                         <span class="material-symbols-outlined text-lg">person_add</span>
                     </span>
                     <span class="text-[11px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">+8.1%</span>
                 </div>
                 <p class="text-xs font-semibold text-slate-500">Ro'yxatdan o'tganlar</p>
-                <h3 class="text-2xl font-black text-[#002046] mt-0.5" id="statUsersCount">4,592</h3>
+                <h3 class="text-2xl font-black text-[#1e1b4b] mt-0.5" id="statUsersCount">4,592</h3>
             </div>
 
             <div onclick="showMetricDetail('Faol arizalar', '12,102', '+18.5%', 'Nomzodlar tomonidan yuborilgan umumiy arizalar soni')"
-                class="bg-white p-4 rounded-2xl card-shadow border border-slate-100 cursor-pointer hover:border-teal-300 transition-all">
+                class="bg-white p-4 rounded-2xl card-shadow border border-slate-100 cursor-pointer hover:border-indigo-300 transition-all">
                 <div class="flex justify-between items-start mb-2">
-                    <span class="w-9 h-9 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center">
+                    <span class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center">
                         <span class="material-symbols-outlined text-lg">touch_app</span>
                     </span>
-                    <span class="text-[11px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full">+18.5%</span>
+                    <span
+                        class="text-[11px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full">+18.5%</span>
                 </div>
                 <p class="text-xs font-semibold text-slate-500">Faol arizalar</p>
-                <h3 class="text-2xl font-black text-[#002046] mt-0.5">12,102</h3>
+                <h3 class="text-2xl font-black text-[#1e1b4b] mt-0.5">12,102</h3>
             </div>
 
             <div onclick="showMetricDetail('O\'rtacha vaqt', '4:20', '+15s', 'Foydalanuvchilarning o\'rtacha portalda qolish davomiyligi')"
@@ -254,7 +256,7 @@
                     <span class="text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">+15s</span>
                 </div>
                 <p class="text-xs font-semibold text-slate-500">O'rtacha vaqt</p>
-                <h3 class="text-2xl font-black text-[#002046] mt-0.5">4m 20s</h3>
+                <h3 class="text-2xl font-black text-[#1e1b4b] mt-0.5">4m 20s</h3>
             </div>
         </div>
 
@@ -262,15 +264,15 @@
         <div class="bg-white p-5 rounded-2xl card-shadow border border-slate-100">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
                 <div>
-                    <h3 class="text-base font-bold text-[#002046]">Vakansiyalar va Foydalanuvchilar o'sishi</h3>
+                    <h3 class="text-base font-bold text-[#1e1b4b]">Vakansiyalar va Foydalanuvchilar o'sishi</h3>
                     <p class="text-xs text-slate-400">Oylik dinamik ko'rsatkichlar monitoringi</p>
                 </div>
                 <div class="flex items-center gap-4 text-xs font-semibold">
-                    <span class="flex items-center gap-1.5 text-[#002046]">
-                        <span class="w-3 h-3 rounded-full bg-[#002046]"></span> Vakansiyalar
+                    <span class="flex items-center gap-1.5 text-[#1e1b4b]">
+                        <span class="w-3 h-3 rounded-full bg-[#1e1b4b]"></span> Vakansiyalar
                     </span>
-                    <span class="flex items-center gap-1.5 text-[#006b5c]">
-                        <span class="w-3 h-3 rounded-full bg-[#006b5c]"></span> Nomzodlar
+                    <span class="flex items-center gap-1.5 text-[#4f46e5]">
+                        <span class="w-3 h-3 rounded-full bg-[#4f46e5]"></span> Nomzodlar
                     </span>
                 </div>
             </div>
@@ -284,24 +286,24 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Categories Breakdown -->
             <div class="bg-white p-5 rounded-2xl card-shadow border border-slate-100 space-y-4">
-                <h3 class="text-base font-bold text-[#002046]">Ommabop sohalar ulushi</h3>
+                <h3 class="text-base font-bold text-[#1e1b4b]">Ommabop sohalar ulushi</h3>
                 <div class="space-y-3 text-xs">
                     <div>
                         <div class="flex justify-between font-semibold mb-1">
                             <span class="text-slate-700">Qurilish va Muhandislik</span>
-                            <span class="text-[#002046] font-bold">42%</span>
+                            <span class="text-[#1e1b4b] font-bold">42%</span>
                         </div>
                         <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                            <div class="bg-[#002046] h-full rounded-full w-[42%]"></div>
+                            <div class="bg-[#1e1b4b] h-full rounded-full w-[42%]"></div>
                         </div>
                     </div>
                     <div>
                         <div class="flex justify-between font-semibold mb-1">
                             <span class="text-slate-700">Savdo va Chakana savdo</span>
-                            <span class="text-[#006b5c] font-bold">28%</span>
+                            <span class="text-[#4f46e5] font-bold">28%</span>
                         </div>
                         <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                            <div class="bg-[#006b5c] h-full rounded-full w-[28%]"></div>
+                            <div class="bg-[#4f46e5] h-full rounded-full w-[28%]"></div>
                         </div>
                     </div>
                     <div>
@@ -316,10 +318,10 @@
                     <div>
                         <div class="flex justify-between font-semibold mb-1">
                             <span class="text-slate-700">Restoran va Mehmondo'stlik</span>
-                            <span class="text-teal-600 font-bold">10%</span>
+                            <span class="text-indigo-600 font-bold">10%</span>
                         </div>
                         <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                            <div class="bg-teal-500 h-full rounded-full w-[10%]"></div>
+                            <div class="bg-indigo-500 h-full rounded-full w-[10%]"></div>
                         </div>
                     </div>
                     <div>
@@ -335,7 +337,7 @@
 
                 <div class="pt-2 border-t border-slate-100">
                     <button id="openFullAnalysisBtn"
-                        class="w-full py-2.5 bg-slate-100 hover:bg-[#006b5c] hover:text-white text-slate-700 font-bold text-xs rounded-xl transition-colors flex items-center justify-center gap-1.5">
+                        class="w-full py-2.5 bg-slate-100 hover:bg-[#4f46e5] hover:text-white text-slate-700 font-bold text-xs rounded-xl transition-colors flex items-center justify-center gap-1.5">
                         <span class="material-symbols-outlined text-base">analytics</span>
                         To'liq tahliliy hisobot
                     </button>
@@ -346,12 +348,12 @@
             <div class="lg:col-span-2 bg-white p-5 rounded-2xl card-shadow border border-slate-100">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                     <div>
-                        <h3 class="text-base font-bold text-[#002046]">Top Ish Beruvchilar</h3>
+                        <h3 class="text-base font-bold text-[#1e1b4b]">Top Ish Beruvchilar</h3>
                         <p class="text-xs text-slate-400">Eng ko'p ish o'rni yaratgan va ariza qabul qilgan kompaniyalar
                         </p>
                     </div>
                     <input id="companySearchInput" type="text" placeholder="Qidirish..."
-                        class="px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-[#006b5c]" />
+                        class="px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-[#4f46e5]" />
                 </div>
 
                 <div class="overflow-x-auto">
@@ -373,14 +375,14 @@
                             <tr class="hover:bg-slate-50 transition-colors">
                                 <td class="py-3 px-3 font-bold text-slate-800 flex items-center gap-2">
                                     <div
-                                        class="w-6 h-6 rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold flex items-center justify-center">
+                                        class="w-6 h-6 rounded bg-indigo-100 text-indigo-800 text-[10px] font-bold flex items-center justify-center">
                                         KZ</div>
                                     Korzinka.uz
                                 </td>
                                 <td class="py-3 px-3">124 ta</td>
                                 <td class="py-3 px-3 font-semibold">1,842</td>
-                                <td class="py-3 px-3 text-emerald-700 font-bold">4.8 mln UZS</td>
-                                <td class="py-3 px-3 text-emerald-600 font-bold">▲ +14%</td>
+                                <td class="py-3 px-3 text-indigo-700 font-bold">4.8 mln UZS</td>
+                                <td class="py-3 px-3 text-indigo-600 font-bold">▲ +14%</td>
                             </tr>
                             <tr class="hover:bg-slate-50 transition-colors">
                                 <td class="py-3 px-3 font-bold text-slate-800 flex items-center gap-2">
@@ -391,8 +393,8 @@
                                 </td>
                                 <td class="py-3 px-3">86 ta</td>
                                 <td class="py-3 px-3 font-semibold">2,105</td>
-                                <td class="py-3 px-3 text-emerald-700 font-bold">6.2 mln UZS</td>
-                                <td class="py-3 px-3 text-emerald-600 font-bold">▲ +21%</td>
+                                <td class="py-3 px-3 text-indigo-700 font-bold">6.2 mln UZS</td>
+                                <td class="py-3 px-3 text-indigo-600 font-bold">▲ +21%</td>
                             </tr>
                             <tr class="hover:bg-slate-50 transition-colors">
                                 <td class="py-3 px-3 font-bold text-slate-800 flex items-center gap-2">
@@ -403,8 +405,8 @@
                                 </td>
                                 <td class="py-3 px-3">74 ta</td>
                                 <td class="py-3 px-3 font-semibold">1,430</td>
-                                <td class="py-3 px-3 text-emerald-700 font-bold">5.5 mln UZS</td>
-                                <td class="py-3 px-3 text-emerald-600 font-bold">▲ +11%</td>
+                                <td class="py-3 px-3 text-indigo-700 font-bold">5.5 mln UZS</td>
+                                <td class="py-3 px-3 text-indigo-600 font-bold">▲ +11%</td>
                             </tr>
                             <tr class="hover:bg-slate-50 transition-colors">
                                 <td class="py-3 px-3 font-bold text-slate-800 flex items-center gap-2">
@@ -415,20 +417,20 @@
                                 </td>
                                 <td class="py-3 px-3">54 ta</td>
                                 <td class="py-3 px-3 font-semibold">920</td>
-                                <td class="py-3 px-3 text-emerald-700 font-bold">3.8 mln UZS</td>
+                                <td class="py-3 px-3 text-indigo-700 font-bold">3.8 mln UZS</td>
                                 <td class="py-3 px-3 text-red-500 font-bold">▼ -4%</td>
                             </tr>
                             <tr class="hover:bg-slate-50 transition-colors">
                                 <td class="py-3 px-3 font-bold text-slate-800 flex items-center gap-2">
                                     <div
-                                        class="w-6 h-6 rounded bg-teal-100 text-teal-800 text-[10px] font-bold flex items-center justify-center">
+                                        class="w-6 h-6 rounded bg-indigo-100 text-indigo-800 text-[10px] font-bold flex items-center justify-center">
                                         MW</div>
                                     MaxWay Logistics
                                 </td>
                                 <td class="py-3 px-3">41 ta</td>
                                 <td class="py-3 px-3 font-semibold">745</td>
-                                <td class="py-3 px-3 text-emerald-700 font-bold">4.2 mln UZS</td>
-                                <td class="py-3 px-3 text-emerald-600 font-bold">▲ +8%</td>
+                                <td class="py-3 px-3 text-indigo-700 font-bold">4.2 mln UZS</td>
+                                <td class="py-3 px-3 text-indigo-600 font-bold">▲ +8%</td>
                             </tr>
                         </tbody>
                     </table>
@@ -444,17 +446,17 @@
                 <span class="material-symbols-outlined">close</span>
             </button>
             <div
-                class="w-14 h-14 rounded-2xl bg-emerald-50 text-[#006b5c] flex items-center justify-center mx-auto mb-3">
+                class="w-14 h-14 rounded-2xl bg-indigo-50 text-[#4f46e5] flex items-center justify-center mx-auto mb-3">
                 <span class="material-symbols-outlined text-3xl">insights</span>
             </div>
             <h3 class="text-lg font-bold text-slate-900" id="metricModalTitle">Ko'rsatkich</h3>
-            <p class="text-3xl font-black text-[#002046] my-2" id="metricModalValue">0</p>
-            <span class="inline-block px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full mb-3"
+            <p class="text-3xl font-black text-[#1e1b4b] my-2" id="metricModalValue">0</p>
+            <span class="inline-block px-3 py-1 bg-indigo-100 text-indigo-800 text-xs font-bold rounded-full mb-3"
                 id="metricModalChange">+0%</span>
             <p class="text-xs text-slate-600 bg-slate-50 p-3 rounded-xl leading-relaxed text-left" id="metricModalDesc">
                 Batafsil ma'lumot</p>
             <button onclick="document.getElementById('metricModal').classList.remove('active')"
-                class="w-full mt-4 py-2.5 bg-[#002046] text-white text-xs font-bold rounded-xl">
+                class="w-full mt-4 py-2.5 bg-[#1e1b4b] text-white text-xs font-bold rounded-xl">
                 Yopish
             </button>
         </div>
@@ -469,29 +471,29 @@
 
             <div class="text-center mb-5">
                 <div
-                    class="w-12 h-12 rounded-2xl bg-emerald-50 text-[#006b5c] flex items-center justify-center mx-auto mb-2">
+                    class="w-12 h-12 rounded-2xl bg-indigo-50 text-[#4f46e5] flex items-center justify-center mx-auto mb-2">
                     <span class="material-symbols-outlined text-2xl">file_download</span>
                 </div>
-                <h3 class="text-lg font-bold text-[#002046]">Hisobotlarni yuklab olish</h3>
+                <h3 class="text-lg font-bold text-[#1e1b4b]">Hisobotlarni yuklab olish</h3>
                 <p class="text-xs text-slate-500">Kerakli formatni tanlang</p>
             </div>
 
             <div class="space-y-3">
                 <!-- CSV Download -->
                 <button onclick="downloadCSVReport()"
-                    class="w-full p-3.5 bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-[#006b5c] rounded-2xl flex items-center justify-between transition-all text-left group">
+                    class="w-full p-3.5 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-[#4f46e5] rounded-2xl flex items-center justify-between transition-all text-left group">
                     <div class="flex items-center gap-3">
                         <div
-                            class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs">
+                            class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs">
                             CSV
                         </div>
                         <div>
-                            <p class="text-xs font-bold text-slate-800 group-hover:text-[#006b5c]">CSV / Excel formati
+                            <p class="text-xs font-bold text-slate-800 group-hover:text-[#4f46e5]">CSV / Excel formati
                             </p>
                             <p class="text-[10px] text-slate-400">Jadval ko'rinishida barcha statistik raqamlar</p>
                         </div>
                     </div>
-                    <span class="material-symbols-outlined text-slate-400 group-hover:text-[#006b5c]">download</span>
+                    <span class="material-symbols-outlined text-slate-400 group-hover:text-[#4f46e5]">download</span>
                 </button>
 
                 <!-- JSON Download -->
@@ -543,11 +545,11 @@
         </a>
         <div class="relative -top-3">
             <a href="./dashboard.html"
-                class="w-12 h-12 rounded-full bg-[#006b5c] text-white flex items-center justify-center shadow-lg shadow-emerald-700/30 active:scale-90 transition-transform">
+                class="w-12 h-12 rounded-full bg-[#4f46e5] text-white flex items-center justify-center shadow-lg shadow-indigo-700/30 active:scale-90 transition-transform">
                 <span class="material-symbols-outlined text-2xl">home</span>
             </a>
         </div>
-        <a href="./statistika.html" class="flex flex-col items-center gap-0.5 text-[#006b5c]">
+        <a href="./statistika.html" class="flex flex-col items-center gap-0.5 text-[#4f46e5]">
             <span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">bar_chart</span>
             <span class="text-[10px] font-bold">Statistika</span>
         </a>
@@ -598,23 +600,23 @@
                         {
                             label: 'Vakansiyalar',
                             data: jobData,
-                            borderColor: '#002046',
+                            borderColor: '#1e1b4b',
                             backgroundColor: 'rgba(0, 32, 70, 0.08)',
                             borderWidth: 3,
                             fill: true,
                             tension: 0.35,
-                            pointBackgroundColor: '#002046',
+                            pointBackgroundColor: '#1e1b4b',
                             pointRadius: 4
                         },
                         {
                             label: 'Nomzodlar',
                             data: userData,
-                            borderColor: '#006b5c',
+                            borderColor: '#4f46e5',
                             backgroundColor: 'rgba(0, 107, 92, 0.08)',
                             borderWidth: 3,
                             fill: true,
                             tension: 0.35,
-                            pointBackgroundColor: '#006b5c',
+                            pointBackgroundColor: '#4f46e5',
                             pointRadius: 4
                         }
                     ]
@@ -645,7 +647,7 @@
                 document.querySelectorAll('.period-btn').forEach(b => {
                     b.className = 'period-btn px-3 py-1.5 text-xs font-bold rounded-lg transition-all text-slate-600 hover:text-slate-900';
                 });
-                this.className = 'period-btn px-3 py-1.5 text-xs font-bold bg-white text-[#002046] shadow-sm rounded-lg transition-all';
+                this.className = 'period-btn px-3 py-1.5 text-xs font-bold bg-white text-[#1e1b4b] shadow-sm rounded-lg transition-all';
 
                 const p = this.dataset.period;
                 initChart(p);

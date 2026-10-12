@@ -15,7 +15,7 @@
         try {
             tg.ready();
             tg.expand();
-            if (tg.setHeaderColor) tg.setHeaderColor('#002046');
+            if (tg.setHeaderColor) tg.setHeaderColor('#1e1b4b');
             if (tg.setBackgroundColor) tg.setBackgroundColor('#f7f9fb');
         } catch (e) {
             // Eski Telegram versiyalarida ba'zi metodlar bo'lmasligi mumkin — jim o'tkazamiz

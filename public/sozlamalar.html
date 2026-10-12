@@ -6,7 +6,7 @@
     <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
         name="viewport" />
     <title>Sozlamalar | ishtop.uz Mini Ilova</title>
-    <meta name="theme-color" content="#002046" />
+    <meta name="theme-color" content="#1e1b4b" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="manifest" href="/manifest.json" />
@@ -44,7 +44,7 @@
             bottom: 80px;
             left: 50%;
             transform: translateX(-50%) translateY(20px);
-            background: #002046;
+            background: #1e1b4b;
             color: white;
             padding: 12px 24px;
             border-radius: 14px;
@@ -103,13 +103,14 @@
         }
 
         input:checked+.toggle-slider {
-            background-color: #006b5c;
+            background-color: #4f46e5;
         }
 
         input:checked+.toggle-slider:before {
             transform: translateX(22px);
         }
     </style>
+    <link rel="stylesheet" href="/theme.css" />
 </head>
 
 <body class="min-h-screen flex flex-col pb-20 md:pb-0">
@@ -122,16 +123,16 @@
         <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
             <a href="./dashboard.html" class="flex items-center gap-2">
                 <div
-                    class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#002046] to-[#006b5c] text-white flex items-center justify-center shadow-md">
+                    class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#1e1b4b] to-[#4f46e5] text-white flex items-center justify-center shadow-md">
                     <span class="material-symbols-outlined text-xl">work_outline</span>
                 </div>
-                <span class="text-xl font-black text-[#002046] tracking-tight">ishtop<span
-                        class="text-[#006b5c]">.uz</span></span>
+                <span class="text-xl font-black text-[#1e1b4b] tracking-tight">ishtop<span
+                        class="text-[#4f46e5]">.uz</span></span>
             </a>
 
             <div class="flex items-center gap-2 sm:gap-3">
                 <button id="headerSaveBtn"
-                    class="flex items-center gap-1.5 px-4 py-2 bg-[#006b5c] text-white rounded-xl text-xs font-bold hover:bg-[#005145] transition-all active:scale-95 shadow-md shadow-emerald-700/20">
+                    class="flex items-center gap-1.5 px-4 py-2 bg-[#4f46e5] text-white rounded-xl text-xs font-bold hover:bg-[#3730a3] transition-all active:scale-95 shadow-md shadow-indigo-700/20">
                     <span class="material-symbols-outlined text-base">save</span>
                     <span>Saqlash</span>
                 </button>
@@ -167,7 +168,7 @@
                     Statistika
                 </a>
                 <a href="./sozlamalar.html"
-                    class="px-4 py-2.5 text-xs font-bold text-[#006b5c] border-b-2 border-[#006b5c] whitespace-nowrap flex items-center gap-1.5">
+                    class="px-4 py-2.5 text-xs font-bold text-[#4f46e5] border-b-2 border-[#4f46e5] whitespace-nowrap flex items-center gap-1.5">
                     <span class="material-symbols-outlined text-base"
                         style="font-variation-settings: 'FILL' 1;">settings</span>
                     Sozlamalar
@@ -185,7 +186,7 @@
     <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-6 space-y-6">
 
         <div>
-            <h1 class="text-xl font-black text-[#002046]">Tizim va Profil Sozlamalari</h1>
+            <h1 class="text-xl font-black text-[#1e1b4b]">Tizim va Profil Sozlamalari</h1>
             <p class="text-xs text-slate-500">Shaxsiy ma'lumotlar, korxona tafsilotlari va xavfsizlik parametrlari</p>
         </div>
 
@@ -200,7 +201,7 @@
                             src="https://ui-avatars.com/api/?name=Alisher+Usmanov&background=002046&color=fff&size=200"
                             alt="Avatar" />
                         <label for="avatarUpload"
-                            class="absolute bottom-1 right-1 w-8 h-8 rounded-full bg-[#006b5c] text-white flex items-center justify-center cursor-pointer shadow-md hover:scale-105 transition-transform"
+                            class="absolute bottom-1 right-1 w-8 h-8 rounded-full bg-[#4f46e5] text-white flex items-center justify-center cursor-pointer shadow-md hover:scale-105 transition-transform"
                             title="Rasm yuklash">
                             <span class="material-symbols-outlined text-sm">photo_camera</span>
                         </label>
@@ -208,12 +209,12 @@
                     </div>
 
                     <div class="text-center sm:text-left flex-1">
-                        <h3 class="text-base font-bold text-[#002046]" id="profileNameDisplay">Alisher Usmanov</h3>
+                        <h3 class="text-base font-bold text-[#1e1b4b]" id="profileNameDisplay">Alisher Usmanov</h3>
                         <p class="text-xs text-slate-400" id="profileRoleDisplay">Bosh Administrator · HR Departament
                         </p>
                         <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-2">
                             <span
-                                class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold">Verifikatsiyadan
+                                class="px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-[10px] font-bold">Verifikatsiyadan
                                 o'tgan</span>
                             <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px]">Toshkent,
                                 O'zbekiston</span>
@@ -225,25 +226,25 @@
             <!-- Personal Information -->
             <div class="bg-white p-5 rounded-2xl card-shadow border border-slate-100 space-y-4">
                 <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
-                    <span class="material-symbols-outlined text-[#006b5c]">person</span>
-                    <h3 class="text-sm font-bold text-[#002046]">Shaxsiy ma'lumotlar</h3>
+                    <span class="material-symbols-outlined text-[#4f46e5]">person</span>
+                    <h3 class="text-sm font-bold text-[#1e1b4b]">Shaxsiy ma'lumotlar</h3>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">To'liq ism-sharif</label>
                         <input id="inputName" type="text" value="Alisher Usmanov"
-                            class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none transition-all" />
+                            class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#4f46e5] outline-none transition-all" />
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Elektron pochta</label>
                         <input id="inputEmail" type="email" value="admin@ishtop.uz"
-                            class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none transition-all" />
+                            class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#4f46e5] outline-none transition-all" />
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Telefon raqam</label>
                         <div
-                            class="flex items-center bg-slate-50 border border-slate-200 rounded-xl overflow-hidden focus-within:border-[#006b5c] focus-within:bg-white">
+                            class="flex items-center bg-slate-50 border border-slate-200 rounded-xl overflow-hidden focus-within:border-[#4f46e5] focus-within:bg-white">
                             <span class="px-3 text-xs font-bold text-slate-500 border-r border-slate-200">+998</span>
                             <input id="inputPhone" type="text" value="90 123 45 67"
                                 class="w-full px-3 py-2.5 text-xs sm:text-sm bg-transparent border-none outline-none" />
@@ -252,7 +253,7 @@
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Lavozim</label>
                         <input id="inputRole" type="text" value="Bosh Administrator"
-                            class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none transition-all" />
+                            class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#4f46e5] outline-none transition-all" />
                     </div>
                 </div>
             </div>
@@ -260,25 +261,25 @@
             <!-- Company Information -->
             <div class="bg-white p-5 rounded-2xl card-shadow border border-slate-100 space-y-4">
                 <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
-                    <span class="material-symbols-outlined text-[#006b5c]">business</span>
-                    <h3 class="text-sm font-bold text-[#002046]">Kompaniya parametrlari</h3>
+                    <span class="material-symbols-outlined text-[#4f46e5]">business</span>
+                    <h3 class="text-sm font-bold text-[#1e1b4b]">Kompaniya parametrlari</h3>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Tashkilot nomi</label>
                         <input id="inputCompany" type="text" value="ishtop.uz MChJ"
-                            class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none transition-all" />
+                            class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#4f46e5] outline-none transition-all" />
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">STIR (INN raqami)</label>
                         <input id="inputStir" type="text" value="309124872"
-                            class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none transition-all" />
+                            class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#4f46e5] outline-none transition-all" />
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Faoliyat sohasi</label>
                         <select id="inputSector"
-                            class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none transition-all">
+                            class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#4f46e5] outline-none transition-all">
                             <option>HR &amp; Bandlik xizmatlari</option>
                             <option>IT &amp; Dasturiy ta'minot</option>
                             <option>Savdo va Chakana</option>
@@ -288,7 +289,7 @@
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Bosh ofis manzili</label>
                         <input id="inputAddress" type="text" value="Toshkent shahri, Amir Temur shox ko'chasi 107B"
-                            class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none transition-all" />
+                            class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#4f46e5] outline-none transition-all" />
                     </div>
                 </div>
             </div>
@@ -296,25 +297,25 @@
             <!-- Security & 2FA -->
             <div class="bg-white p-5 rounded-2xl card-shadow border border-slate-100 space-y-4">
                 <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
-                    <span class="material-symbols-outlined text-[#006b5c]">security</span>
-                    <h3 class="text-sm font-bold text-[#002046]">Xavfsizlik va Parol</h3>
+                    <span class="material-symbols-outlined text-[#4f46e5]">security</span>
+                    <h3 class="text-sm font-bold text-[#1e1b4b]">Xavfsizlik va Parol</h3>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Amaldagi parol</label>
                         <input type="password" placeholder="••••••••"
-                            class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none transition-all" />
+                            class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#4f46e5] outline-none transition-all" />
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Yangi parol</label>
                         <input type="password" placeholder="••••••••"
-                            class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none transition-all" />
+                            class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#4f46e5] outline-none transition-all" />
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Parolni takrorlang</label>
                         <input type="password" placeholder="••••••••"
-                            class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#006b5c] outline-none transition-all" />
+                            class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#4f46e5] outline-none transition-all" />
                     </div>
                 </div>
 
@@ -323,7 +324,7 @@
                     <div class="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-200">
                         <div class="flex items-center gap-3">
                             <span
-                                class="w-10 h-10 rounded-xl bg-emerald-50 text-[#006b5c] flex items-center justify-center">
+                                class="w-10 h-10 rounded-xl bg-indigo-50 text-[#4f46e5] flex items-center justify-center">
                                 <span class="material-symbols-outlined">sms</span>
                             </span>
                             <div>
@@ -347,7 +348,7 @@
                     Bekor qilish
                 </a>
                 <button type="submit" id="saveBtn"
-                    class="px-6 py-2.5 bg-[#006b5c] hover:bg-[#005145] text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-emerald-700/20 active:scale-95 flex items-center gap-1.5">
+                    class="px-6 py-2.5 bg-[#4f46e5] hover:bg-[#3730a3] text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-700/20 active:scale-95 flex items-center gap-1.5">
                     <span class="material-symbols-outlined text-base">check</span>
                     <span>O'zgarishlarni saqlash</span>
                 </button>
@@ -368,7 +369,7 @@
         </a>
         <div class="relative -top-3">
             <a href="./dashboard.html"
-                class="w-12 h-12 rounded-full bg-[#006b5c] text-white flex items-center justify-center shadow-lg shadow-emerald-700/30 active:scale-90 transition-transform">
+                class="w-12 h-12 rounded-full bg-[#4f46e5] text-white flex items-center justify-center shadow-lg shadow-indigo-700/30 active:scale-90 transition-transform">
                 <span class="material-symbols-outlined text-2xl">home</span>
             </a>
         </div>
@@ -376,7 +377,7 @@
             <span class="material-symbols-outlined text-2xl">group</span>
             <span class="text-[10px]">Nomzodlar</span>
         </a>
-        <a href="./sozlamalar.html" class="flex flex-col items-center gap-0.5 text-[#006b5c]">
+        <a href="./sozlamalar.html" class="flex flex-col items-center gap-0.5 text-[#4f46e5]">
             <span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">settings</span>
             <span class="text-[10px] font-bold">Sozlamalar</span>
         </a>

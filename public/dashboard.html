@@ -6,7 +6,7 @@
     <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
         name="viewport" />
     <title>ishtop.uz | Admin Boshqaruv Paneli & Mini Ilova</title>
-    <meta name="theme-color" content="#0F1B2D" />
+    <meta name="theme-color" content="#14122e" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="manifest" href="/manifest.json" />
@@ -151,7 +151,7 @@
             bottom: 80px;
             left: 50%;
             transform: translateX(-50%) translateY(20px);
-            background: #0F1B2D;
+            background: #14122e;
             color: white;
             padding: 12px 24px;
             border-radius: 14px;
@@ -184,6 +184,7 @@
             transform: translateY(0) scale(1);
         }
     </style>
+    <link rel="stylesheet" href="/theme.css" />
 </head>
 
 <body class="min-h-screen flex flex-col pb-20 md:pb-0">
@@ -198,20 +199,20 @@
             <div class="flex items-center gap-3">
                 <a href="./dashboard.html" class="flex items-center gap-2">
                     <div
-                        class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#0F1B2D] to-[#0B5C46] text-white flex items-center justify-center shadow-md">
+                        class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#14122e] to-[#4338ca] text-white flex items-center justify-center shadow-md">
                         <span class="material-symbols-outlined text-xl">work_outline</span>
                     </div>
-                    <span class="text-xl tracking-tight text-[#0F1B2D]"
+                    <span class="text-xl tracking-tight text-[#14122e]"
                         style="font-family:'Fraunces',serif; font-weight:700; font-style:italic;">ishtop<span
-                            class="text-[#0B5C46]" style="font-style:normal;">.uz</span></span>
+                            class="text-[#4338ca]" style="font-style:normal;">.uz</span></span>
                 </a>
             </div>
 
             <!-- Header Center: Uptime & Quick Stats -->
             <div class="hidden md:flex items-center gap-3">
                 <div
-                    class="flex items-center gap-2 px-3 py-1 bg-emerald-50 border border-emerald-200/60 rounded-full text-xs font-semibold text-[#0B5C46]">
-                    <span class="uptime-dot w-2 h-2 rounded-full bg-emerald-500"></span>
+                    class="flex items-center gap-2 px-3 py-1 bg-indigo-50 border border-indigo-200/60 rounded-full text-xs font-semibold text-[#4338ca]">
+                    <span class="uptime-dot w-2 h-2 rounded-full bg-indigo-500"></span>
                     <span>Server: <strong id="uptimeDisplay">00:00:00</strong></span>
                 </div>
                 <div
@@ -224,13 +225,13 @@
             <!-- Header Right: Actions & Profile -->
             <div class="flex items-center gap-2 sm:gap-3">
                 <a href="./vakansiyalar.html"
-                    class="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:text-[#0B5C46] hover:bg-slate-100 transition-colors">
+                    class="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:text-[#4338ca] hover:bg-slate-100 transition-colors">
                     <span class="material-symbols-outlined text-base">work</span>
                     Vakansiyalar
                 </a>
 
                 <button id="openAddModalBtn"
-                    class="flex items-center gap-1.5 px-3.5 py-2 bg-[#0B5C46] text-white rounded-xl text-xs font-bold hover:bg-[#073D2F] transition-all active:scale-95 shadow-md shadow-emerald-700/20">
+                    class="flex items-center gap-1.5 px-3.5 py-2 bg-[#4338ca] text-white rounded-xl text-xs font-bold hover:bg-[#312e81] transition-all active:scale-95 shadow-md shadow-indigo-700/20">
                     <span class="material-symbols-outlined text-base">add</span>
                     <span>Qo'shish</span>
                 </button>
@@ -238,7 +239,7 @@
                 <!-- User Dropdown Menu -->
                 <div class="relative" id="userMenuWrapper">
                     <button id="userAvatarBtn"
-                        class="flex items-center gap-2 p-1 rounded-full hover:ring-2 hover:ring-[#0B5C46]/30 transition-all">
+                        class="flex items-center gap-2 p-1 rounded-full hover:ring-2 hover:ring-[#4338ca]/30 transition-all">
                         <img id="headerAvatar" class="w-9 h-9 rounded-full object-cover border-2 border-slate-200"
                             src="https://ui-avatars.com/api/?name=Alisher+Usmanov&background=0F1B2D&color=fff&size=128"
                             alt="Admin" />
@@ -250,7 +251,7 @@
                             <p class="text-sm font-bold text-slate-900" id="userNameDisplay">Alisher Usmanov</p>
                             <p class="text-xs text-slate-500 truncate" id="userEmailDisplay">admin@ishtop.uz</p>
                             <span
-                                class="inline-block mt-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-md">Bosh
+                                class="inline-block mt-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded-md">Bosh
                                 Administrator</span>
                         </div>
                         <div class="py-1">
@@ -258,12 +259,12 @@
                             </p>
                             <button onclick="switchUser('Alisher Usmanov', 'Bosh Administrator', 'admin@ishtop.uz')"
                                 class="w-full px-3 py-1.5 flex items-center gap-2.5 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-50">
-                                <span class="material-symbols-outlined text-base text-[#0F1B2D]">shield_person</span>
+                                <span class="material-symbols-outlined text-base text-[#14122e]">shield_person</span>
                                 Alisher Usmanov (Admin)
                             </button>
                             <button onclick="switchUser('Madina Karimova', 'HR Menejer', 'madina@ishtop.uz')"
                                 class="w-full px-3 py-1.5 flex items-center gap-2.5 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-50">
-                                <span class="material-symbols-outlined text-base text-[#0B5C46]">badge</span>
+                                <span class="material-symbols-outlined text-base text-[#4338ca]">badge</span>
                                 Madina Karimova (HR)
                             </button>
                         </div>
@@ -288,7 +289,7 @@
         <div class="border-t border-slate-100 bg-white">
             <div class="max-w-7xl mx-auto px-4 flex items-center gap-1 overflow-x-auto">
                 <a href="./dashboard.html"
-                    class="px-4 py-2.5 text-xs font-bold text-[#0B5C46] border-b-2 border-[#0B5C46] whitespace-nowrap flex items-center gap-1.5">
+                    class="px-4 py-2.5 text-xs font-bold text-[#4338ca] border-b-2 border-[#4338ca] whitespace-nowrap flex items-center gap-1.5">
                     <span class="material-symbols-outlined text-base"
                         style="font-variation-settings: 'FILL' 1;">dashboard</span>
                     Boshqaruv paneli
@@ -331,17 +332,17 @@
             <div class="flex items-center gap-2 text-xs text-slate-500">
                 <span>ishtop.uz</span>
                 <span class="material-symbols-outlined text-sm text-slate-300">chevron_right</span>
-                <span class="font-bold text-[#0F1B2D]">Boshqaruv paneli</span>
+                <span class="font-bold text-[#14122e]">Boshqaruv paneli</span>
             </div>
             <div class="flex items-center gap-3 text-xs text-slate-600 flex-wrap">
                 <span class="flex items-center gap-1 text-slate-500">
-                    <span class="material-symbols-outlined text-sm text-[#0B5C46]">today</span>
+                    <span class="material-symbols-outlined text-sm text-[#4338ca]">today</span>
                     <span id="stampDate">Bugun</span>
                 </span>
                 <span class="h-3 w-px bg-slate-200"></span>
                 <span class="flex items-center gap-1 text-slate-500">
-                    <span class="material-symbols-outlined text-sm text-[#0B5C46]">update</span>
-                    Uptime: <strong class="text-[#0B5C46]" id="stampUptime">00:00:00</strong>
+                    <span class="material-symbols-outlined text-sm text-[#4338ca]">update</span>
+                    Uptime: <strong class="text-[#4338ca]" id="stampUptime">00:00:00</strong>
                 </span>
             </div>
         </div>
@@ -350,7 +351,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-3 sm:gap-4">
             <!-- Primary callout -->
             <div class="relative overflow-hidden rounded-2xl p-5 text-white flex flex-col justify-between"
-                style="background:linear-gradient(135deg, #0B5C46 0%, #0F1B2D 130%);">
+                style="background:linear-gradient(135deg, #4338ca 0%, #14122e 130%);">
                 <svg class="absolute inset-0 w-full h-full opacity-20" viewBox="0 0 400 140" preserveAspectRatio="none">
                     <path d="M0 100 C 60 100, 70 40, 130 40 S 220 90, 280 90 S 350 30, 400 30" stroke="#fff"
                         stroke-width="1.4" fill="none" />
@@ -368,10 +369,10 @@
             <div class="bg-white rounded-2xl border border-slate-100 divide-y divide-slate-100">
                 <div class="flex items-center justify-between px-4 py-3">
                     <div class="flex items-center gap-2.5">
-                        <span class="material-symbols-outlined text-lg text-[#0B5C46]">work</span>
+                        <span class="material-symbols-outlined text-lg text-[#4338ca]">work</span>
                         <div>
                             <p class="text-xs font-semibold text-slate-500">Faol vakansiyalar</p>
-                            <h4 class="text-lg font-bold text-[#0F1B2D] leading-tight"><span id="statVacancies">…</span>
+                            <h4 class="text-lg font-bold text-[#14122e] leading-tight"><span id="statVacancies">…</span>
                             </h4>
                         </div>
                     </div>
@@ -382,7 +383,7 @@
                         <span class="material-symbols-outlined text-lg text-amber-600">person_add</span>
                         <div>
                             <p class="text-xs font-semibold text-slate-500">Oxirgi 7 kunda yangi nomzodlar</p>
-                            <h4 class="text-lg font-bold text-[#0F1B2D] leading-tight"><span id="statNewWeek">…</span>
+                            <h4 class="text-lg font-bold text-[#14122e] leading-tight"><span id="statNewWeek">…</span>
                             </h4>
                         </div>
                     </div>
@@ -400,7 +401,7 @@
                         alt="Yangi imkoniyatlar" />
                     <div class="slide-overlay">
                         <span
-                            class="px-2.5 py-1 bg-emerald-500 text-white font-bold text-[11px] rounded-full w-fit mb-2">🚀
+                            class="px-2.5 py-1 bg-indigo-500 text-white font-bold text-[11px] rounded-full w-fit mb-2">🚀
                             Yangi imkoniyatlar</span>
                         <h3 class="text-xl sm:text-2xl text-white"
                             style="font-family:'Fraunces',serif; font-weight:700;">O'zbekistonda eng nufuzli
@@ -468,11 +469,11 @@
                 class="lg:col-span-2 bg-white p-5 rounded-2xl card-shadow border border-slate-100 flex flex-col justify-between">
                 <div class="flex items-center justify-between mb-4">
                     <div>
-                        <h3 class="text-base font-bold text-[#0F1B2D]">Vakansiyalar dinamikasi</h3>
+                        <h3 class="text-base font-bold text-[#14122e]">Vakansiyalar dinamikasi</h3>
                         <p class="text-xs text-slate-400">Haftalik arizalar soni va faollik darajasi</p>
                     </div>
                     <a href="./statistika.html"
-                        class="text-xs font-bold text-[#0B5C46] hover:underline flex items-center gap-1">
+                        class="text-xs font-bold text-[#4338ca] hover:underline flex items-center gap-1">
                         Batafsil tahlil <span class="material-symbols-outlined text-sm">arrow_forward</span>
                     </a>
                 </div>
@@ -480,47 +481,47 @@
                 <!-- Custom Bar Chart Visualization -->
                 <div class="h-44 flex items-end justify-between gap-3 pt-4 px-2 border-b border-slate-100">
                     <div class="flex-1 flex flex-col items-center gap-2 group">
-                        <span class="text-[10px] font-bold text-slate-400 group-hover:text-[#0F1B2D]">450</span>
-                        <div class="w-full bg-slate-100 hover:bg-emerald-300 transition-all rounded-t-lg h-20"></div>
+                        <span class="text-[10px] font-bold text-slate-400 group-hover:text-[#14122e]">450</span>
+                        <div class="w-full bg-slate-100 hover:bg-indigo-300 transition-all rounded-t-lg h-20"></div>
                         <span class="text-xs font-semibold text-slate-500">Dush</span>
                     </div>
                     <div class="flex-1 flex flex-col items-center gap-2 group">
-                        <span class="text-[10px] font-bold text-slate-400 group-hover:text-[#0F1B2D]">720</span>
-                        <div class="w-full bg-slate-100 hover:bg-emerald-400 transition-all rounded-t-lg h-28"></div>
+                        <span class="text-[10px] font-bold text-slate-400 group-hover:text-[#14122e]">720</span>
+                        <div class="w-full bg-slate-100 hover:bg-indigo-400 transition-all rounded-t-lg h-28"></div>
                         <span class="text-xs font-semibold text-slate-500">Sesh</span>
                     </div>
                     <div class="flex-1 flex flex-col items-center gap-2 group">
-                        <span class="text-[10px] font-bold text-slate-400 group-hover:text-[#0F1B2D]">680</span>
-                        <div class="w-full bg-slate-100 hover:bg-emerald-400 transition-all rounded-t-lg h-24"></div>
+                        <span class="text-[10px] font-bold text-slate-400 group-hover:text-[#14122e]">680</span>
+                        <div class="w-full bg-slate-100 hover:bg-indigo-400 transition-all rounded-t-lg h-24"></div>
                         <span class="text-xs font-semibold text-slate-500">Chor</span>
                     </div>
                     <div class="flex-1 flex flex-col items-center gap-2 group">
-                        <span class="text-[10px] font-bold text-slate-400 group-hover:text-[#0F1B2D]">940</span>
-                        <div class="w-full bg-slate-100 hover:bg-emerald-500 transition-all rounded-t-lg h-36"></div>
+                        <span class="text-[10px] font-bold text-slate-400 group-hover:text-[#14122e]">940</span>
+                        <div class="w-full bg-slate-100 hover:bg-indigo-500 transition-all rounded-t-lg h-36"></div>
                         <span class="text-xs font-semibold text-slate-500">Pay</span>
                     </div>
                     <div class="flex-1 flex flex-col items-center gap-2 group">
-                        <span class="text-[10px] font-bold text-slate-400 group-hover:text-[#0F1B2D]">810</span>
-                        <div class="w-full bg-slate-100 hover:bg-emerald-400 transition-all rounded-t-lg h-32"></div>
+                        <span class="text-[10px] font-bold text-slate-400 group-hover:text-[#14122e]">810</span>
+                        <div class="w-full bg-slate-100 hover:bg-indigo-400 transition-all rounded-t-lg h-32"></div>
                         <span class="text-xs font-semibold text-slate-500">Jum</span>
                     </div>
                     <div class="flex-1 flex flex-col items-center gap-2 group">
-                        <span class="text-[10px] font-bold text-slate-400 group-hover:text-[#0F1B2D]">1,200</span>
+                        <span class="text-[10px] font-bold text-slate-400 group-hover:text-[#14122e]">1,200</span>
                         <div
-                            class="w-full bg-[#0B5C46] transition-all rounded-t-lg h-40 shadow-md shadow-emerald-600/30">
+                            class="w-full bg-[#4338ca] transition-all rounded-t-lg h-40 shadow-md shadow-indigo-600/30">
                         </div>
-                        <span class="text-xs font-bold text-[#0B5C46]">Shan</span>
+                        <span class="text-xs font-bold text-[#4338ca]">Shan</span>
                     </div>
                     <div class="flex-1 flex flex-col items-center gap-2 group">
-                        <span class="text-[10px] font-bold text-slate-400 group-hover:text-[#0F1B2D]">920</span>
-                        <div class="w-full bg-slate-100 hover:bg-emerald-400 transition-all rounded-t-lg h-34"></div>
+                        <span class="text-[10px] font-bold text-slate-400 group-hover:text-[#14122e]">920</span>
+                        <div class="w-full bg-slate-100 hover:bg-indigo-400 transition-all rounded-t-lg h-34"></div>
                         <span class="text-xs font-semibold text-slate-500">Yak</span>
                     </div>
                 </div>
 
                 <div class="flex items-center justify-between text-xs text-slate-400 mt-3 pt-1">
                     <span>O'rtacha kunlik: <strong>817 ariza</strong></span>
-                    <span class="flex items-center gap-1 text-emerald-600 font-semibold">
+                    <span class="flex items-center gap-1 text-indigo-600 font-semibold">
                         <span class="material-symbols-outlined text-sm">trending_up</span> Eng yuqori faollik: Shanba
                     </span>
                 </div>
@@ -551,14 +552,14 @@
         <div class="bg-white p-5 rounded-2xl card-shadow border border-slate-100">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                 <div>
-                    <h3 class="text-base font-bold text-[#0F1B2D]">So'nggi faoliyat &amp; Arizalar</h3>
+                    <h3 class="text-base font-bold text-[#14122e]">So'nggi faoliyat &amp; Arizalar</h3>
                     <p class="text-xs text-slate-400">Yangi yuborilgan arizalar va murojaatchilar holati</p>
                 </div>
                 <div class="flex items-center gap-2">
                     <button onclick="filterTable('all')"
                         class="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-colors">Barchasi</button>
                     <button onclick="filterTable('yangi')"
-                        class="px-3 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-lg text-xs font-semibold transition-colors">Yangi</button>
+                        class="px-3 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 rounded-lg text-xs font-semibold transition-colors">Yangi</button>
 
                 </div>
             </div>
@@ -588,14 +589,14 @@
     <footer class="w-full py-4 border-t border-slate-200 bg-white text-slate-500 text-xs mt-auto">
         <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
             <div class="flex items-center gap-2">
-                <span class="font-bold text-[#0F1B2D]">ishtop.uz</span>
+                <span class="font-bold text-[#14122e]">ishtop.uz</span>
                 <span>© 2026 Barcha huquqlar himoyalangan.</span>
             </div>
             <div class="flex items-center gap-4 text-xs font-medium">
-                <a href="./vakansiyalar.html" class="hover:text-[#0B5C46]">Vakansiyalar</a>
-                <a href="./nomzodlar.html" class="hover:text-[#0B5C46]">Nomzodlar</a>
-                <a href="./statistika.html" class="hover:text-[#0B5C46]">Statistika</a>
-                <a href="./sozlamalar.html" class="hover:text-[#0B5C46]">Sozlamalar</a>
+                <a href="./vakansiyalar.html" class="hover:text-[#4338ca]">Vakansiyalar</a>
+                <a href="./nomzodlar.html" class="hover:text-[#4338ca]">Nomzodlar</a>
+                <a href="./statistika.html" class="hover:text-[#4338ca]">Statistika</a>
+                <a href="./sozlamalar.html" class="hover:text-[#4338ca]">Sozlamalar</a>
             </div>
         </div>
     </footer>
@@ -603,7 +604,7 @@
     <!-- Mobile Bottom Navigation -->
     <nav
         class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-slate-200/80 flex items-center justify-around z-30 px-2 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
-        <a href="./dashboard.html" class="flex flex-col items-center gap-0.5 text-[#0B5C46]">
+        <a href="./dashboard.html" class="flex flex-col items-center gap-0.5 text-[#4338ca]">
             <span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">dashboard</span>
             <span class="text-[10px] font-bold">Boshqaruv</span>
         </a>
@@ -613,7 +614,7 @@
         </a>
         <div class="relative -top-3">
             <button onclick="document.getElementById('openAddModalBtn').click()"
-                class="w-12 h-12 rounded-full bg-[#0B5C46] text-white flex items-center justify-center shadow-lg shadow-emerald-700/30 active:scale-90 transition-transform">
+                class="w-12 h-12 rounded-full bg-[#4338ca] text-white flex items-center justify-center shadow-lg shadow-indigo-700/30 active:scale-90 transition-transform">
                 <span class="material-symbols-outlined text-2xl">add</span>
             </button>
         </div>
@@ -636,10 +637,10 @@
 
             <div class="text-center mb-5">
                 <div
-                    class="w-12 h-12 rounded-2xl bg-emerald-50 text-[#0B5C46] flex items-center justify-center mx-auto mb-2">
+                    class="w-12 h-12 rounded-2xl bg-indigo-50 text-[#4338ca] flex items-center justify-center mx-auto mb-2">
                     <span class="material-symbols-outlined text-2xl">person_add</span>
                 </div>
-                <h3 class="text-lg font-bold text-[#0F1B2D]">Yangi nomzod / xodim qo'shish</h3>
+                <h3 class="text-lg font-bold text-[#14122e]">Yangi nomzod / xodim qo'shish</h3>
                 <p class="text-xs text-slate-500">Ma'lumotlarni to'ldirib ro'yxatga kiriting</p>
             </div>
 
@@ -647,25 +648,25 @@
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">To'liq ism *</label>
                     <input id="newUserName" type="text" required
-                        class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#0B5C46] outline-none"
+                        class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#4338ca] outline-none"
                         placeholder="Masalan: Sardor Rustamov" />
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Lavozim *</label>
                     <input id="newUserRole" type="text" required
-                        class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#0B5C46] outline-none"
+                        class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#4338ca] outline-none"
                         placeholder="Masalan: Katta savdo menejeri" />
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Telefon raqam *</label>
                     <input id="newUserPhone" type="tel" required
-                        class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#0B5C46] outline-none"
+                        class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#4338ca] outline-none"
                         placeholder="+998 90 123 45 67" />
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Hudud</label>
                     <select id="newUserLocation"
-                        class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#0B5C46] outline-none">
+                        class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#4338ca] outline-none">
                         <option value="Toshkent">Toshkent shahri</option>
                         <option value="Samarqand">Samarqand viloyati</option>
                         <option value="Farg'ona">Farg'ona vodiysi</option>
@@ -676,7 +677,7 @@
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Boshlang'ich holati</label>
                     <select id="newUserStatus"
-                        class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#0B5C46] outline-none">
+                        class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#4338ca] outline-none">
                         <option value="yangi">🟢 Yangi</option>
                         <option value="jarayonda">🟡 Ko'rib chiqilmoqda</option>
                         <option value="arxiv">⚪ Arxiv</option>
@@ -684,7 +685,7 @@
                 </div>
 
                 <button type="submit"
-                    class="w-full mt-3 py-3 bg-[#0B5C46] hover:bg-[#073D2F] text-white font-bold rounded-xl text-sm transition-all active:scale-95 shadow-md shadow-emerald-700/20 flex items-center justify-center gap-1.5">
+                    class="w-full mt-3 py-3 bg-[#4338ca] hover:bg-[#312e81] text-white font-bold rounded-xl text-sm transition-all active:scale-95 shadow-md shadow-indigo-700/20 flex items-center justify-center gap-1.5">
                     <span class="material-symbols-outlined text-base">check_circle</span>
                     Muvaffaqiyatli saqlash
                 </button>
@@ -699,18 +700,18 @@
                 <span class="material-symbols-outlined">close</span>
             </button>
             <div
-                class="w-16 h-16 rounded-full bg-emerald-50 text-[#0B5C46] flex items-center justify-center mx-auto mb-3">
+                class="w-16 h-16 rounded-full bg-indigo-50 text-[#4338ca] flex items-center justify-center mx-auto mb-3">
                 <span class="material-symbols-outlined text-3xl">account_circle</span>
             </div>
             <h3 class="text-lg font-bold text-slate-900" id="viewModalName">Nomzod</h3>
-            <p class="text-xs text-[#0B5C46] font-semibold" id="viewModalRole">Lavozim</p>
+            <p class="text-xs text-[#4338ca] font-semibold" id="viewModalRole">Lavozim</p>
             <div class="mt-4 p-3 bg-slate-50 rounded-xl text-xs space-y-1.5 text-left">
                 <div class="flex justify-between"><span class="text-slate-400">Hudud:</span> <strong
                         id="viewModalLoc">Toshkent</strong></div>
                 <div class="flex justify-between"><span class="text-slate-400">Telefon:</span> <strong
                         id="viewModalPhone">+998 90 000 00 00</strong></div>
                 <div class="flex justify-between"><span class="text-slate-400">Holat:</span> <span
-                        class="text-emerald-700 font-bold">Faol arizachi</span></div>
+                        class="text-indigo-700 font-bold">Faol arizachi</span></div>
             </div>
             <div class="mt-4 flex gap-2">
                 <a id="viewModalTgLink" href="https://t.me/" target="_blank"
@@ -718,7 +719,7 @@
                     <span class="material-symbols-outlined text-sm">chat</span> Telegram
                 </a>
                 <a href="./nomzodlar.html"
-                    class="flex-1 py-2 bg-[#0F1B2D] text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1">
+                    class="flex-1 py-2 bg-[#14122e] text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1">
                     Barcha nomzodlar
                 </a>
             </div>
@@ -844,7 +845,7 @@
                 set('statCandidates', '—');
                 set('statNewWeek', '—');
                 set('statCandidatesNote', "Nomzodlar ma'lumoti himoyalangan: Nomzodlar sahifasida admin kalitini kiriting");
-                body.innerHTML = '<tr><td colspan="5" class="py-6 px-3 text-center text-slate-400">Nomzodlarni ko\'rish uchun <a href="./nomzodlar.html" class="text-[#0B5C46] font-bold underline">Nomzodlar</a> sahifasida admin kalitini kiriting.</td></tr>';
+                body.innerHTML = '<tr><td colspan="5" class="py-6 px-3 text-center text-slate-400">Nomzodlarni ko\'rish uchun <a href="./nomzodlar.html" class="text-[#4338ca] font-bold underline">Nomzodlar</a> sahifasida admin kalitini kiriting.</td></tr>';
                 return;
             }
 
@@ -869,8 +870,8 @@
                     </td>
                     <td class="py-3 px-3 font-medium text-slate-700">${esc(c.desiredRole)}</td>
                     <td class="py-3 px-3 text-slate-400 hidden sm:table-cell">${esc(when)}</td>
-                    <td class="py-3 px-3"><span class="px-2.5 py-1 ${isNew ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'} font-bold rounded-full text-[10px]">${isNew ? '🟢 Yangi' : '⚪ Faol'}</span></td>
-                    <td class="py-3 px-3 text-right"><button data-i="${i}" class="view-cand px-2.5 py-1 text-slate-600 hover:text-[#0B5C46] hover:bg-slate-100 rounded-lg font-semibold transition-colors">Ko'rish</button></td>
+                    <td class="py-3 px-3"><span class="px-2.5 py-1 ${isNew ? 'bg-indigo-50 text-indigo-700' : 'bg-slate-100 text-slate-600'} font-bold rounded-full text-[10px]">${isNew ? '🟢 Yangi' : '⚪ Faol'}</span></td>
+                    <td class="py-3 px-3 text-right"><button data-i="${i}" class="view-cand px-2.5 py-1 text-slate-600 hover:text-[#4338ca] hover:bg-slate-100 rounded-lg font-semibold transition-colors">Ko'rish</button></td>
                 </tr>`;
             }).join('');
             body.querySelectorAll('.view-cand').forEach(btn => btn.addEventListener('click', () => {

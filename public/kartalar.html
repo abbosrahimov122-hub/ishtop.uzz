@@ -6,7 +6,7 @@
     <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
         name="viewport" />
     <title>Kartalarim &amp; Moliya | ishtop.uz Mini Ilova</title>
-    <meta name="theme-color" content="#002046" />
+    <meta name="theme-color" content="#1e1b4b" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="manifest" href="/manifest.json" />
@@ -95,7 +95,7 @@
             bottom: 80px;
             left: 50%;
             transform: translateX(-50%) translateY(20px);
-            background: #002046;
+            background: #1e1b4b;
             color: white;
             padding: 12px 24px;
             border-radius: 14px;
@@ -115,6 +115,7 @@
             transform: translateX(-50%) translateY(0);
         }
     </style>
+    <link rel="stylesheet" href="/theme.css" />
 </head>
 
 <body class="min-h-screen flex flex-col pb-20 md:pb-0">
@@ -127,11 +128,11 @@
         <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
             <a href="./dashboard.html" class="flex items-center gap-2">
                 <div
-                    class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#002046] to-[#006b5c] text-white flex items-center justify-center shadow-md">
+                    class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#1e1b4b] to-[#4f46e5] text-white flex items-center justify-center shadow-md">
                     <span class="material-symbols-outlined text-xl">work_outline</span>
                 </div>
-                <span class="text-xl font-black text-[#002046] tracking-tight">ishtop<span
-                        class="text-[#006b5c]">.uz</span></span>
+                <span class="text-xl font-black text-[#1e1b4b] tracking-tight">ishtop<span
+                        class="text-[#4f46e5]">.uz</span></span>
             </a>
 
             <div class="flex items-center gap-2 sm:gap-3">
@@ -186,109 +187,98 @@
     </header>
 
     <!-- Main Content -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6 space-y-6">
+    <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-6 space-y-6">
 
-        <div>
-            <h1 class="text-xl font-black text-[#002046]">To'lovlar</h1>
-            <p class="text-xs text-slate-500">VIP obunani sotib olish va to'lovlar tarixi</p>
-        </div>
-
-        <!-- Status Grid -->
-        <div class="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            <div
-                class="bg-gradient-to-br from-amber-50 to-orange-50/60 p-4 rounded-2xl card-shadow border border-amber-200/80 flex flex-col justify-between">
-                <div class="flex items-center justify-between mb-1">
-                    <span class="text-[11px] font-bold text-amber-800 uppercase tracking-wider">A'zolik holati</span>
-                    <span class="text-[10px] bg-amber-200 text-amber-900 font-black px-1.5 py-0.5 rounded">VIP</span>
-                </div>
-                <p class="text-lg font-black text-amber-900" id="vipState">Yuklanmoqda…</p>
-                <p class="text-[11px] text-amber-700 mt-0.5" id="vipUntil"></p>
-            </div>
-
-            <div class="bg-white p-4 rounded-2xl card-shadow border border-slate-100">
-                <div class="flex items-center gap-1.5 text-slate-400 mb-1">
-                    <span class="material-symbols-outlined text-base text-[#006b5c]">calendar_month</span>
-                    <span class="text-[11px] font-semibold">Qolgan muddat</span>
-                </div>
-                <h3 class="text-xl sm:text-2xl font-black text-[#002046]" id="vipDaysLeft">—</h3>
-                <p class="text-[11px] text-slate-400 mt-0.5" id="vipDaysNote"></p>
-            </div>
-
-            <div class="bg-white p-4 rounded-2xl card-shadow border border-slate-100 col-span-2 lg:col-span-1">
-                <div class="flex items-center gap-1.5 text-slate-400 mb-1">
-                    <span class="material-symbols-outlined text-base text-emerald-600">verified_user</span>
-                    <span class="text-[11px] font-semibold">To'lov usuli</span>
-                </div>
-                <h3 class="text-base sm:text-lg font-black text-[#002046]">Payme · Click</h3>
-                <p class="text-[11px] text-slate-400 mt-0.5">Rasmiy litsenziyalangan shlyuzlar</p>
-            </div>
-        </div>
-
-        <!-- VIP Subscription Purchase -->
-        <div class="bg-white p-6 rounded-2xl card-shadow border border-slate-100">
-            <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+        <!-- Hero: VIP holati -->
+        <section
+            class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1e1b4b] via-[#312e81] to-[#4f46e5] text-white p-6 sm:p-8 shadow-xl">
+            <div class="absolute -top-16 -right-10 w-56 h-56 rounded-full bg-indigo-300/20 blur-3xl"></div>
+            <div class="absolute -bottom-20 -left-10 w-56 h-56 rounded-full bg-sky-300/15 blur-3xl"></div>
+            <div class="relative grid sm:grid-cols-[1fr_auto] gap-6 items-end">
                 <div>
-                    <h3 class="text-base font-bold text-[#002046]">VIP obunani sotib olish</h3>
-                    <p class="text-xs text-slate-400">To'lov Payme yoki Click'ning rasmiy sahifasida amalga oshiriladi
-                    </p>
+                    <span
+                        class="inline-flex items-center gap-1.5 text-[11px] font-black tracking-wider uppercase bg-amber-300 text-amber-950 px-2.5 py-1 rounded-full">
+                        <span class="material-symbols-outlined text-sm">workspace_premium</span> VIP
+                    </span>
+                    <p class="text-xs font-semibold text-white/60 uppercase tracking-wider mt-5">A'zolik holati</p>
+                    <p class="text-3xl sm:text-4xl font-black mt-1" id="vipState">Yuklanmoqda…</p>
+                    <p class="text-sm text-white/70 mt-1" id="vipUntil"></p>
+                </div>
+                <div class="rounded-2xl bg-white/10 border border-white/15 backdrop-blur px-5 py-4 min-w-[170px]">
+                    <p class="text-[11px] font-semibold text-white/60 uppercase tracking-wider">Qolgan muddat</p>
+                    <p class="text-2xl font-black mt-1" id="vipDaysLeft">—</p>
+                    <p class="text-[11px] text-white/60 mt-0.5" id="vipDaysNote"></p>
                 </div>
             </div>
+        </section>
 
-            <div class="grid sm:grid-cols-3 gap-3 mb-5" id="planGrid">
+        <!-- Tariflar -->
+        <section class="bg-white p-6 sm:p-8 rounded-3xl card-shadow border border-slate-100">
+            <div class="text-center max-w-md mx-auto mb-6">
+                <h2 class="text-xl sm:text-2xl font-black text-[#1e1b4b]">Tarifni tanlang</h2>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">Uzoq muddat tanlasangiz, oyiga arzonroq tushadi</p>
+            </div>
+
+            <div class="grid sm:grid-cols-3 gap-4 mb-6" id="planGrid">
                 <button type="button" data-amount="99000" data-days="30"
-                    class="plan-btn text-left p-4 rounded-xl border-2 border-[#006b5c] bg-emerald-50/60 transition-all">
-                    <p class="text-xs font-bold text-slate-500 uppercase">1 oy</p>
-                    <p class="text-xl font-black text-[#002046] mt-1">99,000 <span class="text-xs font-bold">UZS</span>
-                    </p>
+                    class="plan-btn relative text-left p-5 rounded-2xl border-2 border-[#4f46e5] bg-indigo-50/60 transition-all">
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">1 oy</p>
+                    <p class="text-2xl font-black text-[#1e1b4b] mt-2">99,000 <span
+                            class="text-xs font-bold text-slate-500">UZS</span></p>
+                    <p class="text-[11px] text-slate-500 mt-1">Sinab ko'rish uchun</p>
                 </button>
                 <button type="button" data-amount="250000" data-days="90"
-                    class="plan-btn text-left p-4 rounded-xl border-2 border-slate-200 hover:border-[#006b5c] transition-all">
-                    <p class="text-xs font-bold text-slate-500 uppercase">3 oy</p>
-                    <p class="text-xl font-black text-[#002046] mt-1">250,000 <span class="text-xs font-bold">UZS</span>
-                    </p>
+                    class="plan-btn relative text-left p-5 rounded-2xl border-2 border-slate-200 hover:border-[#4f46e5] transition-all">
+                    <span
+                        class="absolute -top-2.5 right-4 text-[10px] font-black bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full">−16%</span>
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">3 oy</p>
+                    <p class="text-2xl font-black text-[#1e1b4b] mt-2">250,000 <span
+                            class="text-xs font-bold text-slate-500">UZS</span></p>
+                    <p class="text-[11px] text-slate-500 mt-1">Oyiga ≈ 83,333 UZS</p>
                 </button>
                 <button type="button" data-amount="950000" data-days="365"
-                    class="plan-btn text-left p-4 rounded-xl border-2 border-slate-200 hover:border-[#006b5c] transition-all">
-                    <p class="text-xs font-bold text-slate-500 uppercase">12 oy</p>
-                    <p class="text-xl font-black text-[#002046] mt-1">950,000 <span class="text-xs font-bold">UZS</span>
-                    </p>
+                    class="plan-btn relative text-left p-5 rounded-2xl border-2 border-slate-200 hover:border-[#4f46e5] transition-all">
+                    <span
+                        class="absolute -top-2.5 right-4 text-[10px] font-black bg-amber-300 text-amber-950 px-2 py-0.5 rounded-full">Eng
+                        tejamkor −20%</span>
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">12 oy</p>
+                    <p class="text-2xl font-black text-[#1e1b4b] mt-2">950,000 <span
+                            class="text-xs font-bold text-slate-500">UZS</span></p>
+                    <p class="text-[11px] text-slate-500 mt-1">Oyiga ≈ 79,167 UZS</p>
                 </button>
             </div>
 
             <div class="grid sm:grid-cols-2 gap-3">
                 <button id="payWithPayme"
-                    class="py-3.5 bg-[#00cbff] hover:bg-[#00b8e6] text-[#002046] font-black rounded-xl text-sm transition-all active:scale-95 shadow-md flex items-center justify-center gap-2">
-                    <span class="material-symbols-outlined text-lg">credit_card</span>
-                    Payme orqali to'lash
+                    class="py-4 bg-[#00cbff] hover:bg-[#00b8e6] text-[#1e1b4b] font-black rounded-2xl text-sm transition-all active:scale-95 shadow-md flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-lg">credit_card</span> Payme orqali to'lash
                 </button>
                 <button id="payWithClick"
-                    class="py-3.5 bg-[#0272ff] hover:bg-[#0260d9] text-white font-black rounded-xl text-sm transition-all active:scale-95 shadow-md flex items-center justify-center gap-2">
-                    <span class="material-symbols-outlined text-lg">credit_card</span>
-                    Click orqali to'lash
+                    class="py-4 bg-[#0272ff] hover:bg-[#0260d9] text-white font-black rounded-2xl text-sm transition-all active:scale-95 shadow-md flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-lg">credit_card</span> Click orqali to'lash
                 </button>
             </div>
 
-            <div class="mt-4 p-3 bg-slate-50 rounded-xl text-[11px] text-slate-500 flex items-start gap-2">
-                <span class="material-symbols-outlined text-slate-400 text-sm mt-0.5">info</span>
-                <span>Karta raqami va CVV kod ishtop.uz saytiga emas, faqat Payme/Click'ning o'zining xavfsiz
-                    to'lov sahifasiga kiritiladi. Biz karta ma'lumotlarini hech qachon saqlamaymiz yoki
-                    ko'rmaymiz.</span>
+            <div class="mt-5 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[11px] text-slate-500">
+                <span class="inline-flex items-center gap-1.5"><span
+                        class="material-symbols-outlined text-indigo-600 text-base">lock</span> To'lov Payme/Click
+                    sahifasida</span>
+                <span class="inline-flex items-center gap-1.5"><span
+                        class="material-symbols-outlined text-indigo-600 text-base">visibility_off</span> Karta
+                    ma'lumoti bizda saqlanmaydi</span>
             </div>
-        </div>
+        </section>
 
-        <!-- Payment History -->
-        <div class="bg-white p-5 rounded-2xl card-shadow border border-slate-100">
-            <div class="flex items-center justify-between mb-4">
-                <div>
-                    <h3 class="text-base font-bold text-[#002046]">To'lovlar tarixi</h3>
-                    <p class="text-xs text-slate-400">VIP obuna uchun amalga oshirilgan to'lovlar</p>
-                </div>
+        <!-- To'lovlar tarixi -->
+        <section class="bg-white p-6 rounded-3xl card-shadow border border-slate-100">
+            <div class="mb-3">
+                <h3 class="text-base font-bold text-[#1e1b4b]">To'lovlar tarixi</h3>
+                <p class="text-xs text-slate-400">VIP obuna uchun amalga oshirilgan to'lovlar</p>
             </div>
-
             <div class="divide-y divide-slate-100" id="txList">
                 <p id="txEmpty" class="py-3 text-xs text-slate-400">Yuklanmoqda…</p>
             </div>
-        </div>
+        </section>
     </main>
 
     <!-- Mobile Navigation -->
@@ -304,7 +294,7 @@
         </a>
         <div class="relative -top-3">
             <a href="./dashboard.html"
-                class="w-12 h-12 rounded-full bg-[#006b5c] text-white flex items-center justify-center shadow-lg shadow-emerald-700/30 active:scale-90 transition-transform">
+                class="w-12 h-12 rounded-full bg-[#4f46e5] text-white flex items-center justify-center shadow-lg shadow-indigo-700/30 active:scale-90 transition-transform">
                 <span class="material-symbols-outlined text-2xl">home</span>
             </a>
         </div>
@@ -312,7 +302,7 @@
             <span class="material-symbols-outlined text-2xl">group</span>
             <span class="text-[10px]">Nomzodlar</span>
         </a>
-        <a href="./kartalar.html" class="flex flex-col items-center gap-0.5 text-[#006b5c]">
+        <a href="./kartalar.html" class="flex flex-col items-center gap-0.5 text-[#4f46e5]">
             <span class="material-symbols-outlined text-2xl"
                 style="font-variation-settings: 'FILL' 1;">credit_card</span>
             <span class="text-[10px] font-bold">Kartalar</span>
@@ -341,10 +331,10 @@
         document.querySelectorAll('.plan-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.plan-btn').forEach(b => {
-                    b.classList.remove('border-[#006b5c]', 'bg-emerald-50/60');
+                    b.classList.remove('border-[#4f46e5]', 'bg-indigo-50/60');
                     b.classList.add('border-slate-200');
                 });
-                btn.classList.add('border-[#006b5c]', 'bg-emerald-50/60');
+                btn.classList.add('border-[#4f46e5]', 'bg-indigo-50/60');
                 btn.classList.remove('border-slate-200');
                 selectedAmount = parseInt(btn.dataset.amount, 10);
                 selectedDays = parseInt(btn.dataset.days, 10);

@@ -8,13 +8,17 @@
     <title>IshTop — Kirish (Gmail &amp; Telegram)</title>
     <meta name="description"
         content="O'zbekistondagi eng zamonaviy ish qidiruv portali. Gmail va Telegram orqali xavfsiz kirish." />
-    <meta name="theme-color" content="#0D2247" />
+    <meta name="theme-color" content="#2a2766" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="manifest" href="/manifest.json" />
 
     <!-- Telegram & Google SDKs -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        // ?src=kollej kabi belgini eslab qoladi (nomzod qaysi havoladan kelganini bilish uchun)
+        (function () { try { var m = /[?&]src=([^&#]*)/.exec(location.search); if (m) { var v = decodeURIComponent(m[1]).toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 40); if (v) localStorage.setItem('ishtop_src', v); } } catch (e) { } })();
+    </script>
     <script src="/telegram.js" defer></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
@@ -27,13 +31,13 @@
 
     <style>
         :root {
-            --ink: #0F1B2D;
+            --ink: #14122e;
             --navy: #16324F;
-            --navy-2: #0B1522;
-            --forest: #0B5C46;
+            --navy-2: #0f0e24;
+            --forest: #4338ca;
             --forest-bright: #17A374;
             --emerald: #17A374;
-            --emerald-dark: #0B5C46;
+            --emerald-dark: #4338ca;
             --gold: #D69A2D;
             --amber: #D69A2D;
             --red: #C6433D;
@@ -87,7 +91,7 @@
                 radial-gradient(46% 38% at 14% 8%, rgba(23, 163, 116, 0.40) 0%, transparent 100%),
                 radial-gradient(50% 42% at 92% 14%, rgba(22, 50, 79, 0.85) 0%, transparent 100%),
                 radial-gradient(60% 50% at 50% 100%, rgba(214, 154, 45, 0.16) 0%, transparent 100%),
-                linear-gradient(160deg, #0F1B2D 0%, #0B1522 60%, #070D16 100%);
+                linear-gradient(160deg, #14122e 0%, #0f0e24 60%, #070D16 100%);
         }
 
         .bg-grid {
@@ -522,7 +526,7 @@
         }
 
         .toast.success {
-            background: linear-gradient(135deg, #0E9F6E, #0B7A55);
+            background: linear-gradient(135deg, #0E9F6E, #4f46e5);
         }
 
         .toast.error {
@@ -530,7 +534,7 @@
         }
 
         .toast.info {
-            background: linear-gradient(135deg, #123262, #0D2247);
+            background: linear-gradient(135deg, #123262, #2a2766);
         }
 
         /* Gmail Incoming Simulation Push Notification */
@@ -682,6 +686,7 @@
             cursor: not-allowed;
         }
     </style>
+    <link rel="stylesheet" href="/theme.css" />
 </head>
 
 <body>
@@ -835,7 +840,7 @@
                 </form>
 
                 <a href="./nomzod-royxatdan-otish.html"
-                    style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;padding:13px 16px;border:2px solid #006b5c;border-radius:12px;color:#006b5c;font-weight:700;font-size:14px;text-decoration:none;background:#f0fdf9;"><span
+                    style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;padding:13px 16px;border:2px solid #4f46e5;border-radius:12px;color:#4f46e5;font-weight:700;font-size:14px;text-decoration:none;background:#eef2ff;"><span
                         class="material-symbols-outlined" style="font-size:20px;">person_add</span><span>Ish
                         qidiryapsizmi? Nomzod sifatida ro'yxatdan
                         o'ting</span></a><!-- Quick Navigation to internal pages -->
@@ -933,7 +938,7 @@
                 </div>
 
                 <button type="button" id="verifyGmailCodeBtn" class="login-btn"
-                    style="background: linear-gradient(135deg, #0E9F6E 0%, #0B7A55 100%); margin-top: 10px;">
+                    style="background: linear-gradient(135deg, #0E9F6E 0%, #4f46e5 100%); margin-top: 10px;">
                     <span>Tasdiqlash va Kirish</span>
                     <span class="material-symbols-outlined" style="font-size: 18px;">verified</span>
                 </button>
@@ -1240,11 +1245,13 @@
             telegramWebAppBtn.addEventListener('click', loginWithTelegramWebApp);
             loginWithTelegramWebApp();
         } else {
-            // Oddiy brauzer — Telegram'dan 6 xonali kod keladi (bot orqali).
-            // Domen sozlash (/setdomain) kerak emas; server webhook'ni o'zi o'rnatadi.
-            telegramWidgetContainer.style.flexDirection = 'column';
-            telegramWidgetContainer.style.gap = '10px';
-            telegramWidgetContainer.innerHTML = `
+            // Oddiy brauzer — Telegram'dan 6 xonali kod keladi.
+            // Gateway yoqilgan bo'lsa: kod Telegram'ning rasmiy xizmatidan (telefon raqam bo'yicha).
+            // Aks holda: bot orqali (Start bosiladi, bot kod yuboradi).
+            function setupBotLogin() {
+                telegramWidgetContainer.style.flexDirection = 'column';
+                telegramWidgetContainer.style.gap = '10px';
+                telegramWidgetContainer.innerHTML = `
                 <button type="button" id="tgCodeStartBtn" class="telegram-btn">
                     <svg viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
                     <span>Telegram orqali kod bilan kirish</span>
@@ -1259,60 +1266,164 @@
                     <input id="tgCodeInput" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6 xonali kod"
                         style="width:100%; padding:12px 14px; font-size:18px; letter-spacing:6px; text-align:center; border:1px solid #cbd5e1; border-radius:12px; outline:none; box-sizing:border-box;" />
                     <button type="button" id="tgVerifyBtn"
-                        style="width:100%; margin-top:8px; padding:12px; border:none; border-radius:12px; background:#006b5c; color:#fff; font-weight:700; font-size:14px; cursor:pointer;">Tasdiqlash</button>
+                        style="width:100%; margin-top:8px; padding:12px; border:none; border-radius:12px; background:#4f46e5; color:#fff; font-weight:700; font-size:14px; cursor:pointer;">Tasdiqlash</button>
                 </div>`;
 
-            let tgNonce = null;
-            const tgStartBtn = document.getElementById('tgCodeStartBtn');
-            const tgStep = document.getElementById('tgCodeStep');
-            const tgInput = document.getElementById('tgCodeInput');
-            const tgVerifyBtn = document.getElementById('tgVerifyBtn');
+                let tgNonce = null;
+                const tgStartBtn = document.getElementById('tgCodeStartBtn');
+                const tgStep = document.getElementById('tgCodeStep');
+                const tgInput = document.getElementById('tgCodeInput');
+                const tgVerifyBtn = document.getElementById('tgVerifyBtn');
 
-            tgStartBtn.addEventListener('click', async () => {
-                tgStartBtn.disabled = true;
-                try {
-                    const res = await fetch('/api/auth/tg/start', { method: 'POST', credentials: 'same-origin' });
-                    const data = await res.json();
-                    if (!res.ok) { showToast('❌ ' + (data.error || 'Boshlab bo\'lmadi'), 'error'); return; }
-                    tgNonce = data.nonce;
-                    document.getElementById('tgOpenLink').href = data.link;
-                    tgStep.style.display = 'block';
-                    tgInput.value = '';
-                    tgInput.focus();
-                    window.open(data.link, '_blank', 'noopener');
-                } catch (e) {
-                    showToast('Server bilan bog\'lanishda xato. Qaytadan urinib ko\'ring.', 'error');
-                } finally {
-                    tgStartBtn.disabled = false;
-                }
-            });
+                tgStartBtn.addEventListener('click', async () => {
+                    tgStartBtn.disabled = true;
+                    try {
+                        const res = await fetch('/api/auth/tg/start', { method: 'POST', credentials: 'same-origin' });
+                        const data = await res.json();
+                        if (!res.ok) { showToast('❌ ' + (data.error || 'Boshlab bo\'lmadi'), 'error'); return; }
+                        tgNonce = data.nonce;
+                        document.getElementById('tgOpenLink').href = data.link;
+                        tgStep.style.display = 'block';
+                        tgInput.value = '';
+                        tgInput.focus();
+                        window.open(data.link, '_blank', 'noopener');
+                    } catch (e) {
+                        showToast('Server bilan bog\'lanishda xato. Qaytadan urinib ko\'ring.', 'error');
+                    } finally {
+                        tgStartBtn.disabled = false;
+                    }
+                });
 
-            async function verifyTgCode() {
-                const code = tgInput.value.trim();
-                if (!tgNonce || code.length !== 6) { showToast('6 xonali kodni kiriting', 'error'); return; }
-                tgVerifyBtn.disabled = true;
-                try {
-                    const res = await fetch('/api/auth/tg/verify', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        credentials: 'same-origin',
-                        body: JSON.stringify({ nonce: tgNonce, code })
-                    });
-                    const data = await res.json();
-                    if (!res.ok) { showToast('❌ ' + (data.error || 'Tasdiqlanmadi'), 'error'); return; }
-                    showToast(`✅ Xush kelibsiz, ${data.user.firstName || data.user.username || 'foydalanuvchi'}!`, 'success');
-                    setTimeout(() => { window.location.href = './dashboard.html'; }, 400);
-                } catch (e) {
-                    showToast('Server bilan bog\'lanishda xato. Qaytadan urinib ko\'ring.', 'error');
-                } finally {
-                    tgVerifyBtn.disabled = false;
+                async function verifyTgCode() {
+                    const code = tgInput.value.trim();
+                    if (!tgNonce || code.length !== 6) { showToast('6 xonali kodni kiriting', 'error'); return; }
+                    tgVerifyBtn.disabled = true;
+                    try {
+                        const res = await fetch('/api/auth/tg/verify', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'same-origin',
+                            body: JSON.stringify({ nonce: tgNonce, code })
+                        });
+                        const data = await res.json();
+                        if (!res.ok) { showToast('❌ ' + (data.error || 'Tasdiqlanmadi'), 'error'); return; }
+                        showToast(`✅ Xush kelibsiz, ${data.user.firstName || data.user.username || 'foydalanuvchi'}!`, 'success');
+                        setTimeout(() => { window.location.href = './dashboard.html'; }, 400);
+                    } catch (e) {
+                        showToast('Server bilan bog\'lanishda xato. Qaytadan urinib ko\'ring.', 'error');
+                    } finally {
+                        tgVerifyBtn.disabled = false;
+                    }
                 }
+                tgVerifyBtn.addEventListener('click', verifyTgCode);
+                tgInput.addEventListener('input', () => {
+                    tgInput.value = tgInput.value.replace(/\D/g, '').slice(0, 6);
+                    if (tgInput.value.length === 6) verifyTgCode();
+                });
             }
-            tgVerifyBtn.addEventListener('click', verifyTgCode);
-            tgInput.addEventListener('input', () => {
-                tgInput.value = tgInput.value.replace(/\D/g, '').slice(0, 6);
-                if (tgInput.value.length === 6) verifyTgCode();
-            });
+
+            function setupGatewayLogin() {
+                telegramWidgetContainer.style.flexDirection = 'column';
+                telegramWidgetContainer.style.gap = '10px';
+                telegramWidgetContainer.innerHTML = `
+                    <div id="gwPhoneStep" style="font-family:'Inter',sans-serif;">
+                        <p style="font-size:12px; color:#475569; margin:0 0 8px;">
+                            Telegramda ro'yxatdan o'tgan telefon raqamingizni kiriting. Kod Telegram'ning o'zidan keladi.
+                        </p>
+                        <div style="display:flex; align-items:center; border:1px solid #cbd5e1; border-radius:12px; overflow:hidden; background:#fff;">
+                            <span style="padding:0 12px; font-weight:700; color:#64748b; border-right:1px solid #e2e8f0;">+998</span>
+                            <input id="gwPhone" type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="12" placeholder="90 123 45 67"
+                                style="flex:1; padding:12px; border:none; outline:none; font-size:16px; min-width:0;" />
+                        </div>
+                        <button type="button" id="gwSendBtn" class="telegram-btn" style="margin-top:8px;">
+                            <svg viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                            <span>Kodni Telegram'dan olish</span>
+                        </button>
+                    </div>
+                    <div id="gwCodeStep" style="display:none; font-family:'Inter',sans-serif;">
+                        <p style="font-size:12px; color:#475569; margin:0 0 8px;">
+                            Telegram ilovasida <b>Verification Codes</b> dan kelgan 6 xonali kodni kiriting.
+                        </p>
+                        <input id="gwCodeInput" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6 xonali kod"
+                            style="width:100%; padding:12px 14px; font-size:18px; letter-spacing:6px; text-align:center; border:1px solid #cbd5e1; border-radius:12px; outline:none; box-sizing:border-box;" />
+                        <button type="button" id="gwVerifyBtn"
+                            style="width:100%; margin-top:8px; padding:12px; border:none; border-radius:12px; background:#4f46e5; color:#fff; font-weight:700; font-size:14px; cursor:pointer;">Tasdiqlash</button>
+                        <button type="button" id="gwBackBtn"
+                            style="width:100%; margin-top:6px; padding:8px; border:none; background:none; color:#64748b; font-size:12px; cursor:pointer;">Raqamni o'zgartirish</button>
+                    </div>`;
+
+                let gwNonce = null;
+                const phoneStep = document.getElementById('gwPhoneStep');
+                const codeStep = document.getElementById('gwCodeStep');
+                const phoneInput = document.getElementById('gwPhone');
+                const sendBtn = document.getElementById('gwSendBtn');
+                const codeInput = document.getElementById('gwCodeInput');
+                const verifyBtn = document.getElementById('gwVerifyBtn');
+
+                sendBtn.addEventListener('click', async () => {
+                    const digits = phoneInput.value.replace(/\D/g, '');
+                    if (digits.length !== 9) { showToast('Raqamni to\'liq kiriting: 90 123 45 67', 'error'); return; }
+                    sendBtn.disabled = true;
+                    try {
+                        const res = await fetch('/api/auth/gw/send', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'same-origin',
+                            body: JSON.stringify({ phone: '+998' + digits })
+                        });
+                        const data = await res.json().catch(() => ({}));
+                        if (!res.ok) { showToast('❌ ' + (data.error || 'Kod yuborilmadi'), 'error'); return; }
+                        gwNonce = data.nonce;
+                        phoneStep.style.display = 'none';
+                        codeStep.style.display = 'block';
+                        codeInput.value = '';
+                        codeInput.focus();
+                        showToast('📨 Kod Telegram\'ga yuborildi', 'success');
+                    } catch (e) {
+                        showToast('Server bilan bog\'lanishda xato. Qaytadan urinib ko\'ring.', 'error');
+                    } finally {
+                        sendBtn.disabled = false;
+                    }
+                });
+
+                async function verifyGwCode() {
+                    const code = codeInput.value.replace(/\D/g, '');
+                    if (!gwNonce || code.length !== 6) { showToast('6 xonali kodni kiriting', 'error'); return; }
+                    verifyBtn.disabled = true;
+                    try {
+                        const res = await fetch('/api/auth/gw/verify', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'same-origin',
+                            body: JSON.stringify({ nonce: gwNonce, code })
+                        });
+                        const data = await res.json().catch(() => ({}));
+                        if (!res.ok) { showToast('❌ ' + (data.error || 'Tasdiqlanmadi'), 'error'); return; }
+                        showToast('✅ Xush kelibsiz!', 'success');
+                        setTimeout(() => { window.location.href = './dashboard.html'; }, 400);
+                    } catch (e) {
+                        showToast('Server bilan bog\'lanishda xato. Qaytadan urinib ko\'ring.', 'error');
+                    } finally {
+                        verifyBtn.disabled = false;
+                    }
+                }
+                verifyBtn.addEventListener('click', verifyGwCode);
+                codeInput.addEventListener('input', () => {
+                    codeInput.value = codeInput.value.replace(/\D/g, '').slice(0, 6);
+                    if (codeInput.value.length === 6) verifyGwCode();
+                });
+                document.getElementById('gwBackBtn').addEventListener('click', () => {
+                    gwNonce = null;
+                    codeStep.style.display = 'none';
+                    phoneStep.style.display = 'block';
+                    phoneInput.focus();
+                });
+            }
+
+            fetch('/api/auth/config', { credentials: 'same-origin' })
+                .then(r => r.json())
+                .then(c => (c && c.gateway) ? setupGatewayLogin() : setupBotLogin())
+                .catch(() => setupBotLogin());
         }
 
         // ==========================================

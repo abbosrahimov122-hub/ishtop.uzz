@@ -6,7 +6,7 @@
     <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
         name="viewport" />
     <title>Nomzodlar Bazasi | ishtop.uz Mini Ilova</title>
-    <meta name="theme-color" content="#002046" />
+    <meta name="theme-color" content="#1e1b4b" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="manifest" href="/manifest.json" />
@@ -85,7 +85,7 @@
             bottom: 80px;
             left: 50%;
             transform: translateX(-50%) translateY(20px);
-            background: #002046;
+            background: #1e1b4b;
             color: white;
             padding: 12px 24px;
             border-radius: 14px;
@@ -105,6 +105,7 @@
             transform: translateX(-50%) translateY(0);
         }
     </style>
+    <link rel="stylesheet" href="/theme.css" />
 </head>
 
 <body class="min-h-screen flex flex-col pb-20 md:pb-0">
@@ -117,11 +118,11 @@
         <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
             <a href="./dashboard.html" class="flex items-center gap-2">
                 <div
-                    class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#002046] to-[#006b5c] text-white flex items-center justify-center shadow-md">
+                    class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#1e1b4b] to-[#4f46e5] text-white flex items-center justify-center shadow-md">
                     <span class="material-symbols-outlined text-xl">work_outline</span>
                 </div>
-                <span class="text-xl font-black text-[#002046] tracking-tight">ishtop<span
-                        class="text-[#006b5c]">.uz</span></span>
+                <span class="text-xl font-black text-[#1e1b4b] tracking-tight">ishtop<span
+                        class="text-[#4f46e5]">.uz</span></span>
             </a>
 
             <div class="flex items-center gap-2 sm:gap-3">
@@ -152,7 +153,7 @@
                     Vakansiyalar
                 </a>
                 <a href="./nomzodlar.html"
-                    class="px-4 py-2.5 text-xs font-bold text-[#006b5c] border-b-2 border-[#006b5c] whitespace-nowrap flex items-center gap-1.5">
+                    class="px-4 py-2.5 text-xs font-bold text-[#4f46e5] border-b-2 border-[#4f46e5] whitespace-nowrap flex items-center gap-1.5">
                     <span class="material-symbols-outlined text-base"
                         style="font-variation-settings: 'FILL' 1;">group</span>
                     Nomzodlar
@@ -183,12 +184,12 @@
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
             <div class="bg-white p-4 rounded-2xl card-shadow border border-slate-100 text-center">
                 <span class="text-xs text-slate-400 font-semibold">Jami nomzodlar</span>
-                <h3 class="text-2xl font-black text-[#002046] mt-1" id="totalCandidatesDisplay">0</h3>
-                <span class="text-[11px] text-emerald-600 font-bold">Ro'yxatdan o'tganlar</span>
+                <h3 class="text-2xl font-black text-[#1e1b4b] mt-1" id="totalCandidatesDisplay">0</h3>
+                <span class="text-[11px] text-indigo-600 font-bold">Ro'yxatdan o'tganlar</span>
             </div>
             <div class="bg-white p-4 rounded-2xl card-shadow border border-slate-100 text-center">
                 <span class="text-xs text-slate-400 font-semibold">Yangi (7 kun)</span>
-                <h3 class="text-2xl font-black text-emerald-600 mt-1" id="bookmarkedCount">0</h3>
+                <h3 class="text-2xl font-black text-indigo-600 mt-1" id="bookmarkedCount">0</h3>
                 <span class="text-[11px] text-slate-400">Oxirgi 7 kunda</span>
             </div>
             <div class="bg-white p-4 rounded-2xl card-shadow border border-slate-100 text-center">
@@ -204,14 +205,14 @@
         </div>
 
         <div
-            class="bg-emerald-50 border border-emerald-200/70 rounded-2xl p-4 flex items-center justify-between gap-3 flex-wrap">
+            class="bg-indigo-50 border border-indigo-200/70 rounded-2xl p-4 flex items-center justify-between gap-3 flex-wrap">
             <div>
-                <h2 class="text-sm font-bold text-[#002046]">Nomzodlar shu yerda o'zlari ro'yxatdan o'tadi</h2>
+                <h2 class="text-sm font-bold text-[#1e1b4b]">Nomzodlar shu yerda o'zlari ro'yxatdan o'tadi</h2>
                 <p class="text-[11px] text-slate-500">Havolani ish qidiruvchilarga yuboring, ular to'ldirgach shu yerda
                     ko'rinadi.</p>
             </div>
             <a href="./nomzod-royxatdan-otish.html" target="_blank"
-                class="px-3 py-1.5 bg-[#006b5c] text-white rounded-full text-xs font-bold whitespace-nowrap">Ro'yxatdan
+                class="px-3 py-1.5 bg-[#4f46e5] text-white rounded-full text-xs font-bold whitespace-nowrap">Ro'yxatdan
                 o'tish havolasi</a>
         </div>
 
@@ -223,11 +224,11 @@
                         class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">search</span>
                     <input id="candidateSearchInput" type="text"
                         placeholder="Ism, kasb, soha yoki viloyat bo'yicha qidirish..."
-                        class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:bg-white focus:border-[#006b5c] outline-none transition-all" />
+                        class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:bg-white focus:border-[#4f46e5] outline-none transition-all" />
                 </div>
                 <div class="flex items-center gap-2 w-full sm:w-auto">
                     <select id="sortCandidateSelect"
-                        class="w-full sm:w-auto px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none focus:border-[#006b5c]">
+                        class="w-full sm:w-auto px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none focus:border-[#4f46e5]">
                         <option value="new">Eng yangi nomzodlar</option>
                         <option value="exp">Eng ko'p tajriba</option>
                         <option value="name">Alifbo bo'yicha (A-Z)</option>
@@ -237,7 +238,7 @@
 
             <!-- Region Filter Chips -->
             <div class="flex items-center gap-1.5 overflow-x-auto pb-1" id="regionPills">
-                <button class="region-btn px-3 py-1.5 rounded-full text-xs font-bold bg-[#006b5c] text-white"
+                <button class="region-btn px-3 py-1.5 rounded-full text-xs font-bold bg-[#4f46e5] text-white"
                     data-region="all">Barchasi (<span id="pillAllCount">0</span>)</button>
             </div>
         </div>
@@ -265,12 +266,12 @@
 
             <div class="text-center mb-5">
                 <img id="modalImg"
-                    class="w-20 h-20 rounded-full mx-auto object-cover border-4 border-emerald-100 shadow-md mb-2"
-                    src="" alt="Nomzod" />
-                <h3 class="text-lg font-bold text-[#002046]" id="modalName">Azamat Karimov</h3>
-                <p class="text-xs font-semibold text-[#006b5c]" id="modalRole">Katta sotuvchi-maslahatchi</p>
+                    class="w-20 h-20 rounded-full mx-auto object-cover border-4 border-indigo-100 shadow-md mb-2" src=""
+                    alt="Nomzod" />
+                <h3 class="text-lg font-bold text-[#1e1b4b]" id="modalName">Azamat Karimov</h3>
+                <p class="text-xs font-semibold text-[#4f46e5]" id="modalRole">Katta sotuvchi-maslahatchi</p>
                 <span
-                    class="inline-block mt-1 px-2.5 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-full"
+                    class="inline-block mt-1 px-2.5 py-0.5 bg-indigo-50 text-indigo-700 text-[10px] font-bold rounded-full"
                     id="modalExp">4 yil tajriba</span>
             </div>
 
@@ -332,10 +333,10 @@
 
             <div class="text-center mb-5">
                 <div
-                    class="w-12 h-12 rounded-2xl bg-emerald-50 text-[#006b5c] flex items-center justify-center mx-auto mb-2">
+                    class="w-12 h-12 rounded-2xl bg-indigo-50 text-[#4f46e5] flex items-center justify-center mx-auto mb-2">
                     <span class="material-symbols-outlined text-2xl">tune</span>
                 </div>
-                <h3 class="text-lg font-bold text-[#002046]">Kengaytirilgan filtr</h3>
+                <h3 class="text-lg font-bold text-[#1e1b4b]">Kengaytirilgan filtr</h3>
                 <p class="text-xs text-slate-500">Nomzodlarni tajriba va soha bo'yicha ajrating</p>
             </div>
 
@@ -345,22 +346,22 @@
                     <div class="grid grid-cols-2 gap-2 text-xs">
                         <label
                             class="flex items-center gap-2 p-2 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50">
-                            <input type="radio" name="expFilter" value="all" checked class="text-[#006b5c]" />
+                            <input type="radio" name="expFilter" value="all" checked class="text-[#4f46e5]" />
                             <span>Barchasi</span>
                         </label>
                         <label
                             class="flex items-center gap-2 p-2 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50">
-                            <input type="radio" name="expFilter" value="0" class="text-[#006b5c]" />
+                            <input type="radio" name="expFilter" value="0" class="text-[#4f46e5]" />
                             <span>Tajribasiz</span>
                         </label>
                         <label
                             class="flex items-center gap-2 p-2 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50">
-                            <input type="radio" name="expFilter" value="1-3" class="text-[#006b5c]" />
+                            <input type="radio" name="expFilter" value="1-3" class="text-[#4f46e5]" />
                             <span>1 - 3 yil</span>
                         </label>
                         <label
                             class="flex items-center gap-2 p-2 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50">
-                            <input type="radio" name="expFilter" value="4+" class="text-[#006b5c]" />
+                            <input type="radio" name="expFilter" value="4+" class="text-[#4f46e5]" />
                             <span>4+ yil</span>
                         </label>
                     </div>
@@ -369,7 +370,7 @@
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1.5">Soha</label>
                     <select id="sectorSelect"
-                        class="w-full px-3.5 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-[#006b5c]">
+                        class="w-full px-3.5 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-[#4f46e5]">
                         <option value="all">Barcha sohalar</option>
                         <option value="savdo">Savdo va Retail</option>
                         <option value="it">Axborot texnologiyalari (IT)</option>
@@ -385,7 +386,7 @@
                         Tozalash
                     </button>
                     <button type="submit"
-                        class="flex-1 py-2.5 bg-[#006b5c] hover:bg-[#005145] text-white text-xs font-bold rounded-xl transition-colors">
+                        class="flex-1 py-2.5 bg-[#4f46e5] hover:bg-[#3730a3] text-white text-xs font-bold rounded-xl transition-colors">
                         Qo'llash
                     </button>
                 </div>
@@ -406,11 +407,11 @@
         </a>
         <div class="relative -top-3">
             <a href="./dashboard.html"
-                class="w-12 h-12 rounded-full bg-[#006b5c] text-white flex items-center justify-center shadow-lg shadow-emerald-700/30 active:scale-90 transition-transform">
+                class="w-12 h-12 rounded-full bg-[#4f46e5] text-white flex items-center justify-center shadow-lg shadow-indigo-700/30 active:scale-90 transition-transform">
                 <span class="material-symbols-outlined text-2xl">home</span>
             </a>
         </div>
-        <a href="./nomzodlar.html" class="flex flex-col items-center gap-0.5 text-[#006b5c]">
+        <a href="./nomzodlar.html" class="flex flex-col items-center gap-0.5 text-[#4f46e5]">
             <span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">group</span>
             <span class="text-[10px] font-bold">Nomzodlar</span>
         </a>
@@ -470,6 +471,7 @@
                     telegramUsername: c.telegramUsername,
                     about: c.about || "Nomzod o'zi haqida qo'shimcha ma'lumot qoldirmagan.",
                     createdAt: c.createdAt,
+                    source: c.source || '',
                     avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(c.fullName)}&background=${(i % 2 === 0) ? '006b5c' : '002046'}&color=fff&size=128`
                 }));
             } catch (e) {
@@ -480,9 +482,23 @@
             // Region chips (dinamik)
             const pillsWrap = document.getElementById('regionPills');
             const used = [...new Set(candidates.map(c => c.regionKey))];
-            pillsWrap.innerHTML = `<button class="region-btn px-3 py-1.5 rounded-full text-xs font-bold bg-[#006b5c] text-white" data-region="all">Barchasi (<span id="pillAllCount">${candidates.length}</span>)</button>` +
+            pillsWrap.innerHTML = `<button class="region-btn px-3 py-1.5 rounded-full text-xs font-bold bg-[#4f46e5] text-white" data-region="all">Barchasi (<span id="pillAllCount">${candidates.length}</span>)</button>` +
                 used.map(rk => `<button class="region-btn px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200" data-region="${rk}">${escapeHtml(regionName(rk))}</button>`).join('');
             bindRegionPills();
+
+            // Manba bo'yicha hisob: qaysi havola (telegram, kollej...) nechta nomzod olib kelgan
+            let srcBox = document.getElementById('sourceStats');
+            if (!srcBox) {
+                srcBox = document.createElement('div');
+                srcBox.id = 'sourceStats';
+                srcBox.className = 'text-xs text-slate-500 mt-2';
+                pillsWrap.parentNode.insertBefore(srcBox, pillsWrap.nextSibling);
+            }
+            const srcCounts = {};
+            candidates.forEach(c => { const k = c.source || "noma'lum"; srcCounts[k] = (srcCounts[k] || 0) + 1; });
+            srcBox.innerHTML = candidates.length
+                ? "Manba bo'yicha: " + Object.entries(srcCounts).sort((a, b) => b[1] - a[1]).map(([k, v]) => `<b>${escapeHtml(k)}</b> ${v}`).join(' · ')
+                : '';
 
             document.getElementById('totalCandidatesDisplay').textContent = candidates.length; document.getElementById('statRegions').textContent = used.length; document.getElementById('statAvgExp').textContent = candidates.length ? (candidates.reduce((s, c) => s + (Number(c.expYears) || 0), 0) / candidates.length).toFixed(1) + ' yil' : '—';
             const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
@@ -507,30 +523,31 @@
                 `;
             } else {
                 grid.innerHTML = items.map(c => `
-                    <div class="bg-white p-4 rounded-2xl card-shadow border border-slate-100 flex flex-col justify-between hover:border-emerald-300 transition-all group">
+                    <div class="bg-white p-4 rounded-2xl card-shadow border border-slate-100 flex flex-col justify-between hover:border-indigo-300 transition-all group">
                         <div>
                             <div class="flex items-start justify-between gap-2 mb-3">
                                 <div class="flex items-center gap-3">
                                     <img class="w-12 h-12 rounded-2xl object-cover shadow-sm group-hover:scale-105 transition-transform" src="${c.avatar}" alt="${escapeHtml(c.name)}" />
                                     <div>
-                                        <h4 class="text-sm font-bold text-[#002046] leading-tight">${escapeHtml(c.name)}</h4>
+                                        <h4 class="text-sm font-bold text-[#1e1b4b] leading-tight">${escapeHtml(c.name)}</h4>
                                         <p class="text-xs text-slate-500 font-medium">${escapeHtml(c.role)}</p>
+                                        ${c.source ? `<p class="text-[10px] text-slate-400">Manba: ${escapeHtml(c.source)}</p>` : ''}
                                     </div>
                                 </div>
                             </div>
 
                             <div class="flex flex-wrap gap-1.5 mb-3">
-                                <span class="px-2 py-0.5 rounded-md bg-emerald-50 text-[#006b5c] text-[10px] font-bold">${escapeHtml(c.experience)}</span>
+                                <span class="px-2 py-0.5 rounded-md bg-indigo-50 text-[#4f46e5] text-[10px] font-bold">${escapeHtml(c.experience)}</span>
                                 <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[10px] font-medium">${escapeHtml(c.location)}</span>
                             </div>
                         </div>
 
                         <div class="flex gap-2 pt-2 border-t border-slate-100">
-                            <button onclick="openProfileModal('${c.id}')" class="flex-1 py-2 bg-slate-100 hover:bg-[#002046] hover:text-white text-slate-700 text-xs font-bold rounded-xl transition-all">
+                            <button onclick="openProfileModal('${c.id}')" class="flex-1 py-2 bg-slate-100 hover:bg-[#1e1b4b] hover:text-white text-slate-700 text-xs font-bold rounded-xl transition-all">
                                 Profil
                             </button>
-                            ${c.telegramUsername ? `<a href="https://t.me/${encodeURIComponent(c.telegramUsername)}" target="_blank" class="px-3 py-2 bg-emerald-50 hover:bg-[#006b5c] text-[#006b5c] hover:text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1"><span class="material-symbols-outlined text-sm">chat</span> Telegram</a>`
-                        : `<a href="tel:${encodeURIComponent(c.phone)}" class="px-3 py-2 bg-emerald-50 hover:bg-[#006b5c] text-[#006b5c] hover:text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1"><span class="material-symbols-outlined text-sm">call</span> Qo'ng'iroq</a>`}
+                            ${c.telegramUsername ? `<a href="https://t.me/${encodeURIComponent(c.telegramUsername)}" target="_blank" class="px-3 py-2 bg-indigo-50 hover:bg-[#4f46e5] text-[#4f46e5] hover:text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1"><span class="material-symbols-outlined text-sm">chat</span> Telegram</a>`
+                        : `<a href="tel:${encodeURIComponent(c.phone)}" class="px-3 py-2 bg-indigo-50 hover:bg-[#4f46e5] text-[#4f46e5] hover:text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1"><span class="material-symbols-outlined text-sm">call</span> Qo'ng'iroq</a>`}
                         </div>
                     </div>
                 `).join('');
@@ -576,7 +593,7 @@
                     document.querySelectorAll('.region-btn').forEach(b => {
                         b.className = 'region-btn px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200';
                     });
-                    this.className = 'region-btn px-3 py-1.5 rounded-full text-xs font-bold bg-[#006b5c] text-white';
+                    this.className = 'region-btn px-3 py-1.5 rounded-full text-xs font-bold bg-[#4f46e5] text-white';
 
                     const r = this.dataset.region;
                     filteredCandidates = (r === 'all') ? [...candidates] : candidates.filter(c => c.regionKey === r);
