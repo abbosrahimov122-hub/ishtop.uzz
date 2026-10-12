@@ -1,0 +1,95 @@
+/* ishtop.uz — umumiy dizayn qatlami: barcha sahifalar bir xil, toza va silliq ko'rinishi uchun */
+:root{--navy:#1e1b4b;--teal:#4f46e5;--ink:#0f172a;--bg:#f6f8fb;
+--shadow:0 1px 2px rgba(30,27,75,.04),0 8px 24px -8px rgba(30,27,75,.10);
+--shadow-h:0 2px 4px rgba(30,27,75,.05),0 16px 36px -10px rgba(30,27,75,.18);
+--ease:cubic-bezier(.2,.7,.2,1)}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif!important;
+background-color:var(--bg)!important;
+background-image:radial-gradient(900px 420px at 85% -120px,rgba(79,70,229,.09),transparent 70%),radial-gradient(700px 360px at -10% -80px,rgba(30,27,75,.07),transparent 70%);
+background-repeat:no-repeat;color:var(--ink);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+::selection{background:rgba(79,70,229,.18)}
+*{scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent}
+
+/* Tepa panel: yengil shaffoflik va xira fon */
+header{-webkit-backdrop-filter:saturate(1.4) blur(10px);backdrop-filter:saturate(1.4) blur(10px);
+background-color:rgba(255,255,255,.88)!important}
+
+/* Kartalar */
+.card-shadow{box-shadow:var(--shadow)!important;transition:box-shadow .25s var(--ease),transform .25s var(--ease),border-color .25s}
+.card-shadow:hover{box-shadow:var(--shadow-h)!important}
+.card-shadow.group:hover{transform:translateY(-2px)}
+
+/* Maydonlar */
+input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea{
+transition:border-color .2s,box-shadow .2s,background-color .2s}
+input:focus,select:focus,textarea:focus{border-color:var(--teal)!important;
+box-shadow:0 0 0 4px rgba(79,70,229,.12)!important;outline:none}
+
+/* Tugmalar */
+button,a[class*="rounded"]{transition:transform .12s var(--ease),box-shadow .2s,background-color .2s,color .2s,border-color .2s}
+button:not(:disabled):active{transform:scale(.97)}
+button:disabled{opacity:.6;cursor:not-allowed}
+button.bg-\[\#4f46e5\]{box-shadow:0 6px 16px -6px rgba(79,70,229,.55)}
+button:focus-visible,a:focus-visible{outline:3px solid rgba(79,70,229,.35);outline-offset:2px}
+
+/* Xabar (toast) */
+.toast-message{-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+box-shadow:0 12px 32px -8px rgba(30,27,75,.45);border-radius:14px!important}
+
+/* Sahifa ochilishi */
+main{animation:ishtop-rise .45s var(--ease) both}
+@keyframes ishtop-rise{from{opacity:0;transform:translateY(8px)}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* ===== 2-versiya: chuqurroq dizayn ===== */
+:root{--teal-2:#6366f1;--radius:20px;--line:#e8edf3}
+h1,h2,h3,.font-black{letter-spacing:-.02em}
+h1{line-height:1.15}
+
+/* Logotip va brend rangi */
+[class*="from-[#1e1b4b]"][class*="to-[#4f46e5]"]{box-shadow:0 8px 20px -6px rgba(79,70,229,.55),inset 0 1px 0 rgba(255,255,255,.25)}
+
+/* Asosiy tugmalar: gradient va yorqinlashish */
+button.bg-\[\#4f46e5\]{background-image:linear-gradient(135deg,var(--teal-2),#4f46e5 55%,#005548)}
+button.bg-\[\#4f46e5\]:not(:disabled):hover{filter:brightness(1.08);box-shadow:0 10px 22px -8px rgba(79,70,229,.7)}
+button.bg-\[\#1e1b4b\]{background-image:linear-gradient(135deg,#312e81,#1e1b4b);box-shadow:0 8px 18px -8px rgba(30,27,75,.6)}
+
+/* Oq kartalar: kattaroq burchak, nozik chegara */
+.bg-white.rounded-2xl,.bg-white.rounded-3xl{border-radius:var(--radius);border:1px solid var(--line);box-shadow:var(--shadow);transition:box-shadow .25s var(--ease),border-color .25s,transform .25s var(--ease)}
+.bg-white.rounded-2xl:hover,.bg-white.rounded-3xl:hover{border-color:#d3e3df}
+
+/* Maydonlar: toza oq, yumshoq burchak */
+input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]),select,textarea{border-radius:12px!important;background-color:#fff}
+input::placeholder,textarea::placeholder{color:#94a3b8}
+
+/* Jadvallar */
+table{border-collapse:separate;border-spacing:0}
+tbody tr{transition:background-color .15s}
+tbody tr:hover{background-color:rgba(79,70,229,.045)}
+thead th{letter-spacing:.04em}
+
+/* Nishonlar va tanlov chiplari */
+.rounded-full{transition:background-color .2s,color .2s,border-color .2s,transform .12s var(--ease)}
+button.rounded-full:not(:disabled):active{transform:scale(.95)}
+
+/* Havolalar */
+a{transition:color .2s,opacity .2s}
+a.hover\:underline:hover{text-underline-offset:3px}
+
+/* Sahifa elementlari ketma-ket paydo bo'ladi */
+main>*{animation:ishtop-rise .5s var(--ease) both}
+main>*:nth-child(2){animation-delay:.05s}
+main>*:nth-child(3){animation-delay:.1s}
+main>*:nth-child(4){animation-delay:.15s}
+main>*:nth-child(n+5){animation-delay:.2s}
+
+/* Modal oynalar: xira fon */
+[id*="odal"].fixed,.fixed.inset-0{-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+
+/* Mobil: qulayroq bosish va chetlar */
+@media (max-width:640px){
+  body{background-image:radial-gradient(600px 300px at 90% -100px,rgba(79,70,229,.1),transparent 70%)}
+  .bg-white.rounded-2xl,.bg-white.rounded-3xl{border-radius:16px}
+  button,select,input:not([type=checkbox]):not([type=radio]){min-height:42px}
+}

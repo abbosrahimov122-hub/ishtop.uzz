@@ -452,6 +452,128 @@ async function registerTelegramWebhook() {
     }
 }
 
+// ==========================================
+// TELEGRAM GATEWAY: kod Telegram'ning RASMIY xizmatidan keladi ("Verification Codes")
+// Hujjat: https://core.telegram.org/gateway/api
+// GATEWAY_API_TOKEN (gateway.telegram.org akkauntidan) berilmasa, bu yo'l o'chiq turadi
+// va sayt bot orqali kod yuborish usuliga qaytadi.
+// Telefon raqam = foydalanuvchi identifikatori (id: 'p998901234567').
+// Har yetkazilgan kod pul turadi, shuning uchun suiiste'molga qarshi cheklovlar bor.
+// ==========================================
+const GATEWAY_TOKEN = process.env.GATEWAY_API_TOKEN || '';
+const GATEWAY_DAILY_LIMIT = parseInt(process.env.GATEWAY_DAILY_LIMIT, 10) || 300;
+const gwRequests = new Map();   // nonce -> { requestId, phone, expires, tries }
+const gwPhoneSends = new Map(); // phone -> [vaqtlar]
+const gwDaily = { day: '', n: 0 };
+const gwSendLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, limit: 10, standardHeaders: true, legacyHeaders: false,
+    message: { error: "Juda ko'p urinish. Birozdan so'ng qayta urinib ko'ring." }
+});
+
+function pruneGateway() {
+    const now = Date.now();
+    for (const [k, v] of gwRequests) if (v.expires < now) gwRequests.delete(k);
+    for (const [k, v] of gwPhoneSends) {
+        const fresh = v.filter(t => now - t < 3600 * 1000);
+        if (fresh.length) gwPhoneSends.set(k, fresh); else gwPhoneSends.delete(k);
+    }
+}
+setInterval(pruneGateway, 60 * 1000).unref();
+
+async function gwCall(method, params) {
+    try {
+        const r = await fetch(`https://gatewayapi.telegram.org/${method}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${GATEWAY_TOKEN}` },
+            body: JSON.stringify(params)
+        });
+        return await r.json().catch(() => ({ ok: false, error: 'BAD_RESPONSE' }));
+    } catch (e) {
+        logError('Gateway ' + method, e);
+        return { ok: false, error: 'NETWORK' };
+    }
+}
+
+// Faqat O'zbekiston raqamlari: +998XXXXXXXXX
+function normalizeUzPhone(input) {
+    let d = String(input || '').replace(/\D/g, '');
+    if (d.length === 9) d = '998' + d;
+    return /^998\d{9}$/.test(d) ? d : null;
+}
+
+app.get('/api/auth/config', (req, res) => {
+    res.json({ gateway: !!GATEWAY_TOKEN });
+});
+
+app.post('/api/auth/gw/send', gwSendLimiter, async (req, res) => {
+    try {
+        if (!GATEWAY_TOKEN) return res.status(503).json({ error: "Bu usul hozir yoqilmagan" });
+        const digits = normalizeUzPhone(req.body && req.body.phone);
+        if (!digits) return res.status(400).json({ error: "Telefon raqami noto'g'ri. Masalan: 90 123 45 67" });
+
+        const now = Date.now();
+        const sends = (gwPhoneSends.get(digits) || []).filter(t => now - t < 3600 * 1000);
+        if (sends.length && now - sends[sends.length - 1] < 60 * 1000) {
+            return res.status(429).json({ error: "Kodni 1 daqiqadan keyin qayta so'rang" });
+        }
+        if (sends.length >= 3) return res.status(429).json({ error: "Bu raqamga 1 soatda 3 martadan ko'p kod yuborib bo'lmaydi" });
+
+        const today = new Date().toISOString().slice(0, 10);
+        if (gwDaily.day !== today) { gwDaily.day = today; gwDaily.n = 0; }
+        if (gwDaily.n >= GATEWAY_DAILY_LIMIT) return res.status(503).json({ error: "Bugungi kodlar limiti tugadi. Ertaga urinib ko'ring." });
+
+        const j = await gwCall('sendVerificationMessage', { phone_number: '+' + digits, code_length: 6, ttl: 300 });
+        if (!j.ok) {
+            console.error(`[${new Date().toISOString()}] Gateway sendVerificationMessage xatosi: ${j.error}`);
+            if (j.error === 'PHONE_NUMBER_NOT_FOUND') return res.status(404).json({ error: "Bu raqam Telegramda ro'yxatdan o'tmagan" });
+            if (String(j.error).startsWith('FLOOD')) return res.status(429).json({ error: "Juda ko'p urinish. Birozdan so'ng urinib ko'ring." });
+            return res.status(502).json({ error: "Kodni yuborib bo'lmadi. Keyinroq urinib ko'ring." });
+        }
+        gwDaily.n++;
+        sends.push(now);
+        gwPhoneSends.set(digits, sends);
+
+        const nonce = crypto.randomBytes(16).toString('hex');
+        gwRequests.set(nonce, { requestId: j.result.request_id, phone: digits, expires: now + 5 * 60 * 1000, tries: 0 });
+        res.json({ nonce });
+    } catch (err) {
+        logError('POST /api/auth/gw/send', err);
+        res.status(500).json({ error: 'Ichki server xatosi' });
+    }
+});
+
+app.post('/api/auth/gw/verify', paymentLimiter, async (req, res) => {
+    try {
+        const nonce = String((req.body && req.body.nonce) || '');
+        const code = String((req.body && req.body.code) || '').replace(/\D/g, '');
+        const entry = gwRequests.get(nonce);
+        if (!entry || entry.expires < Date.now()) return res.status(400).json({ error: "Muddati tugagan. Qaytadan boshlang." });
+        if (code.length !== 6) return res.status(400).json({ error: "6 xonali kodni kiriting" });
+
+        entry.tries++;
+        if (entry.tries > 5) {
+            gwRequests.delete(nonce);
+            return res.status(429).json({ error: "Juda ko'p noto'g'ri urinish. Qaytadan boshlang." });
+        }
+        const j = await gwCall('checkVerificationStatus', { request_id: entry.requestId, code });
+        const status = j.ok && j.result && j.result.verification_status && j.result.verification_status.status;
+        if (status === 'code_valid') {
+            gwRequests.delete(nonce);
+            const masked = '+' + entry.phone.slice(0, 3) + '••••' + entry.phone.slice(-4);
+            const tgUser = { id: 'p' + entry.phone, first_name: masked };
+            const user = usersDb.upsert(tgUser);
+            setSessionCookie(res, tgUser);
+            return res.json({ ok: true, user: { id: user.telegramId, firstName: user.firstName } });
+        }
+        if (status === 'code_invalid') return res.status(401).json({ error: "Kod noto'g'ri" });
+        gwRequests.delete(nonce);
+        return res.status(400).json({ error: "Kod muddati tugagan yoki urinishlar tugagan. Qaytadan boshlang." });
+    } catch (err) {
+        logError('POST /api/auth/gw/verify', err);
+        res.status(500).json({ error: 'Ichki server xatosi' });
+    }
+});
+
 // 3) Joriy foydalanuvchini tekshirish — himoyalangan sahifalar shu endpoint'ni
 //    chaqirib, sessiya haqiqiy ekanini tasdiqlaydi.
 app.get('/api/auth/me', (req, res) => {
@@ -908,7 +1030,8 @@ function rowToCandidate(r) {
         desiredRole: r.desiredRole,
         experienceYears: r.experienceYears,
         about: r.about,
-        createdAt: r.createdAt
+        createdAt: r.createdAt,
+        source: r.source || null
     };
 }
 
@@ -947,6 +1070,8 @@ app.post('/api/candidates', paymentLimiter, async (req, res) => {
         const telegramUsername = clean(b.telegramUsername, 40).replace(/^@/, '');
         const desiredRole = clean(b.desiredRole, 120);
         const about = clean(b.about, 1000);
+        // Qaysi havoladan kelgani (?src=...): faqat kichik harf, raqam, _ va -
+        const source = clean(b.source, 40).toLowerCase().replace(/[^a-z0-9_-]/g, '');
         let experienceYears = parseInt(b.experienceYears, 10);
         if (!Number.isFinite(experienceYears) || experienceYears < 0) experienceYears = 0;
         if (experienceYears > 60) experienceYears = 60;
@@ -963,7 +1088,7 @@ app.post('/api/candidates', paymentLimiter, async (req, res) => {
 
         const row = await candidatesStore.insert({
             fullName, phone, telegramUsername, region: b.region, desiredRole,
-            experienceYears, about,
+            experienceYears, about, source: source || null,
             ownerTelegramId: req.user ? String(req.user.telegramId) : null
         });
         res.status(201).json(rowToCandidate(row));

@@ -22,10 +22,10 @@ function sqliteStore(db) {
         },
         async insert(c) {
             const info = db.prepare(`
-                INSERT INTO candidates (fullName, phone, telegramUsername, region, desiredRole, experienceYears, about, ownerTelegramId, createdAt)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO candidates (fullName, phone, telegramUsername, region, desiredRole, experienceYears, about, ownerTelegramId, createdAt, source)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `).run(c.fullName, c.phone, c.telegramUsername || null, c.region, c.desiredRole,
-                c.experienceYears, c.about || null, c.ownerTelegramId || null, new Date().toISOString());
+                c.experienceYears, c.about || null, c.ownerTelegramId || null, new Date().toISOString(), c.source || null);
             return db.prepare('SELECT * FROM candidates WHERE id = ?').get(info.lastInsertRowid);
         }
     };
@@ -42,7 +42,8 @@ const PG_COLUMNS = `
     about,
     owner_telegram_id AS "ownerTelegramId",
     status,
-    created_at        AS "createdAt"`;
+    created_at        AS "createdAt",
+    source`;
 
 function normalize(r) {
     if (!r) return r;
@@ -62,8 +63,10 @@ function postgresStore(pool) {
             about TEXT,
             owner_telegram_id TEXT,
             status TEXT NOT NULL DEFAULT 'yangi',
-            created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+            created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+            source TEXT
         );
+        ALTER TABLE candidates ADD COLUMN IF NOT EXISTS source TEXT;
         CREATE INDEX IF NOT EXISTS idx_candidates_created ON candidates (created_at);
         CREATE INDEX IF NOT EXISTS idx_candidates_region ON candidates (region);
     `);
@@ -80,11 +83,11 @@ function postgresStore(pool) {
         async insert(c) {
             await ready;
             const { rows } = await pool.query(
-                `INSERT INTO candidates (full_name, phone, telegram_username, region, desired_role, experience_years, about, owner_telegram_id)
-                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                `INSERT INTO candidates (full_name, phone, telegram_username, region, desired_role, experience_years, about, owner_telegram_id, source)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
                  RETURNING ${PG_COLUMNS}`,
                 [c.fullName, c.phone, c.telegramUsername || null, c.region, c.desiredRole,
-                c.experienceYears, c.about || null, c.ownerTelegramId || null]
+                c.experienceYears, c.about || null, c.ownerTelegramId || null, c.source || null]
             );
             return normalize(rows[0]);
         }
