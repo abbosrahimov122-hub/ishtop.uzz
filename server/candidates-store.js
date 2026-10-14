@@ -32,6 +32,10 @@ function sqliteStore(db) {
                 c.experienceYears, c.about || null, c.ownerTelegramId || null, new Date().toISOString(), c.source || null);
             return db.prepare('SELECT * FROM candidates WHERE id = ?').get(info.lastInsertRowid);
         },
+        async setStatus(id, status) {
+            db.prepare('UPDATE candidates SET status = ? WHERE id = ?').run(status, id);
+            return db.prepare('SELECT * FROM candidates WHERE id = ?').get(id) || null;
+        },
         async appInsert(a) {
             const info = db.prepare(`INSERT INTO applications (vacancyId, vacancyTitle, company, fullName, phone, message, applicantId, createdAt)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).run(a.vacancyId, a.vacancyTitle || null, a.company || null,
@@ -115,6 +119,11 @@ function postgresStore(pool) {
                 c.experienceYears, c.about || null, c.ownerTelegramId || null, c.source || null]
             );
             return normalize(rows[0]);
+        },
+        async setStatus(id, status) {
+            await ready;
+            const { rows } = await pool.query(`UPDATE candidates SET status = $2 WHERE id = $1 RETURNING ${PG_COLUMNS}`, [id, status]);
+            return rows[0] ? normalize(rows[0]) : null;
         },
         async appInsert(a) {
             await ready;

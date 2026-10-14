@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
         name="viewport" />
-    <title>Nomzod sifatida ro'yxatdan o'tish | ishtop.uz</title>
+    <title>Ariza yuborish | ishtop.uz</title>
     <meta name="theme-color" content="#1e1b4b" />
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
@@ -69,9 +69,9 @@
 
     <main class="flex-1 max-w-xl w-full mx-auto px-4 py-8">
         <div class="bg-white rounded-2xl card-shadow border border-slate-100 p-6">
-            <h1 class="text-xl font-black text-[#1e1b4b] mb-1">Nomzod sifatida ro'yxatdan o'ting</h1>
-            <p class="text-xs text-slate-500 mb-6">Ma'lumotlaringiz ish beruvchilarga ko'rinadi. Faqat haqiqiy
-                ma'lumotlaringizni kiriting.</p>
+            <h1 class="text-xl font-black text-[#1e1b4b] mb-1">Ariza yuboring</h1>
+            <p class="text-xs text-slate-500 mb-6">Arizangiz ko'rib chiqish uchun administratorga yuboriladi. Faqat
+                haqiqiy ma'lumotlaringizni kiriting.</p>
 
             <form id="candidateForm" class="space-y-4">
                 <div>
@@ -120,7 +120,7 @@
 
                 <button type="submit" id="submitBtn"
                     class="w-full py-3 bg-[#4f46e5] hover:bg-[#4338ca] text-white font-bold rounded-xl text-sm transition-all active:scale-95">
-                    Ro'yxatdan o'tish
+                    Ariza yuborish
                 </button>
             </form>
         </div>
@@ -168,7 +168,7 @@
                 });
                 const data = await res.json();
                 if (!res.ok) { showToast(data.error || 'Xatolik yuz berdi'); return; }
-                showToast("✅ Ro'yxatdan muvaffaqiyatli o'tdingiz!");
+                showToast("✅ Arizangiz yuborildi! Qaror chiqqach siz bilan bog'lanamiz.");
                 document.getElementById('candidateForm').reset();
             } catch (err) {
                 showToast("Server bilan aloqa yo'q");

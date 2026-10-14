@@ -336,18 +336,62 @@ function pruneLoginAttempts() {
 }
 setInterval(pruneLoginAttempts, 60 * 1000).unref();
 
-async function tgSend(chatId, text) {
+async function tgSend(chatId, text, extra = {}) {
     try {
         const r = await fetch(`${TG_API}/sendMessage`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' })
+            body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML', ...extra })
         });
         if (!r.ok) console.error(`[${new Date().toISOString()}] Telegram sendMessage: HTTP ${r.status}`);
         return r.ok;
     } catch (e) {
         logError('Telegram sendMessage', e);
         return false;
+    }
+}
+
+async function tgCall(method, params) {
+    try {
+        const r = await fetch(`${TG_API}/${method}`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(params)
+        });
+        return r.ok;
+    } catch (e) { logError('Telegram ' + method, e); return false; }
+}
+
+// Yangi ariza: adminga Telegram'da "Qabul qilish / Olib tashlash" tugmalari bilan xabar
+async function notifyAdminsNewCandidate(row) {
+    const region = (REGIONS.find(r => r.key === row.region) || {}).name || row.region;
+    const text = `📝 <b>Yangi ariza</b>\n👤 ${escHtml(row.fullName)}\n📞 ${escHtml(row.phone)}`
+        + (row.telegramUsername ? `\n✈️ @${escHtml(row.telegramUsername)}` : '')
+        + `\n📍 ${escHtml(region)}\n💼 ${escHtml(row.desiredRole)}\n⏱ Tajriba: ${Number(row.experienceYears) || 0} yil`
+        + (row.about ? `\nℹ️ ${escHtml(String(row.about).slice(0, 500))}` : '')
+        + (row.source ? `\n🔗 Manba: ${escHtml(row.source)}` : '');
+    const reply_markup = {
+        inline_keyboard: [[
+            { text: '✅ Qabul qilish', callback_data: `c:ok:${row.id}` },
+            { text: '🗑 Olib tashlash', callback_data: `c:no:${row.id}` }
+        ]]
+    };
+    for (const id of ADMIN_IDS) if (/^\d+$/.test(id)) tgSend(id, text, { reply_markup });
+}
+
+// Admin tugmani bosganda ishlaydi (faqat ADMIN_IDS dagilar)
+async function handleCandidateCallback(cq) {
+    const answer = (text, alert) => tgCall('answerCallbackQuery', { callback_query_id: cq.id, text, show_alert: !!alert });
+    const m = /^c:(ok|no):(\d+)$/.exec(String(cq.data || ''));
+    if (!m) return answer();
+    if (!ADMIN_IDS.has(String(cq.from && cq.from.id))) return answer("Sizda ruxsat yo'q", true);
+    const status = m[1] === 'ok' ? 'qabul' : 'removed';
+    const row = await candidatesStore.setStatus(parseInt(m[2], 10), status);
+    if (!row) return answer('Ariza topilmadi', true);
+    await answer(status === 'qabul' ? 'Qabul qilindi' : 'Olib tashlandi');
+    if (cq.message) {
+        await tgCall('editMessageText', {
+            chat_id: cq.message.chat.id, message_id: cq.message.message_id,
+            text: (cq.message.text || '') + '\n\n' + (status === 'qabul' ? '✅ Qabul qilindi' : '🗑 Olib tashlandi')
+        });
     }
 }
 
@@ -366,9 +410,17 @@ app.post('/api/telegram/webhook', webhookLimiter, async (req, res) => {
         const want = Buffer.from(TG_WEBHOOK_SECRET);
         if (given.length !== want.length || !crypto.timingSafeEqual(given, want)) return res.sendStatus(403);
 
+        if (req.body && req.body.callback_query) {
+            await handleCandidateCallback(req.body.callback_query);
+            return res.sendStatus(200);
+        }
         const msg = req.body && req.body.message;
         if (msg && msg.chat && msg.chat.type === 'private' && msg.from && !msg.from.is_bot) {
-            const m = /^\/start(?:\s+([a-f0-9]{32}))?$/.exec(String(msg.text || '').trim());
+            const txt = String(msg.text || '').trim();
+            if (/^\/id(@\w+)?$/i.test(txt)) {
+                await tgSend(msg.chat.id, `Sizning Telegram ID: <code>${msg.from.id}</code>`);
+            }
+            const m = /^\/start(?:\s+([a-f0-9]{32}))?$/.exec(txt);
             if (m && !m[1]) {
                 await tgSend(msg.chat.id, "Salom! ishtop.uz saytida «Telegram orqali kod bilan kirish» tugmasini bosing, kod shu yerga keladi.");
             } else if (m) {
@@ -441,7 +493,7 @@ async function registerTelegramWebhook() {
             body: JSON.stringify({
                 url: base.replace(/\/$/, '') + '/api/telegram/webhook',
                 secret_token: TG_WEBHOOK_SECRET,
-                allowed_updates: ['message'],
+                allowed_updates: ['message', 'callback_query'],
                 drop_pending_updates: true
             })
         });
@@ -1032,6 +1084,7 @@ function rowToCandidate(r) {
         experienceYears: r.experienceYears,
         about: r.about,
         createdAt: r.createdAt,
+        status: r.status,
         source: r.source || null
     };
 }
@@ -1085,6 +1138,7 @@ app.post('/api/candidates', paymentLimiter, async (req, res) => {
             experienceYears, about, source: source || null,
             ownerTelegramId: req.user ? String(req.user.telegramId) : null
         });
+        notifyAdminsNewCandidate(row).catch(e => logError('notifyAdmins', e));
         res.status(201).json(rowToCandidate(row));
     } catch (err) {
         logError('POST /api/candidates', err);

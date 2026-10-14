@@ -469,6 +469,7 @@
                     about: c.about || "Nomzod o'zi haqida qo'shimcha ma'lumot qoldirmagan.",
                     createdAt: c.createdAt,
                     source: c.source || '',
+                    status: c.status || '',
                     avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(c.fullName)}&background=${(i % 2 === 0) ? '006b5c' : '002046'}&color=fff&size=128`
                 }));
             } catch (e) {
@@ -528,7 +529,7 @@
                                     <div>
                                         <h4 class="text-sm font-bold text-[#1e1b4b] leading-tight">${escapeHtml(c.name)}</h4>
                                         <p class="text-xs text-slate-500 font-medium">${escapeHtml(c.role)}</p>
-                                        ${c.source ? `<p class="text-[10px] text-slate-400">Manba: ${escapeHtml(c.source)}</p>` : ''}
+                                        <p class="text-[10px] text-slate-400">${c.status === 'qabul' ? '✅ Qabul qilingan' : 'Yangi ariza'}${c.source ? ' · Manba: ' + escapeHtml(c.source) : ''}</p>
                                     </div>
                                 </div>
                             </div>
